@@ -4,8 +4,9 @@ Live (online) indexer — self-learning RAG enrichment.
 Every live-fetch tool (PubChem, UniProt, SABIO-RK, live-PubMed, live-KEGG,
 ZINC, etc.) funnels its structured responses through :func:`index_documents`
 so the knowledge base grows with every agent turn. The embedding model is
-loaded lazily on first call and shared as a process-wide singleton (the same
-``Embedder`` weights used by the offline ingestion pipeline).
+the single process-wide PubMedBERT owned by the :class:`Retriever` singleton
+(see ``vectorstore.retriever.get_retriever``) — the live indexer never
+creates a second embedder.
 
 Design constraints
 - **Non-blocking failure**: if embedding or upsert fails for any reason, the
@@ -36,7 +37,6 @@ from vectorstore.chroma_setup import COLLECTIONS, get_client, get_or_create_coll
 log = logging.getLogger(__name__)
 
 _lock = threading.Lock()
-_embedder = None  # lazy — don't load PubMedBERT until first live fetch
 _client = None
 _collections: dict[str, object] = {}
 
@@ -58,12 +58,15 @@ class VectorDocument:
 
 
 def _get_embedder():
-    global _embedder
-    if _embedder is None:
-        from vectorstore.embedder import Embedder
-        log.info("Live indexer: loading PubMedBERT (first live fetch)")
-        _embedder = Embedder()
-    return _embedder
+    """Return the process-wide Embedder owned by the Retriever singleton.
+
+    This does not load a new model — it forwards to
+    :func:`vectorstore.retriever.get_embedder`. If this is the first call
+    anywhere in the process, the Retriever singleton boots (which logs
+    "Retriever singleton: initializing ..."); otherwise it's a no-op.
+    """
+    from vectorstore.retriever import get_embedder
+    return get_embedder()
 
 
 def _get_collection(name: str):
