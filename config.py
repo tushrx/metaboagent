@@ -172,12 +172,18 @@ PUBMED_ALL_TERMS = PUBMED_SEARCH_TERMS + PUBMED_EXPANSION_TERMS
 PUBMED_MAX_ABSTRACTS = int(_os.environ.get("PUBMED_MAX_ABSTRACTS", "100000"))
 PUBMED_BATCH_SIZE = 200  # efetch batch size
 
-# === Embedding Model (runs on CPU) ===
+# === Embedding Model (runs on cuda:0 since Phase 1) ===
+# Day-1 placed PubMedBERT on CPU to keep all 4 L40s free for the 31B vLLM.
+# Phase 1 moves it to cuda:0 because (a) TP=4 leaves ~2 GB free on each L40,
+# (b) PubMedBERT-base (~110M params) needs ~500 MB in bf16 + activations,
+# and (c) GPU embedding makes retrieval latency dominant-by-network, not
+# dominant-by-compute. Override with EMBEDDING_DEVICE=cpu if vLLM is
+# reconfigured to take all of cuda:0 (e.g. Phase 2 E4B on a single L40).
 EMBEDDING_MODEL_NAME = _os.environ.get(
     "EMBEDDING_MODEL_NAME",
     "microsoft/BiomedNLP-PubMedBERT-base-uncased-abstract-fulltext",
 )
-EMBEDDING_DEVICE = _os.environ.get("EMBEDDING_DEVICE", "cpu")
+EMBEDDING_DEVICE = _os.environ.get("EMBEDDING_DEVICE", "cuda:0")
 EMBEDDING_BATCH_SIZE = int(_os.environ.get("EMBEDDING_BATCH_SIZE", "64"))
 EMBEDDING_DIMENSION = 768      # PubMedBERT output dim
 
