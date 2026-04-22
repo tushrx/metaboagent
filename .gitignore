@@ -1,0 +1,38 @@
+# Secrets
+.env*
+!.env.example
+
+# Large / runtime data
+data/raw/
+data/processed/
+data/chromadb/
+vectorstore/data/
+logs/
+*.jsonl
+archive/
+
+# Model weights
+*.safetensors
+*.bin
+*.pt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Node / Next.js
+node_modules/
+ui/web/.next/
+ui/web/out/
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
