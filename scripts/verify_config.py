@@ -62,10 +62,9 @@ def main() -> int:
 
     print("\n=== Secret check (presence only) ===")
     print(f"  PRIMARY_LLM_API_KEY set: {bool(config.PRIMARY_LLM_API_KEY)}")
-    key_from_env = os.environ.get("PRIMARY_LLM_API_KEY") or os.environ.get("VLLM_API_KEY")
-    if not key_from_env:
-        print("  NOTE: no API key in env — using literal fallback from config.py.")
-        print("        Set PRIMARY_LLM_API_KEY or VLLM_API_KEY to remove that dependency.")
+    if not config.PRIMARY_LLM_API_KEY:
+        print("  NOTE: no API key in env — LLM-client construction will fail.")
+        print("        Set PRIMARY_LLM_API_KEY (or VLLM_API_KEY) in .env or your shell.")
 
     return 1 if failed else 0
 

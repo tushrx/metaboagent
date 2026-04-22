@@ -91,3 +91,12 @@ Baseline commit `b92ea34` intentionally leaves these imports broken — `agent/r
 | `tests/test_router.py` | (verify at Phase 1 pytest run) | Phase 3 (new router) |
 
 After Phase 1 lands the shim, all five `test_*_resolver.py` / `test_rag_*.py` / `test_rule_library.py` / `test_citation_verifier.py` files should at least *collect* (import without error). Full pass waits on Phase 3 for anything that transitively needs `agent.router`.
+
+### Post-Phase-1 expected test state
+
+After the Phase 1 commits (including `phase1: lazy-validate PRIMARY_LLM_API_KEY`), the only expected test failures are router/UI imports that need Phase 3:
+
+- `tests/test_router.py` — cannot import `agent.router` (archived). Phase 3.
+- `tests/test_ui_response_log.py` — collection error via `ui/app.py` → `agent.rag.citation_verifier`. The shim fixes the import path, but `ui/app.py` also transitively pulls `agent.metabo_agent` → `agent.router` (archived). Phase 3 rewrite.
+
+`tests/test_config.py` and `tests/test_storage_paths.py` must pass from this commit forward — the import-time key raise has been replaced with a lazy `get_primary_llm_api_key()` helper, so reloading `config` with a clean env dict no longer crashes. If either of those files regresses, stop and investigate before continuing.

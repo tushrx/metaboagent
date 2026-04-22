@@ -137,19 +137,20 @@ class ConfigOverrideTest(unittest.TestCase):
 
 
 class ConfigHardeningTests(unittest.TestCase):
-    """Phase-9 hardening: the committed API-key fallback should never be used
-    silently — operators must see a warning when env isn't set, and the env
-    value must suppress the warning entirely.
+    """Phase-1 hardening: importing config must never raise when the API key
+    is absent (tests / ingestion / path tools don't need it). Enforcement
+    is lazy — ``get_primary_llm_api_key()`` raises at the point an LLM
+    client is actually being built.
     """
 
-    def test_missing_api_key_env_emits_warning(self):
-        with self.assertLogs("config", level="WARNING") as captured:
-            cfg = _reload_config({})  # no PRIMARY / VLLM key set
-        joined = "\n".join(captured.output)
-        self.assertIn("no PRIMARY_LLM_API_KEY", joined)
-        # Behaviour preserved: fallback value still populated so existing
-        # callers keep working against vLLM.
-        self.assertTrue(cfg.PRIMARY_LLM_API_KEY)
+    def test_missing_api_key_does_not_raise_at_import(self):
+        import re
+
+        cfg = _reload_config({})  # no PRIMARY / VLLM key set
+        self.assertIsNone(cfg.PRIMARY_LLM_API_KEY)
+        with self.assertRaises(RuntimeError) as ctx:
+            cfg.get_primary_llm_api_key()
+        self.assertRegex(str(ctx.exception), r"PRIMARY_LLM_API_KEY.*not set")
 
     def test_api_key_env_suppresses_warning(self):
         # Collect any warnings emitted by config import.

@@ -27,7 +27,10 @@ Environment variables (all optional; defaults match Day-1 behavior):
     # Primary reasoning LLM (default target: GPUs 0,1 on port 8000)
     PRIMARY_LLM_BASE_URL      default: http://localhost:8000/v1
     PRIMARY_LLM_MODEL_NAME    default: google/gemma-4-31B-it
-    PRIMARY_LLM_API_KEY       default: $VLLM_API_KEY if set, else literal fallback
+    PRIMARY_LLM_API_KEY       default: $VLLM_API_KEY if set, else None.
+                              Import never raises; call
+                              ``get_primary_llm_api_key()`` at the point an
+                              LLM client is constructed to enforce presence.
 
     # Utility / fast LLM (default target: GPUs 2,3 on port 8001)
     # Unset => utility model is not configured; callers should fall back
@@ -212,16 +215,13 @@ PRIMARY_LLM_MODEL_NAME = _os.environ.get(
     "PRIMARY_LLM_MODEL_NAME",
     _os.environ.get("VLLM_MODEL_NAME", "google/gemma-4-31B-it"),
 )
-_PRIMARY_LLM_API_KEY_FROM_ENV = (
+# API key validation is lazy: importing ``config`` must never raise for a
+# missing secret (tests, path tools, and ingestion scripts all import this
+# module without needing the LLM). Callers that actually construct an LLM
+# client must go through ``get_primary_llm_api_key()`` below.
+PRIMARY_LLM_API_KEY: str | None = (
     _os.environ.get("PRIMARY_LLM_API_KEY") or _os.environ.get("VLLM_API_KEY")
 )
-if not _PRIMARY_LLM_API_KEY_FROM_ENV:
-    raise RuntimeError(
-        "config: PRIMARY_LLM_API_KEY (or legacy VLLM_API_KEY) must be set in "
-        "the environment. Copy .env.example to .env and fill in the value, "
-        "or export the variable before starting any process."
-    )
-PRIMARY_LLM_API_KEY = _PRIMARY_LLM_API_KEY_FROM_ENV
 
 # Utility model: only honored when a base URL is explicitly configured.
 # Model name falls back to the primary so a single deployed server can serve
@@ -230,14 +230,14 @@ UTILITY_LLM_BASE_URL = _os.environ.get("UTILITY_LLM_BASE_URL") or None
 UTILITY_LLM_MODEL_NAME = (
     _os.environ.get("UTILITY_LLM_MODEL_NAME") or (PRIMARY_LLM_MODEL_NAME if UTILITY_LLM_BASE_URL else None)
 )
-UTILITY_LLM_API_KEY = _os.environ.get("UTILITY_LLM_API_KEY", PRIMARY_LLM_API_KEY)
+UTILITY_LLM_API_KEY: str | None = _os.environ.get("UTILITY_LLM_API_KEY") or PRIMARY_LLM_API_KEY
 
 # Backward-compatibility aliases. Existing code (agent/metabo_agent.py,
 # vectorstore/retriever.py) imports VLLM_*; keep these names working until
 # the router phase migrates callers.
 VLLM_BASE_URL = PRIMARY_LLM_BASE_URL
 VLLM_MODEL_NAME = PRIMARY_LLM_MODEL_NAME
-VLLM_API_KEY = PRIMARY_LLM_API_KEY
+VLLM_API_KEY: str | None = PRIMARY_LLM_API_KEY
 
 LLM_TEMPERATURE = float(_os.environ.get("LLM_TEMPERATURE", "0.1"))
 LLM_MAX_TOKENS = int(_os.environ.get("LLM_MAX_TOKENS", "4096"))
@@ -300,6 +300,23 @@ UI_DESCRIPTION = (
     "Design microbial strains to synthesize any target molecule. "
     "Powered by Gemma 4 31B-IT with RAG over KEGG, BRENDA, and scientific literature."
 )
+
+
+def get_primary_llm_api_key() -> str:
+    """Return the primary LLM API key; raise if not configured.
+
+    Import-time validation would force every caller (tests, ingestion,
+    path tooling) to set a secret they never use. Call this at the point
+    an LLM client is constructed — fast fail, clear message, no global
+    crash.
+    """
+    if not PRIMARY_LLM_API_KEY:
+        raise RuntimeError(
+            "PRIMARY_LLM_API_KEY (or VLLM_API_KEY) is not set. "
+            "Export it in your shell or set it in .env before starting "
+            "the LLM backend."
+        )
+    return PRIMARY_LLM_API_KEY
 
 
 def get_log_path(name: str) -> Path:
