@@ -64,4 +64,30 @@ The API key `f9f9…08aae` was committed in plaintext to `config.py` before Phas
 - It has lived on a shared server since at least 2026-04-15.
 - It is visible in the running vLLM process's `/proc/<pid>/cmdline`.
 
-Rotate before making the repo public. After rotation, update `.env`, kill + relaunch vLLM with the new `--api-key`, and verify with the curl snippet above.
+**Rotation is MANDATORY before the next vLLM restart.** Phase 2 relaunches vLLM (E4B on `:8001`, 26B MoE on `:8002`, with `--enable-auto-tool-choice`, etc.). That is the rotation window — do not start any new vLLM process with the old key. Procedure:
+
+1. Generate a new key: `python3 -c "import secrets; print(secrets.token_hex(32))"`
+2. Update `.env` (`PRIMARY_LLM_API_KEY=<new>`).
+3. When launching the new vLLM processes in Phase 2, pass `--api-key "$PRIMARY_LLM_API_KEY"` (already using env substitution — do not paste the literal on the command line).
+4. Leave the Day-1 `:8000` process running with the **old** key until Phase 2 validation is complete; kill it afterward (its argv is the last place the old key lives).
+5. Verify with `curl -s -H "Authorization: Bearer $PRIMARY_LLM_API_KEY" http://localhost:8001/v1/models`.
+
+---
+
+## Known broken during rebuild
+
+Baseline commit `b92ea34` intentionally leaves these imports broken — `agent/rag/` and `agent/router.py` were moved to `archive/` (gitignored) and will be reconstituted by later phases. Track here; strike through as they turn green.
+
+| File | Broken import | Expected to turn green |
+|---|---|---|
+| `ui/app.py` | `from agent.rag import ...`, `from agent.rag.citation_verifier import ...` | Phase 5 (UI rebuild replaces this file entirely) — interim: Phase 1 shim at `agent/rag/__init__.py` re-exports from `vectorstore/` |
+| `agent/metabo_agent.py` | `from agent.router import TASK_REACT_LOOP, build_llm_for` | Phase 3 (agent core rewrite replaces this file; `agent/router.py` rewritten for model-size routing) |
+| `vectorstore/retriever.py` | `from agent.router import TASK_RERANK, build_llm_for` | Phase 3 (router rewrite) — interim: reranker call is optional, retriever should still work without it |
+| `tests/test_citation_verifier.py` | `from agent.rag import ...` | Phase 1 shim |
+| `tests/test_organism_resolver.py` | `from agent.rag import ...` | Phase 1 shim |
+| `tests/test_rag_interfaces.py` | `from agent.rag.adapters import ...`, `from agent.rag.hybrid import ...`, `from agent.rag.interfaces import ...` | Phase 1 shim |
+| `tests/test_rule_library.py` | `from agent.rag import ...` | Phase 1 shim |
+| `tests/test_molecule_resolver.py` | `from agent.rag.interfaces import ...`, `from agent.rag.molecule_resolver import ...` | Phase 1 shim |
+| `tests/test_router.py` | (verify at Phase 1 pytest run) | Phase 3 (new router) |
+
+After Phase 1 lands the shim, all five `test_*_resolver.py` / `test_rag_*.py` / `test_rule_library.py` / `test_citation_verifier.py` files should at least *collect* (import without error). Full pass waits on Phase 3 for anything that transitively needs `agent.router`.
