@@ -12,10 +12,24 @@ Metadata filter semantics
 - We stored list-valued metadata as comma-joined strings (see indexer._flatten_metadata).
   Chroma `where` does not support substring match, so for list fields we fall back to
   a post-retrieval Python filter.
+
+Singleton pattern (Phase 1)
+---------------------------
+Callers MUST obtain the retriever through :func:`get_retriever`, not by
+constructing ``Retriever()`` directly. ``get_retriever()`` returns a single
+process-wide instance, which in turn owns a single :class:`Embedder`
+(PubMedBERT on GPU). Sharing that embedder prevents two independent
+~110M-parameter model loads — the live indexer (``vectorstore.live_indexer``)
+reuses this same instance via :func:`get_embedder`.
+
+Construction still works for tests that want an isolated instance (e.g. with
+a mock embedder): ``Retriever(embedder=FakeEmbedder())``. Production code
+paths — tools, UI, indexer — use ``get_retriever()``.
 """
 from __future__ import annotations
 
 import logging
+import threading
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -180,6 +194,33 @@ class Retriever:
             d.extras["llm_score"] = s
         docs.sort(key=lambda d: d.extras.get("llm_score", 0), reverse=True)
         return docs[:top_k]
+
+
+# ---------- process-wide singleton ----------
+_retriever_lock = threading.Lock()
+_retriever_singleton: Retriever | None = None
+
+
+def get_retriever() -> Retriever:
+    """Return the process-wide :class:`Retriever` instance.
+
+    Lazy, thread-safe: the first caller triggers construction (which also
+    triggers the one-and-only PubMedBERT load); all subsequent callers get
+    the same object. Use this from tools, the UI, and the live indexer —
+    never instantiate ``Retriever()`` directly in production code.
+    """
+    global _retriever_singleton
+    if _retriever_singleton is None:
+        with _retriever_lock:
+            if _retriever_singleton is None:
+                log.info("Retriever singleton: initializing (this loads PubMedBERT once)")
+                _retriever_singleton = Retriever()
+    return _retriever_singleton
+
+
+def get_embedder() -> Embedder:
+    """Return the singleton's embedder. Shared with the live indexer."""
+    return get_retriever().embedder
 
 
 def _unpack(raw: dict) -> list[RetrievedDoc]:
