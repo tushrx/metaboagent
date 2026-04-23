@@ -22,11 +22,14 @@ from __future__ import annotations
 import json
 import logging
 import math
-from typing import Optional
+from typing import Literal, Optional
 
 from langchain_core.tools import tool
 
 log = logging.getLogger(__name__)
+
+HostOrganism = Literal["ecoli", "scerevisiae", "cglutamicum", "bsubtilis", "pputida"]
+PromoterStrength = Literal["low", "med", "high"]
 
 
 _VECTOR_CATALOG: dict[str, dict[str, dict]] = {
@@ -244,18 +247,17 @@ def _render_plasmid_svg(
     return svg
 
 
-@tool
+@tool(parse_docstring=True)
 def design_expression_vector(
     target_gene: str,
-    host: str = "ecoli",
-    promoter_strength: str = "med",
+    host: HostOrganism = "ecoli",
+    promoter_strength: PromoterStrength = "med",
 ) -> str:
     """Recommend an expression-vector design for a target gene in a host.
 
     Args:
-        target_gene: Gene symbol or protein name ("crtE", "ADS", "GGPPS").
-        host: Host chassis key — ecoli, scerevisiae, cglutamicum, bsubtilis,
-            or pputida. Names ("E. coli", "yeast") also accepted.
+        target_gene: Gene symbol or protein name (e.g., "crtE", "ADS", "GGPPS").
+        host: Host chassis key, one of ecoli, scerevisiae, cglutamicum, bsubtilis, pputida.
         promoter_strength: One of "low", "med", "high". Defaults to "med".
 
     Returns:
