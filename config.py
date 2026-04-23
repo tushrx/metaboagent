@@ -232,6 +232,30 @@ UTILITY_LLM_MODEL_NAME = (
 )
 UTILITY_LLM_API_KEY: str | None = _os.environ.get("UTILITY_LLM_API_KEY") or PRIMARY_LLM_API_KEY
 
+# === Gemma 4 tier endpoints (Phase 3 router) ===
+#
+# The v2 architecture runs three Gemma 4 tiers concurrently. The router in
+# agent/router.py maps tier → endpoint:
+#   "default"   → PRIMARY_LLM_* (E4B on :8001 in the v2 deployment — set via .env)
+#   "deep"      → DEEP_LLM_*    (26B MoE on :8002)
+#   "max_rigor" → MAX_RIGOR_LLM_* (31B dense on :8000, only when systemd
+#                                  service is up; router does not health-check)
+#
+# All three tiers reuse the same API key (PRIMARY_LLM_API_KEY / VLLM_API_KEY)
+# — one key, three endpoints. Do not introduce per-tier keys.
+DEEP_LLM_BASE_URL = _os.environ.get(
+    "DEEP_LLM_BASE_URL", "http://127.0.0.1:8002/v1"
+)
+DEEP_LLM_MODEL_NAME = _os.environ.get(
+    "DEEP_LLM_MODEL_NAME", "google/gemma-4-26B-A4B-it"
+)
+MAX_RIGOR_LLM_BASE_URL = _os.environ.get(
+    "MAX_RIGOR_LLM_BASE_URL", "http://127.0.0.1:8000/v1"
+)
+MAX_RIGOR_LLM_MODEL_NAME = _os.environ.get(
+    "MAX_RIGOR_LLM_MODEL_NAME", "google/gemma-4-31B-it"
+)
+
 # Backward-compatibility aliases. Existing code (agent/metabo_agent.py,
 # vectorstore/retriever.py) imports VLLM_*; keep these names working until
 # the router phase migrates callers.

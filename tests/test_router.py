@@ -1,177 +1,140 @@
-"""
-Router behavior tests.
+"""Tests for agent.router.select_llm — hermetic (ChatOpenAI is mocked).
 
-Covers:
-- default policy (primary vs utility classification)
-- fallback when UTILITY_LLM_BASE_URL is unset
-- client construction wires base_url and model correctly
-- policy override is respected
-- unknown task types default to primary with a clear reason
-
-Run with:
+Run:
     PYTHONPATH=/home/tusharmicro/metaboagent python3 -m unittest tests.test_router
 """
 from __future__ import annotations
 
-import importlib
 import os
-import sys
 import unittest
+from unittest.mock import MagicMock, patch
+
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
+import config
+from agent.router import ModelTier, select_llm
 
 
-ENV_KEYS = (
-    "PRIMARY_LLM_BASE_URL",
-    "PRIMARY_LLM_MODEL_NAME",
-    "PRIMARY_LLM_API_KEY",
-    "UTILITY_LLM_BASE_URL",
-    "UTILITY_LLM_MODEL_NAME",
-    "UTILITY_LLM_API_KEY",
-    "VLLM_BASE_URL",
-    "VLLM_MODEL_NAME",
-    "VLLM_API_KEY",
-)
+class _BasePatch(unittest.TestCase):
+    """Patches agent.router.ChatOpenAI for every test. The mock returns a
+    MagicMock whose .bind_tools() returns a sentinel we can assert on."""
+
+    def setUp(self) -> None:
+        patcher = patch("agent.router.ChatOpenAI")
+        self.mock_chat_cls = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.mock_instance = MagicMock(name="ChatOpenAI-instance")
+        self.bound_sentinel = MagicMock(name="bind_tools-result")
+        self.mock_instance.bind_tools.return_value = self.bound_sentinel
+        self.mock_chat_cls.return_value = self.mock_instance
 
 
-def _reload(env: dict):
-    for k in ENV_KEYS:
-        os.environ.pop(k, None)
-    os.environ.update(env)
-    import config
-    importlib.reload(config)
-    from agent import router
-    importlib.reload(router)
-    router.reset_client_cache()
-    return router
+class DefaultTierTests(_BasePatch):
+    def test_default_tier_uses_primary_endpoint(self) -> None:
+        result = select_llm("default", [])
+        self.mock_chat_cls.assert_called_once()
+        kwargs = self.mock_chat_cls.call_args.kwargs
+        # PRIMARY defaults to http://localhost:8000/v1; router rewrites to 127.0.0.1.
+        self.assertEqual(
+            kwargs["base_url"],
+            config.PRIMARY_LLM_BASE_URL.replace("localhost", "127.0.0.1"),
+        )
+        self.assertEqual(kwargs["model"], config.PRIMARY_LLM_MODEL_NAME)
+        self.assertEqual(kwargs["api_key"],
+                         config.PRIMARY_LLM_API_KEY or "none")
+        self.mock_instance.bind_tools.assert_called_once_with([])
+        self.assertIs(result, self.bound_sentinel)
 
 
-class RoutingPolicyTest(unittest.TestCase):
-    def test_primary_tasks_route_to_primary(self):
-        router = _reload({
-            "PRIMARY_LLM_BASE_URL": "http://primary:8000/v1",
-            "PRIMARY_LLM_MODEL_NAME": "primary-model",
-        })
-        for task in (
-            router.TASK_FINAL_SYNTHESIS,
-            router.TASK_DESIGN,
-            router.TASK_INVESTIGATE,
-            router.TASK_COMPARE,
-            router.TASK_REACT_LOOP,
+class DeepTierTests(_BasePatch):
+    def test_deep_tier_uses_deep_endpoint(self) -> None:
+        select_llm("deep", [])
+        kwargs = self.mock_chat_cls.call_args.kwargs
+        self.assertEqual(kwargs["base_url"], config.DEEP_LLM_BASE_URL)
+        self.assertEqual(kwargs["model"], config.DEEP_LLM_MODEL_NAME)
+        self.assertEqual(kwargs["api_key"],
+                         config.PRIMARY_LLM_API_KEY or "none")
+
+
+class MaxRigorTierTests(_BasePatch):
+    def test_max_rigor_tier_uses_max_rigor_endpoint(self) -> None:
+        """Router resolves max_rigor even if :8000 is down — no pre-flight."""
+        select_llm("max_rigor", [])
+        kwargs = self.mock_chat_cls.call_args.kwargs
+        self.assertEqual(kwargs["base_url"], config.MAX_RIGOR_LLM_BASE_URL)
+        self.assertEqual(kwargs["model"], config.MAX_RIGOR_LLM_MODEL_NAME)
+        self.assertEqual(kwargs["api_key"],
+                         config.PRIMARY_LLM_API_KEY or "none")
+
+
+class ToolsForwardingTests(_BasePatch):
+    def test_tools_list_forwarded_to_bind_tools(self) -> None:
+        sentinel_tool_a = MagicMock(name="tool_a")
+        sentinel_tool_b = MagicMock(name="tool_b")
+        select_llm("default", [sentinel_tool_a, sentinel_tool_b])
+        self.mock_instance.bind_tools.assert_called_once_with(
+            [sentinel_tool_a, sentinel_tool_b]
+        )
+
+    def test_empty_tools_list_still_calls_bind_tools(self) -> None:
+        select_llm("deep", [])
+        self.mock_instance.bind_tools.assert_called_once_with([])
+
+    def test_tuple_tools_converted_to_list(self) -> None:
+        a, b = MagicMock(name="a"), MagicMock(name="b")
+        select_llm("default", (a, b))
+        self.mock_instance.bind_tools.assert_called_once_with([a, b])
+
+
+class TemperatureTests(_BasePatch):
+    def test_default_temperature_is_point_two(self) -> None:
+        select_llm("default", [])
+        self.assertEqual(self.mock_chat_cls.call_args.kwargs["temperature"], 0.2)
+
+    def test_temperature_override_respected(self) -> None:
+        select_llm("default", [], temperature=0.7)
+        self.assertEqual(self.mock_chat_cls.call_args.kwargs["temperature"], 0.7)
+
+
+class InvalidTierTests(_BasePatch):
+    def test_unknown_tier_raises_value_error(self) -> None:
+        with self.assertRaises(ValueError) as ctx:
+            select_llm("turbo", [])  # type: ignore[arg-type]
+        self.assertIn("turbo", str(ctx.exception))
+        self.mock_chat_cls.assert_not_called()
+
+    def test_empty_string_tier_raises(self) -> None:
+        with self.assertRaises(ValueError):
+            select_llm("", [])  # type: ignore[arg-type]
+
+    def test_none_tier_raises(self) -> None:
+        with self.assertRaises(ValueError):
+            select_llm(None, [])  # type: ignore[arg-type]
+
+
+class IPv4RewriteTests(_BasePatch):
+    def test_localhost_rewritten_to_127_0_0_1(self) -> None:
+        """If a tier endpoint carries 'localhost', router rewrites it."""
+        with patch.dict(
+            "agent.router._TIER_ENDPOINTS",
+            {"default": ("http://localhost:8001/v1",
+                         config.PRIMARY_LLM_MODEL_NAME)},
         ):
-            d = router.route(task)
-            self.assertEqual(d.effective_role, router.ROLE_PRIMARY, task)
-            self.assertEqual(d.base_url, "http://primary:8000/v1", task)
-            self.assertEqual(d.model, "primary-model", task)
-            self.assertFalse(d.used_fallback, task)
-
-    def test_utility_tasks_fall_back_when_unset(self):
-        router = _reload({
-            "PRIMARY_LLM_BASE_URL": "http://primary:8000/v1",
-            "PRIMARY_LLM_MODEL_NAME": "primary-model",
-            # UTILITY_LLM_BASE_URL deliberately unset
-        })
-        for task in (
-            router.TASK_CLASSIFY,
-            router.TASK_REWRITE_QUERY,
-            router.TASK_SUMMARIZE_EVIDENCE,
-            router.TASK_VERIFY,
-            router.TASK_RERANK,
-        ):
-            d = router.route(task)
-            self.assertEqual(d.requested_role, router.ROLE_UTILITY, task)
-            self.assertEqual(d.effective_role, router.ROLE_PRIMARY, task)
-            self.assertTrue(d.used_fallback, task)
-            self.assertEqual(d.base_url, "http://primary:8000/v1", task)
-            self.assertIn("falling back", d.reason.lower())
-
-    def test_utility_tasks_route_to_utility_when_set(self):
-        router = _reload({
-            "PRIMARY_LLM_BASE_URL": "http://primary:8000/v1",
-            "PRIMARY_LLM_MODEL_NAME": "primary-model",
-            "UTILITY_LLM_BASE_URL": "http://utility:8001/v1",
-            "UTILITY_LLM_MODEL_NAME": "utility-model",
-        })
-        d = router.route(router.TASK_RERANK)
-        self.assertEqual(d.effective_role, router.ROLE_UTILITY)
-        self.assertFalse(d.used_fallback)
-        self.assertEqual(d.base_url, "http://utility:8001/v1")
-        self.assertEqual(d.model, "utility-model")
-
-    def test_utility_model_defaults_to_primary_model_name(self):
-        # UTILITY_LLM_BASE_URL is set but model name is not — config already
-        # has it fall back to the primary model name.
-        router = _reload({
-            "PRIMARY_LLM_BASE_URL": "http://primary:8000/v1",
-            "PRIMARY_LLM_MODEL_NAME": "primary-model",
-            "UTILITY_LLM_BASE_URL": "http://utility:8001/v1",
-        })
-        d = router.route(router.TASK_CLASSIFY)
-        self.assertEqual(d.effective_role, router.ROLE_UTILITY)
-        self.assertEqual(d.base_url, "http://utility:8001/v1")
-        self.assertEqual(d.model, "primary-model")
-
-    def test_unknown_task_defaults_to_primary(self):
-        router = _reload({})
-        d = router.route("something_new")
-        self.assertEqual(d.effective_role, router.ROLE_PRIMARY)
-        self.assertFalse(d.used_fallback)
-        self.assertIn("unknown", d.reason.lower())
-
-    def test_custom_policy_override(self):
-        router = _reload({})
-        # Force final_synthesis to utility — and prove fallback still applies.
-        custom = {router.TASK_FINAL_SYNTHESIS: router.ROLE_UTILITY}
-        d = router.route(router.TASK_FINAL_SYNTHESIS, policy=custom)
-        self.assertEqual(d.requested_role, router.ROLE_UTILITY)
-        self.assertEqual(d.effective_role, router.ROLE_PRIMARY)  # not configured
-        self.assertTrue(d.used_fallback)
+            select_llm("default", [])
+            self.assertEqual(
+                self.mock_chat_cls.call_args.kwargs["base_url"],
+                "http://127.0.0.1:8001/v1",
+            )
 
 
-class RoutedClientTest(unittest.TestCase):
-    def test_primary_client_has_expected_base_url_and_model(self):
-        router = _reload({
-            "PRIMARY_LLM_BASE_URL": "http://primary:8000/v1",
-            "PRIMARY_LLM_MODEL_NAME": "primary-model",
-            "PRIMARY_LLM_API_KEY": "primary-key",
-        })
-        llm = router.build_llm_for(router.TASK_REACT_LOOP)
-        self.assertEqual(llm.model_name, "primary-model")
-        # ChatOpenAI exposes the resolved base URL as openai_api_base.
-        self.assertIn("primary:8000", str(llm.openai_api_base))
-
-    def test_utility_client_built_with_utility_endpoint(self):
-        router = _reload({
-            "PRIMARY_LLM_BASE_URL": "http://primary:8000/v1",
-            "PRIMARY_LLM_MODEL_NAME": "primary-model",
-            "UTILITY_LLM_BASE_URL": "http://utility:8001/v1",
-            "UTILITY_LLM_MODEL_NAME": "utility-model",
-        })
-        llm = router.build_llm_for(router.TASK_RERANK)
-        self.assertEqual(llm.model_name, "utility-model")
-        self.assertIn("utility:8001", str(llm.openai_api_base))
-
-    def test_client_cache_reuses_instances(self):
-        router = _reload({})
-        a = router.build_llm_for(router.TASK_REACT_LOOP)
-        b = router.build_llm_for(router.TASK_FINAL_SYNTHESIS)  # same (primary, model)
-        self.assertIs(a, b)  # cached
-
-    def test_utility_fallback_returns_primary_client(self):
-        router = _reload({
-            "PRIMARY_LLM_BASE_URL": "http://primary:8000/v1",
-            "PRIMARY_LLM_MODEL_NAME": "primary-model",
-        })
-        # No UTILITY_LLM_BASE_URL — rerank should silently use primary.
-        llm = router.build_llm_for(router.TASK_RERANK)
-        self.assertEqual(llm.model_name, "primary-model")
-
-
-class DescribeRouteAliasTest(unittest.TestCase):
-    def test_describe_route_returns_same_as_route(self):
-        router = _reload({})
-        d1 = router.route(router.TASK_CLASSIFY)
-        d2 = router.describe_route(router.TASK_CLASSIFY)
-        self.assertEqual(d1, d2)
-        self.assertIn("task_type", d1.as_dict())
+class TierLiteralExportedTests(unittest.TestCase):
+    def test_model_tier_literal_exports_three_values(self) -> None:
+        from typing import get_args
+        self.assertEqual(
+            set(get_args(ModelTier)),
+            {"default", "deep", "max_rigor"},
+        )
 
 
 if __name__ == "__main__":
