@@ -1,20 +1,24 @@
 """
 LangChain tool: search_kegg — query KEGG reactions and compounds.
 
-Wraps vectorstore.Retriever with optional metadata filters:
-    filter_type in {"ec_number", "compound_id", "pathway_id", "none"}
-Returns a compact JSON string so the LLM can reason over structured fields.
+Wraps vectorstore.Retriever with an optional metadata filter. filter_type
+is Optional[Literal["ec_number","compound_id","pathway_id"]]; junk strings
+("none"/"null"/"") in filter_value are explicitly rejected (no silent
+passthrough).
 """
 from __future__ import annotations
 
 import json
-from typing import Optional
+from typing import Literal, Optional
 
 from langchain_core.tools import tool
 
 from vectorstore.retriever import Retriever
 
 _retriever: Retriever | None = None
+
+KeggFilter = Literal["ec_number", "compound_id", "pathway_id"]
+_FILTER_VALUE_REJECTIONS = frozenset({"none", "null", ""})
 
 
 def _get_retriever() -> Retriever:
@@ -30,20 +34,19 @@ def set_retriever(r: Retriever) -> None:
     _retriever = r
 
 
-@tool
+@tool(parse_docstring=True)
 def search_kegg(
     query: str,
-    filter_type: str = "none",
+    filter_type: Optional[KeggFilter] = None,
     filter_value: Optional[str] = None,
     top_k: int = 5,
 ) -> str:
     """Search the KEGG reactions and compounds knowledge base.
 
     Args:
-        query: natural-language query about a reaction, compound, or enzyme
-            (e.g., "enzyme that converts GGPP to lycopene").
-        filter_type: one of "ec_number", "compound_id", "pathway_id", "none".
-        filter_value: exact value for the filter (e.g., "2.5.1.29", "C05432", "map00900").
+        query: natural-language query about a reaction, compound, or enzyme (e.g., "enzyme that converts GGPP to lycopene").
+        filter_type: optional filter to narrow results. One of "ec_number" (e.g. "2.5.1.29"), "compound_id" (e.g. "C05432"), or "pathway_id" (e.g. "map00900"). Pass null for no filter.
+        filter_value: exact value for the filter; must match filter_type. Pass null for no filter.
         top_k: number of results to return from each collection.
 
     Returns:
@@ -54,13 +57,20 @@ def search_kegg(
 
     rxn_kwargs: dict = {"top_k": top_k}
     cpd_kwargs: dict = {"top_k": top_k}
-    if filter_type == "ec_number" and filter_value:
-        rxn_kwargs["ec_number"] = filter_value
-    elif filter_type == "compound_id" and filter_value:
-        rxn_kwargs["compound_id"] = filter_value
-        cpd_kwargs["compound_id"] = filter_value
-    elif filter_type == "pathway_id" and filter_value:
-        rxn_kwargs["pathway_id"] = filter_value
+
+    # TODO(phase later): reaction_id filter — requires retriever.py changes, out of scope for 3.2
+    applied_filter: Optional[tuple[str, str]] = None
+    if filter_type and filter_value:
+        val = filter_value.strip()
+        if val.lower() not in _FILTER_VALUE_REJECTIONS:
+            if filter_type == "ec_number":
+                rxn_kwargs["ec_number"] = val
+            elif filter_type == "compound_id":
+                rxn_kwargs["compound_id"] = val
+                cpd_kwargs["compound_id"] = val
+            elif filter_type == "pathway_id":
+                rxn_kwargs["pathway_id"] = val
+            applied_filter = (filter_type, val)
 
     rxns = r.search_reactions(query, **rxn_kwargs)
     cpds = r.search_compounds(query, **cpd_kwargs)
@@ -88,5 +98,8 @@ def search_kegg(
             "pathway_ids": m.get("pathway_ids", ""),
         })
 
-    return json.dumps({"query": query, "filter": {filter_type: filter_value}, "hits": hits},
+    filter_report = (
+        {applied_filter[0]: applied_filter[1]} if applied_filter else None
+    )
+    return json.dumps({"query": query, "filter": filter_report, "hits": hits},
                       ensure_ascii=False)
