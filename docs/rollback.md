@@ -106,3 +106,9 @@ After the Phase 1 commits (including `phase1: lazy-validate PRIMARY_LLM_API_KEY`
 ## Followups
 
 - Firewall `:8000` / `:8001` / `:8002` to 127.0.0.1 + LAN CIDR only. Not done yet.
+
+---
+
+## Service state (as of 2026-04-23, Phase 2 prep)
+
+31B vLLM service stopped for Phase 2/3 dev. All 4 L40s freed. Restart via `sudo systemctl start vllm-gemma4` when needed (override.conf intact, key in `.env`, no code change required).
