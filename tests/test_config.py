@@ -54,11 +54,31 @@ class ConfigDefaultsTest(unittest.TestCase):
         self.assertEqual(cfg.LOG_DIR, repo_root / "logs")
 
     def test_default_primary_endpoint(self):
+        # Phase 2 topology: PRIMARY is Gemma 4 E4B on :8001 (default agentic
+        # tier). Day-1 had this pointing at 31B on :8000 — that's now the
+        # max_rigor tier (see config.MAX_RIGOR_LLM_*).
         cfg = _reload_config({})
-        self.assertEqual(cfg.PRIMARY_LLM_BASE_URL, "http://localhost:8000/v1")
-        self.assertEqual(cfg.PRIMARY_LLM_MODEL_NAME, "google/gemma-4-31B-it")
+        self.assertEqual(cfg.PRIMARY_LLM_BASE_URL, "http://127.0.0.1:8001/v1")
+        self.assertEqual(cfg.PRIMARY_LLM_MODEL_NAME, "google/gemma-4-E4B-it")
         self.assertEqual(cfg.VLLM_BASE_URL, cfg.PRIMARY_LLM_BASE_URL)
         self.assertEqual(cfg.VLLM_MODEL_NAME, cfg.PRIMARY_LLM_MODEL_NAME)
+
+    def test_default_tier_endpoints_distinct(self):
+        # Router contract: the three tiers must resolve to distinct
+        # (base_url, model) pairs and all three must use 127.0.0.1.
+        cfg = _reload_config({})
+        tiers = {
+            "default":   (cfg.PRIMARY_LLM_BASE_URL,   cfg.PRIMARY_LLM_MODEL_NAME),
+            "deep":      (cfg.DEEP_LLM_BASE_URL,      cfg.DEEP_LLM_MODEL_NAME),
+            "max_rigor": (cfg.MAX_RIGOR_LLM_BASE_URL, cfg.MAX_RIGOR_LLM_MODEL_NAME),
+        }
+        self.assertEqual(len(set(tiers.values())), 3,
+                         f"tier endpoints not distinct: {tiers}")
+        for name, (url, _model) in tiers.items():
+            self.assertIn("127.0.0.1", url,
+                          f"{name} endpoint {url!r} must use 127.0.0.1")
+            self.assertNotIn("localhost", url,
+                             f"{name} endpoint {url!r} must not use localhost")
 
     def test_utility_defaults_to_none(self):
         cfg = _reload_config({})

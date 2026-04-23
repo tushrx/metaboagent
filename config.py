@@ -24,9 +24,11 @@ Environment variables (all optional; defaults match Day-1 behavior):
                                    if set and HF_HOME is unset, HF_HOME is
                                    populated from this value.
 
-    # Primary reasoning LLM (default target: GPUs 0,1 on port 8000)
-    PRIMARY_LLM_BASE_URL      default: http://localhost:8000/v1
-    PRIMARY_LLM_MODEL_NAME    default: google/gemma-4-31B-it
+    # Primary/default-tier LLM. Phase 2 topology: Gemma 4 E4B on GPU 0
+    # serving on port 8001. (Day-1 had this pointing at 31B dense on :8000;
+    # v2 makes E4B the default agentic/tool-calling tier.)
+    PRIMARY_LLM_BASE_URL      default: http://127.0.0.1:8001/v1
+    PRIMARY_LLM_MODEL_NAME    default: google/gemma-4-E4B-it
     PRIMARY_LLM_API_KEY       default: $VLLM_API_KEY if set, else None.
                               Import never raises; call
                               ``get_primary_llm_api_key()`` at the point an
@@ -209,11 +211,11 @@ COLLECTION_LITERATURE = "literature"
 
 PRIMARY_LLM_BASE_URL = _os.environ.get(
     "PRIMARY_LLM_BASE_URL",
-    _os.environ.get("VLLM_BASE_URL", "http://localhost:8000/v1"),
+    _os.environ.get("VLLM_BASE_URL", "http://127.0.0.1:8001/v1"),
 )
 PRIMARY_LLM_MODEL_NAME = _os.environ.get(
     "PRIMARY_LLM_MODEL_NAME",
-    _os.environ.get("VLLM_MODEL_NAME", "google/gemma-4-31B-it"),
+    _os.environ.get("VLLM_MODEL_NAME", "google/gemma-4-E4B-it"),
 )
 # API key validation is lazy: importing ``config`` must never raise for a
 # missing secret (tests, path tools, and ingestion scripts all import this
