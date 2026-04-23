@@ -57,16 +57,12 @@ def _classify(entity_id: str) -> tuple[str, str, str]:
     return "unknown", q, COLLECTION_LITERATURE
 
 
-@tool
+@tool(parse_docstring=True)
 def fetch_kegg_live(entity_id: str) -> str:
     """Fetch any KEGG entity (reaction, compound, enzyme, pathway) on demand.
 
     Args:
-        entity_id: KEGG ID, accepted forms include:
-          - "R00024" or "rn:R00024" for reactions
-          - "C05432" or "cpd:C05432" for compounds
-          - "1.3.99.31" or "EC 1.3.99.31" or "ec:1.3.99.31" for enzymes
-          - "map00900" or "path:map00900" for reference pathways
+        entity_id: KEGG ID. Accepted forms include reactions like "R00024" or "rn:R00024", compounds like "C05432" or "cpd:C05432", enzymes like "1.3.99.31" or "EC 1.3.99.31" or "ec:1.3.99.31", reference pathways like "map00900" or "path:map00900", and organism-specific pathways like "eco00010".
 
     Returns:
         JSON string with the canonical id, detected kind, parsed sections
