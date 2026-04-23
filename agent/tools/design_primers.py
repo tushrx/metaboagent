@@ -21,13 +21,16 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Optional
+from typing import Literal, Optional
 
 from Bio.Seq import Seq
 from Bio.SeqUtils import MeltingTemp as MT
 from langchain_core.tools import tool
 
 log = logging.getLogger(__name__)
+
+CloningStrategy = Literal["gibson", "restriction"]
+RestrictionEnzyme = Literal["NdeI", "XhoI", "BamHI", "EcoRI", "HindIII", "NcoI", "SalI", "PstI"]
 
 _MAX_INPUT_LEN = 10_000
 _PRIMER_MIN = 18
@@ -180,28 +183,24 @@ def _add_overhangs(
     return fwd, rev, {"strategy": "bare"}
 
 
-@tool
+@tool(parse_docstring=True)
 def design_primers(
     gene_sequence: str,
     tm_target: float = 60.0,
-    cloning_strategy: str = "gibson",
-    re_enzyme: str = "NdeI",
-    vector_upstream_flank: str = "",
-    vector_downstream_flank: str = "",
+    cloning_strategy: CloningStrategy = "gibson",
+    re_enzyme: RestrictionEnzyme = "NdeI",
+    vector_upstream_flank: Optional[str] = None,
+    vector_downstream_flank: Optional[str] = None,
 ) -> str:
     """Design forward/reverse cloning primers for a gene CDS.
 
     Args:
-        gene_sequence: DNA sequence (A/C/G/T/N, case-insensitive). Whitespace
-            and FASTA-style newlines are tolerated. Capped at 10 kb.
-        tm_target: Target melting temperature in °C (default 60).
-        cloning_strategy: "gibson" (adds 25-bp vector-homology arms) or
-            "restriction" (adds an RE site + protective cap).
-        re_enzyme: Restriction enzyme name for the "restriction" strategy —
-            one of NdeI, XhoI, BamHI, EcoRI, HindIII, NcoI, SalI, PstI.
-        vector_upstream_flank / vector_downstream_flank: Optional 20–30 nt
-            flanks from your destination vector (Gibson only). When omitted,
-            pET28a NdeI/XhoI defaults are used.
+        gene_sequence: DNA sequence (A/C/G/T/N, case-insensitive). Whitespace and FASTA-style newlines are tolerated. Capped at 10 kb.
+        tm_target: Target melting temperature in celsius (default 60).
+        cloning_strategy: "gibson" (adds 25-bp vector-homology arms) or "restriction" (adds an RE site + protective cap).
+        re_enzyme: Restriction enzyme name for the "restriction" strategy — one of NdeI, XhoI, BamHI, EcoRI, HindIII, NcoI, SalI, PstI.
+        vector_upstream_flank: Optional 20-30 nt upstream flank from the destination vector (Gibson only). Pass null to use the pET28a NdeI default.
+        vector_downstream_flank: Optional 20-30 nt downstream flank from the destination vector (Gibson only). Pass null to use the pET28a XhoI default.
 
     Returns:
         JSON string with ``forward_primer`` / ``reverse_primer`` (with
