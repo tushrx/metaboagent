@@ -10,11 +10,14 @@ Scoring (coarse; literature-grounded refinement happens in the agent):
 from __future__ import annotations
 
 import json
+from typing import Literal
 
 from langchain_core.tools import tool
 
 from config import CHASSIS_ORGANISMS
 from agent.tools.kegg_search import _get_retriever
+
+HostOrganism = Literal["ecoli", "scerevisiae", "cglutamicum", "bsubtilis", "pputida"]
 
 
 def _kegg_org_code(host: str) -> str:
@@ -27,13 +30,17 @@ def _kegg_org_code(host: str) -> str:
     return host
 
 
-@tool
-def rank_enzymes(ec_number: str, host_organism: str = "ecoli", top_k: int = 5) -> str:
+@tool(parse_docstring=True)
+def rank_enzymes(
+    ec_number: str,
+    host_organism: HostOrganism = "ecoli",
+    top_k: int = 5,
+) -> str:
     """Rank enzyme candidates for a given EC number with respect to a target host.
 
     Args:
         ec_number: EC number such as "1.3.99.31" (no "EC " prefix).
-        host_organism: chassis key or name (ecoli, scerevisiae, ...).
+        host_organism: chassis key, one of ecoli, scerevisiae, cglutamicum, bsubtilis, pputida.
         top_k: number of candidates to return.
 
     Returns:
