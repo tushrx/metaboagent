@@ -16,9 +16,11 @@ from __future__ import annotations
 
 import json
 from collections import deque
-from typing import Optional
+from typing import Literal, Optional
 
 from langchain_core.tools import tool
+
+HostOrganism = Literal["ecoli", "scerevisiae", "cglutamicum", "bsubtilis", "pputida"]
 
 from config import CHASSIS_ORGANISMS
 from agent.tools.kegg_search import _get_retriever
@@ -104,15 +106,16 @@ def _split_csv(s) -> list[str]:
     return [t.strip() for t in str(s).split(",") if t.strip()]
 
 
-@tool
-def plan_retrosynthesis(target_compound_id: str, host_organism: str = "ecoli") -> str:
-    """Backward-chain a biosynthetic pathway from a target KEGG compound to host-native
-    precursors.
+@tool(parse_docstring=True)
+def plan_retrosynthesis(
+    target_compound_id: str,
+    host_organism: HostOrganism = "ecoli",
+) -> str:
+    """Backward-chain a biosynthetic pathway from a target KEGG compound to host-native precursors.
 
     Args:
         target_compound_id: KEGG compound ID of the target molecule (e.g., "C05432").
-        host_organism: chassis key ("ecoli", "scerevisiae", "cglutamicum", "bsubtilis",
-            "pputida") or a name/KEGG-org code we can match.
+        host_organism: chassis key, one of ecoli, scerevisiae, cglutamicum, bsubtilis, pputida.
 
     Returns:
         JSON with ordered pathway steps from a native precursor to the target, each with
