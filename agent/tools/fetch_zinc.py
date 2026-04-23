@@ -79,7 +79,7 @@ def _short_record(rec: dict) -> dict:
     }
 
 
-@tool
+@tool(parse_docstring=True)
 def fetch_zinc(compound_name_or_zinc_id: str) -> str:
     """Look up a compound in ZINC15 (commercial availability + vendor info).
 

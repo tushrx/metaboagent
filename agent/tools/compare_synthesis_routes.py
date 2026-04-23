@@ -105,7 +105,7 @@ def _as_list(v) -> list[str]:
     return [t.strip() for t in str(v).split(",") if t.strip()]
 
 
-@tool
+@tool(parse_docstring=True)
 def compare_synthesis_routes(target: str, top_k: int = 4) -> str:
     """Build a side-by-side microbial-vs-chemical synthesis comparison scaffold.
 

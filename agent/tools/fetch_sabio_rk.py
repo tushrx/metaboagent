@@ -43,7 +43,7 @@ def _build_query(ec: str, organism: Optional[str]) -> str:
     return " AND ".join(parts)
 
 
-@tool
+@tool(parse_docstring=True)
 def fetch_sabio_rk(ec_number: str, organism: str = "", max_results: int = 15) -> str:
     """Fetch enzyme kinetic parameters (Km, kcat, Ki, etc.) from SABIO-RK.
 

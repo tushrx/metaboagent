@@ -72,7 +72,7 @@ def _fetch_fasta(accession_or_id: str) -> tuple[str, str]:
     return header, seq
 
 
-@tool
+@tool(parse_docstring=True)
 def fetch_gene_sequence(gene_or_accession: str, organism: str = "") -> str:
     """Fetch a gene CDS / nucleotide sequence from NCBI.
 

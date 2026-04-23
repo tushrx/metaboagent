@@ -106,7 +106,7 @@ def _short_entry(entry: dict) -> dict:
     }
 
 
-@tool
+@tool(parse_docstring=True)
 def fetch_uniprot(protein_name_or_ec: str, organism: str = "") -> str:
     """Search UniProt (reviewed/Swiss-Prot) for a protein by name or EC number.
 

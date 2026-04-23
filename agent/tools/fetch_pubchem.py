@@ -58,7 +58,7 @@ def _fetch_synonyms(cid: int, max_syn: int = 6) -> list[str]:
     return syn[:max_syn]
 
 
-@tool
+@tool(parse_docstring=True)
 def fetch_pubchem(compound_name_or_cid: str) -> str:
     """Fetch compound data from PubChem (PUG REST) in real time.
 

@@ -71,7 +71,7 @@ def _parse_pubmed_xml(xml_text: str) -> list[dict]:
     return records
 
 
-@tool
+@tool(parse_docstring=True)
 def fetch_pubmed_live(query: str, max_results: int = 10) -> str:
     """Search PubMed in real time via NCBI E-utilities.
 

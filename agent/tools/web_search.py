@@ -26,7 +26,7 @@ def _run_ddg(query: str, max_results: int) -> list[dict]:
     return hits or []
 
 
-@tool
+@tool(parse_docstring=True)
 def web_search(query: str, max_results: int = 5) -> str:
     """Search the open web (DuckDuckGo) for up-to-date scientific info.
 
