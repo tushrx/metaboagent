@@ -100,3 +100,9 @@ After the Phase 1 commits (including `phase1: lazy-validate PRIMARY_LLM_API_KEY`
 - `tests/test_ui_response_log.py` — collection error via `ui/app.py` → `agent.rag.citation_verifier`. The shim fixes the import path, but `ui/app.py` also transitively pulls `agent.metabo_agent` → `agent.router` (archived). Phase 3 rewrite.
 
 `tests/test_config.py` and `tests/test_storage_paths.py` must pass from this commit forward — the import-time key raise has been replaced with a lazy `get_primary_llm_api_key()` helper, so reloading `config` with a clean env dict no longer crashes. If either of those files regresses, stop and investigate before continuing.
+
+---
+
+## Followups
+
+- Firewall `:8000` / `:8001` / `:8002` to 127.0.0.1 + LAN CIDR only. Not done yet.
