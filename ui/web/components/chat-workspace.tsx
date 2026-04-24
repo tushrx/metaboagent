@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatRequestError, streamChat } from "@/lib/sse";
 import type {
   MessageIn,
@@ -16,12 +16,58 @@ import { EvidenceDrawer } from "./evidence-drawer";
 import type { InputAreaHandle } from "./input-area";
 import type { ChatMessage, StreamingState } from "./message-list";
 
+const STORAGE_KEY = "metaboagent.chat.v1";
+
 function newId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
 function toMessageIn(messages: ChatMessage[]): MessageIn[] {
   return messages.map((m) => ({ role: m.role, content: m.content }));
+}
+
+/**
+ * Persisted shape is just the prose — role, content, id, and the
+ * stable-ish error/canceled markers. We deliberately drop toolCalls
+ * (bulky, stale by the time a page reloads) and pathway/toolActivity
+ * (session-only state). The user gets their message thread back; they
+ * don't get every tool result frozen in amber, which would be noise.
+ */
+function loadMessages(): ChatMessage[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (m): m is ChatMessage =>
+        !!m &&
+        typeof m === "object" &&
+        typeof (m as ChatMessage).id === "string" &&
+        typeof (m as ChatMessage).content === "string" &&
+        ((m as ChatMessage).role === "user" ||
+          (m as ChatMessage).role === "assistant"),
+    );
+  } catch {
+    return [];
+  }
+}
+
+function saveMessages(messages: ChatMessage[]) {
+  if (typeof window === "undefined") return;
+  try {
+    const persisted = messages.map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      error: m.error,
+      canceled: m.canceled,
+    }));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+  } catch {
+    // quota exceeded / storage disabled — silently drop
+  }
 }
 
 export function ChatWorkspace() {
@@ -32,6 +78,21 @@ export function ChatWorkspace() {
   const [toolActivity, setToolActivity] = useState<ToolActivity[]>([]);
   const [pathway, setPathway] = useState<PathwayData | null>(null);
   const [deepMode, setDeepMode] = useState(false);
+
+  // Hydrate message history from localStorage on mount.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+    const saved = loadMessages();
+    if (saved.length > 0) setMessages(saved);
+  }, []);
+
+  // Persist message history on every change (after hydration).
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    saveMessages(messages);
+  }, [messages]);
 
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<InputAreaHandle | null>(null);
@@ -227,9 +288,34 @@ export function ChatWorkspace() {
     railRef.current?.scrollToToolCall(id);
   }, []);
 
+  const handleNewConversation = useCallback(() => {
+    if (streaming) return;
+    if (messages.length === 0) return;
+    const confirmed = window.confirm(
+      "Clear the current conversation? Message history will be deleted.",
+    );
+    if (!confirmed) return;
+    setMessages([]);
+    setToolActivity([]);
+    setPathway(null);
+    setLastError(null);
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        // ignore
+      }
+    }
+  }, [messages.length, streaming]);
+
   return (
     <>
-      <Header deepMode={deepMode} onDeepModeChange={setDeepMode} />
+      <Header
+        deepMode={deepMode}
+        onDeepModeChange={setDeepMode}
+        onNewConversation={handleNewConversation}
+        canClearConversation={messages.length > 0 && !streaming}
+      />
       <div className="flex h-[calc(100vh-56px)]">
         <MainPane
           messages={messages}

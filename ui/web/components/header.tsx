@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { HealthOverall, HealthResponse } from "@/lib/api";
 import { StatusDot } from "./status-dot";
@@ -13,6 +14,8 @@ type DotStatus = HealthOverall | "pending";
 interface HeaderProps {
   deepMode: boolean;
   onDeepModeChange: (on: boolean) => void;
+  onNewConversation?: () => void;
+  canClearConversation?: boolean;
 }
 
 function onlineCount(h: HealthResponse | null): number {
@@ -31,7 +34,12 @@ function statusLabel(status: DotStatus, h: HealthResponse | null): string {
   return `${count}/3 tiers online`;
 }
 
-export function Header({ deepMode, onDeepModeChange }: HeaderProps) {
+export function Header({
+  deepMode,
+  onDeepModeChange,
+  onNewConversation,
+  canClearConversation = false,
+}: HeaderProps) {
   const [status, setStatus] = useState<DotStatus>("pending");
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [showHelper, setShowHelper] = useState(true);
@@ -143,6 +151,19 @@ export function Header({ deepMode, onDeepModeChange }: HeaderProps) {
             </div>
           )}
         </div>
+
+        {onNewConversation && (
+          <button
+            type="button"
+            onClick={onNewConversation}
+            disabled={!canClearConversation}
+            aria-label="Start a new conversation"
+            title="New conversation"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+          >
+            <Trash2 size={16} />
+          </button>
+        )}
       </div>
     </header>
   );
