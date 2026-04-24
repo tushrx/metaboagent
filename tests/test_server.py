@@ -12,6 +12,9 @@ vLLM or hitting the network. The 7 test cases mirror the Phase-4 spec:
     f. GET  /health all down → 503, overall=down
     g. GET  /tools → 15 descriptors, each has name/desc/schema
 
+Phase 5.6 adds 3 attachment cases: valid attachment → stubbed stream,
+too many attachments → 422, unsupported mime → 422.
+
 Run:
     PYTHONPATH=/home/tusharmicro/metaboagent python3 -m unittest tests.test_server
 """
@@ -163,6 +166,68 @@ class ToolsEndpointTests(unittest.TestCase):
             schema = entry["parameters_schema"]
             self.assertEqual(schema.get("type"), "object",
                              f"{entry['name']} schema not object: {schema}")
+
+
+# ---- Phase 5.6: attachments ----------------------------------------------
+
+# Smallest valid base64 payload — contents don't matter for server-side
+# validation (the server doesn't decode pixels, only enforces the mime
+# allowlist and size ceiling).
+_TINY_B64 = "iVBORw0KGgo="
+
+
+def _attachment(mime: str = "image/png", name: str = "a.png") -> dict:
+    return {
+        "kind": "image",
+        "mime_type": mime,
+        "filename": name,
+        "data_base64": _TINY_B64,
+        "thumbnail_base64": _TINY_B64,
+    }
+
+
+class AttachmentTests(unittest.TestCase):
+    def test_valid_attachment_returns_stub_stream(self):
+        # Stub mode is the default (ATTACHMENTS_STUBBED unset or "1").
+        with patch.dict(os.environ, {"ATTACHMENTS_STUBBED": "1"}):
+            with TestClient(create_app()) as client:
+                with client.stream("POST", "/chat", json={
+                    "messages": [{
+                        "role": "user",
+                        "content": "what's this?",
+                        "attachments": [_attachment()],
+                    }],
+                }) as r:
+                    self.assertEqual(r.status_code, 200)
+                    events = _parse_sse_events(r.iter_lines())
+        types = [e["type"] for e in events]
+        self.assertIn("thinking", types)
+        self.assertIn("final_answer", types)
+        self.assertEqual(types[-1], "done")
+        final = next(e for e in events if e["type"] == "final_answer")
+        self.assertIn("attached 1 image", final["content"])
+
+    def test_four_attachments_rejected_422(self):
+        with TestClient(create_app()) as client:
+            r = client.post("/chat", json={
+                "messages": [{
+                    "role": "user",
+                    "content": "lots",
+                    "attachments": [_attachment() for _ in range(4)],
+                }],
+            })
+        self.assertEqual(r.status_code, 422)
+
+    def test_invalid_mime_rejected_422(self):
+        with TestClient(create_app()) as client:
+            r = client.post("/chat", json={
+                "messages": [{
+                    "role": "user",
+                    "content": "nope",
+                    "attachments": [_attachment(mime="image/gif", name="x.gif")],
+                }],
+            })
+        self.assertEqual(r.status_code, 422)
 
 
 if __name__ == "__main__":

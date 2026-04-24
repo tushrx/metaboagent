@@ -42,6 +42,43 @@ _PROBE_TIMEOUT_S = 2.0
 _DEFAULT_CORS_REGEX = r"https?://(127\.0\.0\.1|localhost)(:\d+)?"
 
 
+def _attachments_stubbed() -> bool:
+    """Phase 5.6 gate. When true, any /chat request that includes
+    attachments short-circuits to a canned SSE sequence instead of
+    running the agent. Phase 6 flips this to 0 and wires vision.
+    """
+    return os.environ.get("ATTACHMENTS_STUBBED", "1") == "1"
+
+
+def _any_attachments(body: "ChatRequest") -> int:
+    return sum(len(m.attachments) for m in body.messages)
+
+
+async def _stubbed_attachment_stream(n: int) -> AsyncIterator[dict]:
+    """Canned event sequence for Phase 5.6. Keeps the event shape
+    identical to the live agent so the UI needs no special-casing."""
+    yield {
+        "type": "thinking",
+        "content": "Got the image(s). Vision wiring lands in Phase 6.",
+    }
+    text = (
+        f"I can see you attached {n} image{'s' if n != 1 else ''}. "
+        "Image understanding arrives in Phase 6 — for now I can only read text."
+    )
+    yield {"type": "token", "content": text}
+    yield {"type": "final_answer", "content": text}
+    yield {
+        "type": "done",
+        "usage": {
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "iterations": 0,
+            "tool_calls": 0,
+            "ms": 0,
+        },
+    }
+
+
 def _extra_cors_origins() -> list[str]:
     raw = os.environ.get("CORS_ALLOWED_ORIGINS", "").strip()
     if not raw:
@@ -64,8 +101,15 @@ def create_app() -> FastAPI:
     async def chat(body: ChatRequest) -> StreamingResponse:
         messages = _to_langchain_messages(body.messages)
 
+        attachment_count = _any_attachments(body)
+        stub_mode = attachment_count > 0 and _attachments_stubbed()
+
         async def event_stream() -> AsyncIterator[bytes]:
             try:
+                if stub_mode:
+                    async for ev in _stubbed_attachment_stream(attachment_count):
+                        yield _sse(ev)
+                    return
                 async for ev in run_agent(
                     messages,
                     tier=body.tier,
