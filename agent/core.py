@@ -44,6 +44,7 @@ from agent.tools.fetch_uniprot import fetch_uniprot
 from agent.tools.fetch_zinc import fetch_zinc
 from agent.tools.kegg_search import search_kegg
 from agent.tools.literature_search import search_literature
+from agent.tools.parse_structure_image import parse_structure_image
 from agent.tools.retrosynthesis import plan_retrosynthesis
 from agent.tools.web_search import web_search
 
@@ -53,12 +54,14 @@ logger = logging.getLogger(__name__)
 
 
 def build_tool_registry() -> dict[str, BaseTool]:
-    """Return a {name → BaseTool} mapping of all 15 tools."""
+    """Return a {name → BaseTool} mapping of the agent's tools (16 as of
+    Phase 6.2: the original 15 plus parse_structure_image for vision)."""
     tools: list[BaseTool] = [
         compare_synthesis_routes, design_expression_vector, design_primers,
         rank_enzymes, fetch_gene_sequence, fetch_kegg_live, fetch_pubchem,
         fetch_pubmed_live, fetch_sabio_rk, fetch_uniprot, fetch_zinc,
-        search_kegg, search_literature, plan_retrosynthesis, web_search,
+        search_kegg, search_literature, parse_structure_image,
+        plan_retrosynthesis, web_search,
     ]
     return {t.name: t for t in tools}
 

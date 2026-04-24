@@ -144,13 +144,14 @@ class HealthEndpointTests(unittest.TestCase):
 # ---- g: /tools endpoint ---------------------------------------------------
 
 class ToolsEndpointTests(unittest.TestCase):
-    def test_returns_15_well_formed_descriptors(self):
+    def test_returns_16_well_formed_descriptors(self):
         with TestClient(create_app()) as client:
             r = client.get("/tools")
         self.assertEqual(r.status_code, 200)
         body = r.json()
         self.assertIsInstance(body, list)
-        self.assertEqual(len(body), 15, f"expected 15 tools, got {len(body)}")
+        # 15 original + parse_structure_image added in Phase 6.2.
+        self.assertEqual(len(body), 16, f"expected 16 tools, got {len(body)}")
 
         seen_names: set[str] = set()
         for entry in body:
