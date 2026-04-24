@@ -106,6 +106,7 @@ After the Phase 1 commits (including `phase1: lazy-validate PRIMARY_LLM_API_KEY`
 ## Followups
 
 - Firewall `:8000` / `:8001` / `:8002` to 127.0.0.1 + LAN CIDR only. Not done yet.
+- vLLM streaming doesn't surface usage_metadata through LangChain at v0.19.0. `tokens_in` / `tokens_out` report as 0 in `Event{type=done}`. Affects eval harness (Phase 8) metrics. Workaround: non-streaming usage probe after stream, or local tokenization. Not blocking Phase 3.
 
 ---
 
