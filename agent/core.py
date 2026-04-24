@@ -91,6 +91,12 @@ async def run_agent(
     history = _history_from_messages(messages)
     tools = build_tool_registry()
 
+    # Phase 6.3 — run-scoped buffer of attachments on the last user turn.
+    # The LLM sees a hint telling it to call parse_structure_image but
+    # has no way to encode the real base64 bytes; the tool-dispatch path
+    # below splices in the real image from this queue per call.
+    pending_images: list[dict] = _extract_last_turn_attachments(messages)
+
     try:
         llm = select_llm(tier, list(tools.values()), temperature=temperature)
     except Exception as e:
@@ -99,6 +105,8 @@ async def run_agent(
         return
 
     working: list[BaseMessage] = list(history.bounded_messages(PRIMARY_SYSTEM_PROMPT))
+    if pending_images:
+        working.append(HumanMessage(content=_attachment_hint(len(pending_images))))
 
     for iteration in range(max_iterations):
         usage["iterations"] = iteration + 1
@@ -140,7 +148,22 @@ async def run_agent(
             name = tc.get("name", "")
             args = tc.get("args", {}) or {}
             call_id = tc.get("id") or f"tc_{iteration}_{usage['tool_calls']}"
-            yield _ev("tool_call", name=name, args=args, id=call_id)
+
+            # Phase 6.3 — splice in a real image for parse_structure_image
+            # calls. The LLM prompt doesn't give it raw base64, so whatever
+            # it provides for image_data_base64 is placeholder/hallucinated;
+            # we overwrite with the next queued attachment. The override
+            # happens BEFORE dedup so two successive calls against two
+            # different attachments don't collide on a shared placeholder.
+            if name == "parse_structure_image" and pending_images:
+                img = pending_images.pop(0)
+                args = {
+                    **args,
+                    "image_data_base64": img.get("data_base64") or "",
+                    "mime_type": img.get("mime_type") or "image/png",
+                }
+
+            yield _ev("tool_call", name=name, args=_redact_tool_args(name, args), id=call_id)
 
             if not history.check_and_record_call(name, args):
                 synthetic = (
@@ -231,6 +254,54 @@ async def _invoke_tool(tool: BaseTool, args: dict[str, Any]) -> Any:
     if hasattr(tool, "ainvoke"):
         return await tool.ainvoke(args)
     return tool.invoke(args)
+
+
+def _extract_last_turn_attachments(messages: list[BaseMessage]) -> list[dict]:
+    """Pull attachments off the most recent HumanMessage.
+
+    Attachments ride inside ``HumanMessage.additional_kwargs['attachments']``
+    — see ``app.server._to_langchain_messages``. We only surface them for
+    the *last* user turn; older attachments are historical context, the
+    analysis for those turns has already happened.
+    """
+    for m in reversed(messages):
+        if isinstance(m, HumanMessage):
+            atts = (m.additional_kwargs or {}).get("attachments") or []
+            return [dict(a) for a in atts]
+    return []
+
+
+def _attachment_hint(n: int) -> str:
+    """Directive hint for the LLM that image(s) are available.
+
+    Gemma 4 E4B reads a polite "attached images" instruction as "ask the
+    user for base64" and stalls. Telling the model it can pass a sentinel
+    and the runtime will splice in the real bytes unblocks the tool call.
+    """
+    s = "s" if n != 1 else ""
+    plural = "each" if n != 1 else "it"
+    return (
+        f"[{n} image{s} already attached to this turn. Call "
+        f"parse_structure_image on {plural} NOW. Pass "
+        f"image_data_base64=\"ATTACHED\" — the runtime substitutes the "
+        f"real bytes at call time. Do NOT ask the user for base64 data.]"
+    )
+
+
+def _redact_tool_args(name: str, args: dict[str, Any]) -> dict[str, Any]:
+    """Strip the inline image payload from the tool_call event.
+
+    parse_structure_image's image_data_base64 is typically tens-to-hundreds
+    of KB; piping it through the SSE stream bloats the UI crumb strip and
+    the persisted activity log. Replace with a short marker for display.
+    """
+    if name != "parse_structure_image":
+        return args
+    b64 = args.get("image_data_base64") or ""
+    if not b64:
+        return args
+    redacted = {**args, "image_data_base64": f"<{len(b64)} chars redacted>"}
+    return redacted
 
 
 def _accumulate_usage(usage: dict, final_ai) -> None:

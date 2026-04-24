@@ -151,8 +151,10 @@ def parse_structure_image(
     extraction as failed.
 
     Args:
-        image_data_base64: Base64-encoded image bytes. NO ``data:``
-            prefix — the bytes only.
+        image_data_base64: Base64-encoded image bytes, NO ``data:`` prefix.
+            When the runtime hint tells you an image was attached to the
+            user message, pass the string ``"ATTACHED"`` here and the
+            runtime will splice in the real bytes at call time.
         mime_type: MIME type of the image; one of image/png,
             image/jpeg, image/webp.
 

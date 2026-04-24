@@ -187,10 +187,25 @@ def _attachment(mime: str = "image/png", name: str = "a.png") -> dict:
     }
 
 
+def _capturing_run_agent(events: list[dict], capture: dict):
+    """Same as _scripted_run_agent but records the call args for assertions."""
+    async def fake(messages, *args, **kwargs):
+        capture["messages"] = messages
+        capture["kwargs"] = kwargs
+        for ev in events:
+            yield ev
+    return fake
+
+
 class AttachmentTests(unittest.TestCase):
-    def test_valid_attachment_returns_stub_stream(self):
-        # Stub mode is the default (ATTACHMENTS_STUBBED unset or "1").
-        with patch.dict(os.environ, {"ATTACHMENTS_STUBBED": "1"}):
+    def test_valid_attachment_reaches_run_agent(self):
+        events = [
+            {"type": "token", "content": "ok"},
+            {"type": "final_answer", "content": "ok"},
+            {"type": "done", "usage": {}},
+        ]
+        capture: dict = {}
+        with patch("app.server.run_agent", _capturing_run_agent(events, capture)):
             with TestClient(create_app()) as client:
                 with client.stream("POST", "/chat", json={
                     "messages": [{
@@ -200,13 +215,15 @@ class AttachmentTests(unittest.TestCase):
                     }],
                 }) as r:
                     self.assertEqual(r.status_code, 200)
-                    events = _parse_sse_events(r.iter_lines())
-        types = [e["type"] for e in events]
-        self.assertIn("thinking", types)
-        self.assertIn("final_answer", types)
-        self.assertEqual(types[-1], "done")
-        final = next(e for e in events if e["type"] == "final_answer")
-        self.assertIn("attached 1 image", final["content"])
+                    _ = list(r.iter_lines())  # drain
+
+        received = capture["messages"]
+        self.assertEqual(len(received), 1)
+        msg = received[0]
+        atts = (getattr(msg, "additional_kwargs", {}) or {}).get("attachments") or []
+        self.assertEqual(len(atts), 1, f"expected 1 attachment on user turn, got {atts}")
+        self.assertEqual(atts[0]["mime_type"], "image/png")
+        self.assertTrue(atts[0]["data_base64"])
 
     def test_four_attachments_rejected_422(self):
         with TestClient(create_app()) as client:
