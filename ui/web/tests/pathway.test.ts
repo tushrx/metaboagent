@@ -98,6 +98,25 @@ Step 3: HMG-CoA &rarr; Mevalonate
     expect(p.steps[2].product).toBe("Mevalonate");
   });
 
+  it("strips trailing PMID:xxxxxxx placeholder from enzyme names", () => {
+    const content = `Step 1: A → B
+    Enzyme: Thiolase (E. coli) PMID:xxxxxxx
+`;
+    const p = extractPathway(content, "m-pmid-trail");
+    expect(p.steps[0].enzyme?.name).toBe("Thiolase");
+    expect(p.steps[0].enzyme?.organism).toBe("E. coli");
+    expect(p.steps[0].pmid).toBeUndefined();
+  });
+
+  it("strips embedded PMID without damaging enzyme name", () => {
+    const content = `Step 1: A → B
+    Enzyme: HMG-CoA Synthase PMID:12345 (E. coli)
+`;
+    const p = extractPathway(content, "m-pmid-embed");
+    expect(p.steps[0].enzyme?.name).toBe("HMG-CoA Synthase");
+    expect(p.steps[0].enzyme?.organism).toBe("E. coli");
+  });
+
   it("truncates to the first pathway when a second 'Step 1' appears", () => {
     const content = `Pathway A:
 Step 1: A1 → A2

@@ -116,11 +116,19 @@ export function extractPathway(
       continue;
     }
     if (/^Enzyme[:\s]/i.test(line)) {
-      const m = ENZYME_RE.exec(line);
+      // Capture real PMIDs (digit form) before we strip anything — we
+      // still want to record them in step.pmid.
+      const realPmid = /\bPMID[:\s]*(\d+)\b/i.exec(line);
+      if (realPmid && !current.pmid) current.pmid = realPmid[1];
+      // Strip both real and placeholder PMIDs so the enzyme-name regex
+      // can find the organism-paren group reliably. Without this, a
+      // trailing ``PMID:xxxxxxx`` fools the optional-paren backtrack
+      // and the organism ends up absorbed into the name capture.
+      const scrubbed = scrubPmid(line);
+      const m = ENZYME_RE.exec(scrubbed);
       if (m) {
         current.enzyme = { name: m[1].trim() };
         if (m[2]) current.enzyme.organism = m[2].trim();
-        if (m[3] && !current.pmid) current.pmid = m[3];
       }
       continue;
     }
@@ -137,6 +145,20 @@ function cleanLabel(s: string): string {
   // Strip stray markdown emphasis / code-fence chars; preserve content.
   return s
     .replace(/^[*_`\s]+|[*_`\s]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Strip both real PMIDs (``PMID:12345``) and the model's placeholder
+ * (``PMID:xxxxxxx``) from an enzyme line so the ENZYME_RE can match
+ * ``(organism)`` cleanly. Real PMIDs are captured into ``step.pmid``
+ * before we run this, so no citation data is lost.
+ */
+function scrubPmid(line: string): string {
+  return line
+    .replace(/\s*PMID[:\s]*[x0-9]+\s*$/i, "") // trailing
+    .replace(/\s*PMID[:\s]*[x0-9]+\s*/gi, " ") // embedded
     .replace(/\s+/g, " ")
     .trim();
 }
