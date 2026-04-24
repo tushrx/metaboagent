@@ -36,13 +36,19 @@ export interface Citation {
 // ---- Regex patterns -----------------------------------------------------
 
 // Use fresh instances each call — global regexes carry lastIndex.
+//
+// PMID and CHEBI allow `["\s:,]*` between the prefix and the digits so we
+// match both prose (``PMID:12345``) and JSON-stringified tool results
+// (``"pmid":"12345"``). UniProt widens the spec's `[A-NR-Z]` first letter
+// to `[A-Z]` so we don't miss the common ``P12345``/``O60341``/``Q14739``
+// forms — false positives are tolerable at the evidence-panel layer.
 function patterns() {
   return {
-    pmid: /PMID[:\s]?(\d{4,})/gi,
+    pmid: /pmid["\s:,]*(\d{4,})/gi,
     kegg: /\b([CRK]\d{5})\b/g,
     keggPath: /\b(map\d{5})\b/g,
-    chebi: /CHEBI[:\s]?(\d+)/gi,
-    uniprot: /\b([A-NR-Z][0-9][A-Z0-9]{3}[0-9])\b/g,
+    chebi: /chebi["\s:,]*(\d+)/gi,
+    uniprot: /\b([A-Z][0-9][A-Z0-9]{3}[0-9])\b/g,
     doi: /10\.\d{4,9}\/[-._;()/:A-Z0-9]+/gi,
   };
 }
