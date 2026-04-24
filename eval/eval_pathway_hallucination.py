@@ -53,8 +53,19 @@ KEGG_TIMEOUT_S = 10.0
 RID_RE = re.compile(r"\bR\d{5}\b")
 EC_RE = re.compile(r"\bEC\s?(\d+\.\d+\.\d+\.\d+)\b")
 PLAN_BLOCK_RE = re.compile(r"<plan>\s*(.*?)\s*</plan>", re.DOTALL | re.IGNORECASE)
-# "Step 1:", optionally markdown-bold-wrapped ("**Step 1:**") at line start.
-STEP_LINE_RE = re.compile(r"(?im)^\s*\**\s*Step\s+\d+\s*[:.]")
+# A pathway step opener. Accepts the canonical "Step 1:" shape plus the
+# markdown numbered-list styles the model sometimes drifts into:
+#   Step 1:          (canonical from the system prompt)
+#   **Step 1:**      (bold-wrapped canonical)
+#   1.               (markdown ordered list)
+#   1)               (paren-style list)
+#   **1.**           (bold-wrapped numbered)
+# Anchored to line start with optional leading whitespace. The closing
+# punctuation ([.):]) guards against false positives like "1 gram" or
+# "Figure 1." (the latter doesn't start with a digit at line anchor).
+STEP_LINE_RE = re.compile(
+    r"(?im)^\s*(?:\*\*)?\s*(?:Step\s+)?(\d+)[.):]"
+)
 # Marker for Phase 6.5.c's nudge thinking event.
 _NUDGE_MARKER = "Empty completion detected"
 
