@@ -9,6 +9,7 @@ import type {
 } from "@/lib/api";
 import { MainPane } from "./main-pane";
 import { EvidenceRail, type EvidenceRailHandle } from "./evidence-rail";
+import { EvidenceDrawer } from "./evidence-drawer";
 import type { InputAreaHandle } from "./input-area";
 import type { ChatMessage, StreamingState } from "./message-list";
 
@@ -226,6 +227,7 @@ export function ChatWorkspace() {
         onToolCrumbClick={handleToolCrumbClick}
       />
       <EvidenceRail ref={railRef} toolActivity={toolActivity} />
+      <EvidenceDrawer toolActivity={toolActivity} />
     </div>
   );
 }
