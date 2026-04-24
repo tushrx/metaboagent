@@ -30,9 +30,34 @@ export interface HealthResponse {
 
 export type Tier = "default" | "deep" | "max_rigor";
 
+/** MIME types the UI + backend agree to accept for image attachments. */
+export const ATTACHMENT_ALLOWED_MIME = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+] as const;
+export type AttachmentMime = (typeof ATTACHMENT_ALLOWED_MIME)[number];
+
+/**
+ * One image the user attached to a message. `data_base64` is the
+ * full-resolution payload the backend will feed to the vision model
+ * (Phase 6); `thumbnail_base64` is a small copy the UI uses for history
+ * rendering so reloads don't decode the big blob. On restore from
+ * localStorage `data_base64` may be null — the thumbnail is all we keep
+ * locally (see chat-workspace persistence notes).
+ */
+export interface Attachment {
+  kind: "image";
+  mime_type: AttachmentMime;
+  filename: string;
+  data_base64: string | null;
+  thumbnail_base64: string;
+}
+
 export interface MessageIn {
   role: "user" | "assistant";
   content: string;
+  attachments?: Attachment[];
 }
 
 export interface ChatRequest {

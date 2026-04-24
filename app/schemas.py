@@ -12,12 +12,38 @@ from pydantic import BaseModel, Field
 
 Tier = Literal["default", "deep", "max_rigor"]
 
+AttachmentMime = Literal["image/png", "image/jpeg", "image/webp"]
+
+# ~6 MB raw → ~8 MB base64 (4/3 expansion). Matches the client-side 5 MB
+# raw cap with a little slack for the base64 overhead.
+_MAX_ATTACHMENT_B64_BYTES = 8 * 1024 * 1024
+_MAX_ATTACHMENTS_PER_MESSAGE = 3
+
+
+class Attachment(BaseModel):
+    """One image attachment on a user message.
+
+    The client validates dimensions/type; the server only enforces the
+    mime allowlist, attachment count, and a hard ceiling on base64 size
+    so a malicious or buggy client can't post a 500 MB blob.
+    """
+
+    kind: Literal["image"] = "image"
+    mime_type: AttachmentMime
+    filename: str = Field(..., min_length=1, max_length=256)
+    data_base64: str = Field(..., min_length=1, max_length=_MAX_ATTACHMENT_B64_BYTES)
+    thumbnail_base64: str = Field(..., min_length=1, max_length=_MAX_ATTACHMENT_B64_BYTES)
+
 
 class MessageIn(BaseModel):
     """One turn of conversation as received from a client."""
 
     role: Literal["user", "assistant"]
     content: str
+    attachments: list[Attachment] = Field(
+        default_factory=list,
+        max_length=_MAX_ATTACHMENTS_PER_MESSAGE,
+    )
 
 
 class ChatRequest(BaseModel):
