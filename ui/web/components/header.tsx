@@ -1,9 +1,59 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import type { HealthOverall, HealthResponse } from "@/lib/api";
 import { StatusDot } from "./status-dot";
 
+const POLL_INTERVAL_MS = 15_000;
+
+type DotStatus = HealthOverall | "pending";
+
+function onlineCount(h: HealthResponse | null): number {
+  if (!h) return 0;
+  return (["default", "deep", "max_rigor"] as const).reduce(
+    (n, k) => n + (h[k] === "ok" ? 1 : 0),
+    0,
+  );
+}
+
+function statusLabel(status: DotStatus, h: HealthResponse | null): string {
+  if (status === "pending") return "Checking backend status…";
+  const count = onlineCount(h);
+  if (status === "ok") return "All tiers online (3/3)";
+  if (status === "down") return "Backend offline (0/3 tiers)";
+  return `${count}/3 tiers online`;
+}
+
 export function Header() {
+  const [status, setStatus] = useState<DotStatus>("pending");
+  const [health, setHealth] = useState<HealthResponse | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function probe() {
+      try {
+        const res = await fetch("/api/health-proxy", { cache: "no-store" });
+        const body = (await res.json()) as HealthResponse;
+        if (cancelled) return;
+        setHealth(body);
+        setStatus(body.overall ?? "down");
+      } catch {
+        if (cancelled) return;
+        setHealth(null);
+        setStatus("down");
+      }
+    }
+
+    probe();
+    const id = setInterval(probe, POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
+
   return (
     <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-5">
       <div className="flex items-center gap-3">
@@ -28,7 +78,7 @@ export function Header() {
 
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <StatusDot status="pending" label="Checking backend status…" />
+          <StatusDot status={status} label={statusLabel(status, health)} />
           <span className="text-sm text-gray-600">Backend</span>
         </div>
 
