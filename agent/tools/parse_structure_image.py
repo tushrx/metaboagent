@@ -21,6 +21,7 @@ import base64
 import binascii
 import json
 import logging
+import os
 from typing import Any, Literal, Optional
 
 from langchain_core.messages import HumanMessage
@@ -57,7 +58,15 @@ _EXTRACTION_PROMPT = (
     "SMILES, return smiles: null."
 )
 
-_VISION_TIMEOUT_S = 90
+def _vision_timeout_s() -> int:
+    """90 s by default; overridable so the eval can push past dense
+    structures (B12, erythromycin) that blow the default."""
+    try:
+        return max(10, int(os.environ.get("PARSE_STRUCTURE_TIMEOUT_S") or 90))
+    except (TypeError, ValueError):
+        return 90
+
+
 _VISION_TEMPERATURE = 0.1  # low but non-zero; leaves room for alt-smiles hedging
 _NOTES_TRUNCATE = 200
 
@@ -74,7 +83,12 @@ def _build_vision_llm() -> ChatOpenAI:
         base_url=_force_ipv4(PRIMARY_LLM_BASE_URL),
         api_key=PRIMARY_LLM_API_KEY or "none",
         temperature=_VISION_TEMPERATURE,
-        timeout=_VISION_TIMEOUT_S,
+        timeout=_vision_timeout_s(),
+        # openai client retries timeouts 2× by default. Here, a timeout
+        # is a signal the vision call is genuinely slow, not a transient
+        # error — retrying just burns ~3× the wallclock budget. Fail
+        # fast; the agent loop surfaces tool_error cleanly.
+        max_retries=0,
     )
 
 

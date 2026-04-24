@@ -1,0 +1,77 @@
+{
+  "timestamp_utc": "20260424T165107Z",
+  "model": "PRIMARY_LLM (E4B via parse_structure_image)",
+  "summary": {
+    "overall": {
+      "PASS_STRICT": 0,
+      "PASS_INCHI": 0,
+      "PARTIAL": 1,
+      "FAIL": 1
+    },
+    "overall_n": 2,
+    "by_difficulty": {
+      "simple": {
+        "PASS_STRICT": 0,
+        "PASS_INCHI": 0,
+        "PARTIAL": 0,
+        "FAIL": 0
+      },
+      "medium": {
+        "PASS_STRICT": 0,
+        "PASS_INCHI": 0,
+        "PARTIAL": 0,
+        "FAIL": 0
+      },
+      "hard": {
+        "PASS_STRICT": 0,
+        "PASS_INCHI": 0,
+        "PARTIAL": 0,
+        "FAIL": 1
+      },
+      "very_hard": {
+        "PASS_STRICT": 0,
+        "PASS_INCHI": 0,
+        "PARTIAL": 1,
+        "FAIL": 0
+      }
+    }
+  },
+  "rows": [
+    {
+      "cid": "5311498",
+      "name": "coenzyme_b12",
+      "difficulty": "hard",
+      "image": "5311498_coenzyme_b12.png",
+      "ground_truth_smiles": "CC1=CC2=C(C=C1C)N(C=N2)C3C(C(C(O3)CO)OP(=O)([O-])OC(C)CNC(=O)CCC4(C(C5C6(C(C(C(=C(C7=NC(=CC8=NC(=C(C4=N5)C)C(C8(C)C)CCC(=O)N)C(C7(C)CC(=O)N)CCC(=O)N)C)[N-]6)CCC(=O)N)(C)CC(=O)N)C)CC(=O)N)C)O.[C-]#N.[Co+3]",
+      "ground_truth_inchi_key": "FDJOLVPMNUYSCM-UHFFFAOYSA-L",
+      "extracted": {
+        "smiles": null,
+        "confidence": "low",
+        "alternative_smiles": [],
+        "notes": "tool exception: APITimeoutError: Request timed out.",
+        "rdkit_canonical": null,
+        "inchi_key": null,
+        "formula": null
+      },
+      "verdict": "FAIL"
+    },
+    {
+      "cid": "12560",
+      "name": "erythromycin",
+      "difficulty": "very_hard",
+      "image": "12560_erythromycin.png",
+      "ground_truth_smiles": "CCC1C(C(C(C(=O)C(CC(C(C(C(C(C(=O)O1)C)OC2CC(C(C(O2)C)O)(C)OC)C)OC3C(C(CC(O3)C)N(C)C)O)(C)O)C)C)O)(C)O",
+      "ground_truth_inchi_key": "ULGZDMOVFRHVEP-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CC(C)C1C(C(C(C1)O)O)C(C(C(C)O)O)C(C(C(C)O)O)C(C(C(C)O)O)C(C(C(C)O)O)O",
+        "confidence": "medium",
+        "alternative_smiles": [],
+        "notes": "The structure appears to be a complex glycoside or related molecule. The SMILES provided is a simplification based on the visible connectivity, but stereochemistry and exact functional group representation (especially the phosphate/carboxylate group) might be simplified or inaccurate without more context.",
+        "rdkit_canonical": "CC(C)C1CC(O)C(O)C1C(C(O)C(C)O)C(C(O)C(C)O)C(C(O)C(C)O)C(O)C(O)C(C)O",
+        "inchi_key": "QDVFMYCCCYZRSM-UHFFFAOYSA-N",
+        "formula": "C24H48O11"
+      },
+      "verdict": "PARTIAL"
+    }
+  ]
+}

@@ -135,6 +135,11 @@ def main() -> int:
         help="run only the first N structures (debug).",
     )
     parser.add_argument(
+        "--cids", type=str, default=None,
+        help="comma-separated CID list; only these structures are scored. "
+             "Overrides --limit. Useful for re-running specific timeouts.",
+    )
+    parser.add_argument(
         "--output", type=str, default=None,
         help="explicit output path; default is eval/results/structure_extraction_<ts>.json",
     )
@@ -154,7 +159,14 @@ def main() -> int:
         ground_truth.items(),
         key=lambda kv: (DIFFICULTY_ORDER.index(kv[1]["difficulty"]), int(kv[0])),
     )
-    if args.limit:
+    if args.cids:
+        wanted = {c.strip() for c in args.cids.split(",") if c.strip()}
+        missing = wanted - set(ground_truth)
+        if missing:
+            log.error("CID(s) not in ground truth: %s", sorted(missing))
+            return 1
+        items = [kv for kv in items if kv[0] in wanted]
+    elif args.limit:
         items = items[: args.limit]
 
     rows: list[dict] = []
