@@ -9,6 +9,7 @@ import {
   type ChatMessage,
   type StreamingState,
 } from "./message-list";
+import { SuggestedPrompts } from "./suggested-prompts";
 
 function newId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
@@ -129,11 +130,13 @@ export function MainPane() {
     if (errorMessage) setLastError(errorMessage);
   }, [input, messages, streaming]);
 
-  const isEmpty = messages.length === 0 && !streaming;
+  const fillInput = useCallback((prompt: string) => {
+    setInput(prompt);
+    // Defer focus so the textarea renders before we touch it.
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }, []);
 
-  // fillInput will be wired to SuggestedPrompts in the next commit.
-  // Exposing the function + ref now keeps the wiring commit minimal.
-  void inputRef;
+  const isEmpty = messages.length === 0 && !streaming;
 
   return (
     <section
@@ -142,7 +145,7 @@ export function MainPane() {
     >
       <div className="flex-1 overflow-y-auto">
         {isEmpty ? (
-          <EmptyState />
+          <SuggestedPrompts onPick={fillInput} />
         ) : (
           <MessageList messages={messages} streaming={streaming} />
         )}
@@ -178,13 +181,3 @@ export function MainPane() {
   );
 }
 
-// Placeholder — the real SuggestedPrompts lands in the next commit.
-function EmptyState() {
-  return (
-    <div className="flex h-full items-center justify-center">
-      <p className="text-sm text-gray-400">
-        Ready when you are. Type a question below.
-      </p>
-    </div>
-  );
-}
