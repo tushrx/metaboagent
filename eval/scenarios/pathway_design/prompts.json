@@ -16,7 +16,7 @@
     "prompt": "Show me a heterologous pathway for lycopene production in E. coli, with KEGG R-IDs and ECs."
   },
   {
-    "id": "glucose_shikimate",
-    "prompt": "Design a three-step enzymatic route from glucose to shikimate. Include KEGG R-IDs and EC numbers."
+    "id": "resveratrol_ecoli",
+    "prompt": "Design a heterologous pathway for resveratrol production in E. coli starting from tyrosine. Include KEGG reaction IDs and EC numbers."
   }
 ]
