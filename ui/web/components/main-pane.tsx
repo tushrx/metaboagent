@@ -6,6 +6,7 @@ import type { ChatMessage, StreamingState } from "./message-list";
 import { MessageList } from "./message-list";
 import { InputArea, type InputAreaHandle } from "./input-area";
 import { SuggestedPrompts } from "./suggested-prompts";
+import { Footer } from "./footer";
 import type { Ref } from "react";
 
 const BOTTOM_THRESHOLD_PX = 40;
@@ -136,6 +137,7 @@ export function MainPane({
         onAbort={onAbort}
         streaming={!!streaming}
       />
+      <Footer />
     </section>
   );
 }
