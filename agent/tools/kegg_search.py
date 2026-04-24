@@ -43,6 +43,14 @@ def search_kegg(
 ) -> str:
     """Search the KEGG reactions and compounds knowledge base.
 
+    Call this tool whenever the user wants KEGG reactions or compounds
+    surfaced by topic ("enzyme that converts X to Y", "compounds in
+    glycolysis") or when filtering by EC number, compound ID, or
+    pathway ID. For a specific KEGG identifier the user already has in
+    hand (C\\d+, R\\d+, K\\d+, map\\d+), use fetch_kegg_live instead to
+    pull the full record. Prefer tool calls over memory when the user
+    writes "look up", "fetch", or "search KEGG for".
+
     Args:
         query: natural-language query about a reaction, compound, or enzyme (e.g., "enzyme that converts GGPP to lycopene").
         filter_type: optional filter to narrow results. One of "ec_number" (e.g. "2.5.1.29"), "compound_id" (e.g. "C05432"), or "pathway_id" (e.g. "map00900"). Pass null for no filter.

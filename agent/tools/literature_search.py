@@ -19,6 +19,14 @@ def search_literature(
 ) -> str:
     """Semantic search over PubMed abstracts and KEGG pathway descriptions.
 
+    Call this tool whenever the user wants literature on a topic and
+    does not specifically need *latest/recent* papers (in which case
+    prefer fetch_pubmed_live). Works for questions like "what's known
+    about X", "papers on Y", or when citing evidence for a mechanism.
+    Prefer this over memory when the user asks "what does the
+    literature say" or requests PMIDs — the indexed corpus has ~54k
+    papers and the ground truth lives there, not in your recall.
+
     Args:
         query: free-text query (e.g., "heterologous lycopene production in E. coli").
         max_results: number of hits to return.

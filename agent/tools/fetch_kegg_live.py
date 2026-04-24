@@ -61,6 +61,12 @@ def _classify(entity_id: str) -> tuple[str, str, str]:
 def fetch_kegg_live(entity_id: str) -> str:
     """Fetch any KEGG entity (reaction, compound, enzyme, pathway) on demand.
 
+    Call this tool whenever the user references a KEGG identifier
+    (reactions R\\d+, compounds C\\d+, orthologs K\\d+, pathways map\\d+
+    or path:\\w+, EC numbers) OR asks to "look up", "fetch", or "get"
+    KEGG data. Prefer this over answering from memory — the user wants
+    the database record itself, not your recall.
+
     Args:
         entity_id: KEGG ID. Accepted forms include reactions like "R00024" or "rn:R00024", compounds like "C05432" or "cpd:C05432", enzymes like "1.3.99.31" or "EC 1.3.99.31" or "ec:1.3.99.31", reference pathways like "map00900" or "path:map00900", and organism-specific pathways like "eco00010".
 

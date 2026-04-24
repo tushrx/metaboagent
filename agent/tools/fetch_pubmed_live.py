@@ -75,10 +75,13 @@ def _parse_pubmed_xml(xml_text: str) -> list[dict]:
 def fetch_pubmed_live(query: str, max_results: int = 10) -> str:
     """Search PubMed in real time via NCBI E-utilities.
 
-    Use this when you need the *latest* papers on a topic or when
-    ``search_literature`` returned empty for a specific query. The returned
-    abstracts are auto-indexed into the literature collection, so follow-up
-    semantic searches can find them immediately.
+    Call this tool whenever the user references a PMID, asks for
+    "recent", "latest", or "new" papers on a topic, or explicitly says
+    "PubMed", "NCBI", "search the literature", "find papers", or
+    similar. Prefer this over answering from memory when the user wants
+    actual citations. Also use it when ``search_literature`` returned
+    empty. The returned abstracts are auto-indexed into the literature
+    collection so follow-up semantic searches can find them.
 
     Args:
         query: Free-text search (supports MeSH syntax, e.g.,

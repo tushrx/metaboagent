@@ -110,6 +110,14 @@ def _short_entry(entry: dict) -> dict:
 def fetch_uniprot(protein_name_or_ec: str, organism: str = "") -> str:
     """Search UniProt (reviewed/Swiss-Prot) for a protein by name or EC number.
 
+    Call this tool whenever the user references a UniProt accession
+    (e.g. P0A6F5, O60341), an EC number the user wants protein-level
+    data for, or asks "look up in UniProt", "find the protein", or
+    "what enzyme does X". Prefer this over memory when the user wants
+    protein features, active-site residues, or cross-references (KEGG,
+    PDB, BRENDA) — the answer must come from the database record, not
+    your recall.
+
     Args:
         protein_name_or_ec: Protein name (e.g., "phytoene synthase") or EC
             number like "2.5.1.32".
