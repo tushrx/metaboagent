@@ -111,6 +111,14 @@ async def run_agent(
     if pending_images:
         working.append(HumanMessage(content=_attachment_hint(len(pending_images))))
 
+    # Phase 6.5.c — counts re-prompts for E4B's empty-completion bug.
+    # After a successful tool call E4B occasionally emits an AIMessage
+    # with zero content AND zero tool_calls with finish_reason=stop. We
+    # nudge once per run. A second consecutive empty response is
+    # surfaced as a clean error. Local to this run_agent invocation so
+    # every call starts fresh.
+    nudge_count = 0
+
     for iteration in range(max_iterations):
         usage["iterations"] = iteration + 1
         accumulated_text = ""
@@ -137,9 +145,35 @@ async def run_agent(
         _accumulate_usage(usage, final_ai)
 
         tool_calls = list(getattr(final_ai, "tool_calls", []) or [])
+        content_text = accumulated_text or (
+            final_ai.content if isinstance(final_ai.content, str) else ""
+        ) or ""
         if not tool_calls:
-            yield _ev("final_answer",
-                      content=accumulated_text or str(final_ai.content))
+            if content_text.strip():
+                yield _ev("final_answer", content=content_text)
+                yield _ev("done", usage=_finalize(usage, t0))
+                return
+            if nudge_count < 1:
+                nudge_count += 1
+                working.append(HumanMessage(
+                    content=(
+                        "Please provide your response now based on the "
+                        "tool results above."
+                    ),
+                ))
+                yield _ev(
+                    "thinking",
+                    content="Empty completion detected; retrying with prompt nudge.",
+                )
+                continue
+            yield _ev(
+                "error",
+                where="agent_loop",
+                message=(
+                    "The model returned an empty response twice; "
+                    "try rephrasing or switching tier."
+                ),
+            )
             yield _ev("done", usage=_finalize(usage, t0))
             return
 
