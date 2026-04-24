@@ -69,6 +69,42 @@ STEP_LINE_RE = re.compile(
 # Marker for Phase 6.5.c's nudge thinking event.
 _NUDGE_MARKER = "Empty completion detected"
 
+# Hedge phrases that indicate the agent is declaring insufficient
+# evidence rather than silently giving up. Matched case-insensitively.
+_INSUFFICIENT_EVIDENCE_MARKERS = (
+    "evidence needed",
+    "omit",
+    "insufficient",
+    "confirmed via",
+    "database lookup",
+    "not available",
+    "unable to confirm",
+    "pending verification",
+)
+# Silent-giveup threshold: any meaningful design explanation will be
+# well above this in non-whitespace characters.
+_SILENT_GIVEUP_MAX_CHARS = 50
+
+
+def _classify_no_ids_reason(text: str) -> str:
+    """Refine a no_ids_emitted verdict into one of:
+
+      silent_giveup                — short, no step markers, no hedge language
+      declared_insufficient_evidence — long enough + contains hedge language
+      unclassified                  — neither clearly applies (default)
+    """
+    body = text or ""
+    nws = sum(1 for c in body if not c.isspace())
+    has_step = bool(STEP_LINE_RE.search(body))
+    lower = body.lower()
+    has_hedge = any(m in lower for m in _INSUFFICIENT_EVIDENCE_MARKERS)
+
+    if nws <= _SILENT_GIVEUP_MAX_CHARS and not has_step and not has_hedge:
+        return "silent_giveup"
+    if nws >= _SILENT_GIVEUP_MAX_CHARS and has_hedge:
+        return "declared_insufficient_evidence"
+    return "unclassified"
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -240,6 +276,7 @@ async def _run_one(prompt_spec: dict, max_iterations: int) -> dict[str, Any]:
         "rids": [],
         "ecs": [],
         "status": "ok",  # ok | plan_parse_failed | no_ids_emitted
+        "no_ids_reason": None,  # silent_giveup | declared_insufficient_evidence | unclassified | None
     }
 
     if not plan_ids:
@@ -278,7 +315,11 @@ async def _run_one(prompt_spec: dict, max_iterations: int) -> dict[str, Any]:
 
     if not rids and not ecs:
         row["status"] = "no_ids_emitted"
-        log.warning("[%s]   phase2 emitted zero R-IDs/ECs — pathway convention skipped", pid)
+        row["no_ids_reason"] = _classify_no_ids_reason(phase2["final_answer"])
+        log.warning(
+            "[%s]   phase2 emitted zero R-IDs/ECs — %s",
+            pid, row["no_ids_reason"],
+        )
         return row
 
     final = phase2["final_answer"]
@@ -327,7 +368,16 @@ def _aggregate(per_prompt: list[dict]) -> dict[str, Any]:
     p2_tokens_out = sum(r["phase2_tokens_out"] for r in p2_eligible)
     p2_durs = [r["phase2_duration_ms"] for r in p2_eligible if r["phase2_duration_ms"]]
     p2_avg_ms = int(round(sum(p2_durs) / len(p2_durs))) if p2_durs else 0
-    no_ids_emitted = sum(1 for r in per_prompt if r["status"] == "no_ids_emitted")
+    no_ids_rows = [r for r in per_prompt if r["status"] == "no_ids_emitted"]
+    no_ids_total = len(no_ids_rows)
+    no_ids_silent = sum(1 for r in no_ids_rows if r.get("no_ids_reason") == "silent_giveup")
+    no_ids_declared = sum(
+        1 for r in no_ids_rows
+        if r.get("no_ids_reason") == "declared_insufficient_evidence"
+    )
+    no_ids_unclassified = sum(
+        1 for r in no_ids_rows if r.get("no_ids_reason") == "unclassified"
+    )
 
     total_r = sum(len(r["rids"]) for r in per_prompt)
     total_r_bad = sum(1 for r in per_prompt for x in r["rids"] if not x["verified"])
@@ -357,7 +407,12 @@ def _aggregate(per_prompt: list[dict]) -> dict[str, Any]:
             "total_tokens_out": p2_tokens_out,
             "avg_duration_ms": p2_avg_ms,
             "phase2_runs": len(p2_eligible),
-            "no_ids_emitted": no_ids_emitted,
+            "no_ids_emitted": {
+                "total": no_ids_total,
+                "silent_giveup": no_ids_silent,
+                "declared_insufficient_evidence": no_ids_declared,
+                "unclassified": no_ids_unclassified,
+            },
             "step_convention_ok": step_convention_ok,
         },
         "pathway_accuracy": {
@@ -397,10 +452,14 @@ def _print_summary(agg: dict, per_prompt: list[dict]) -> None:
         f"avg_ms={p1['avg_duration_ms']}  plans_emitted={p1['plans_emitted']}  "
         f"plans_parse_failed={p1['plans_parse_failed']}"
     )
+    nie = p2.get("no_ids_emitted") or {}
     print(
         f"Phase 2: tokens in/out={p2['total_tokens_in']}/{p2['total_tokens_out']}  "
         f"avg_ms={p2['avg_duration_ms']}  runs={p2['phase2_runs']}  "
-        f"no_ids_emitted={p2['no_ids_emitted']}"
+        f"no_ids_emitted={nie.get('total', 0)} "
+        f"(silent={nie.get('silent_giveup', 0)} "
+        f"declared={nie.get('declared_insufficient_evidence', 0)} "
+        f"unclassified={nie.get('unclassified', 0)})"
     )
     print()
     print(
@@ -435,8 +494,11 @@ def _print_summary(agg: dict, per_prompt: list[dict]) -> None:
         e_bad = sum(1 for e in row["ecs"] if not e["verified"])
         nudge_tot = row.get("phase1_nudge_count", 0) + row.get("phase2_nudge_count", 0)
         step_ok = "Y" if row.get("step_convention_ok") else "N"
+        status = row["status"]
+        if row.get("no_ids_reason"):
+            status = f"{status}:{row['no_ids_reason']}"
         print(
-            f"  {row['id']:<22} status={row['status']:<20}"
+            f"  {row['id']:<22} status={status:<42}"
             f" step={step_ok}"
             f" nudges={nudge_tot}"
             f" rids={r_bad}/{len(row['rids'])}"

@@ -21,7 +21,10 @@ os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "eval"))
 
-from eval_pathway_hallucination import STEP_LINE_RE  # noqa: E402
+from eval_pathway_hallucination import (  # noqa: E402
+    STEP_LINE_RE,
+    _classify_no_ids_reason,
+)
 
 
 class StepLineRegexTests(unittest.TestCase):
@@ -80,6 +83,45 @@ class StepLineRegexTests(unittest.TestCase):
 
     def test_empty_text_no_match(self) -> None:
         self.assertIsNone(STEP_LINE_RE.search(""))
+
+
+class NoIdsReasonClassifierTests(unittest.TestCase):
+    def test_empty_text_is_silent_giveup(self) -> None:
+        self.assertEqual(_classify_no_ids_reason(""), "silent_giveup")
+
+    def test_short_punt_is_silent_giveup(self) -> None:
+        self.assertEqual(
+            _classify_no_ids_reason("ok."),
+            "silent_giveup",
+        )
+
+    def test_long_design_with_hedge_is_declared(self) -> None:
+        # Mimics artemisinic_yeast's real output: structurally a full
+        # design + explicit hedge.
+        text = (
+            "Step 1: FPP → Artemisinic Acid\n"
+            "    Reaction: (Precursor) → FPP\n"
+            "    PMID: [Evidence needed]\n"
+            "The exact KEGG R-IDs and EC numbers need to be confirmed via "
+            "database lookups to provide the full reaction diagram."
+        )
+        self.assertEqual(
+            _classify_no_ids_reason(text),
+            "declared_insufficient_evidence",
+        )
+
+    def test_long_design_without_hedge_is_unclassified(self) -> None:
+        # Enough text to rule out silent giveup, but no hedge language —
+        # shouldn't be credited as honest either.
+        text = (
+            "Step 1: A → B. Step 2: B → C. This is a long description "
+            "of a pathway that the model confidently asserted without any "
+            "hedging language or acknowledgement of missing data."
+        )
+        self.assertEqual(
+            _classify_no_ids_reason(text),
+            "unclassified",
+        )
 
 
 if __name__ == "__main__":
