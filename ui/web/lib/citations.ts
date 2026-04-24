@@ -81,29 +81,77 @@ function keggKind(token: string): CitationKind {
   return "kegg_ortholog"; // K
 }
 
+// ---- Source-aware gating ------------------------------------------------
+
+type RegexKey = "pmid" | "doi" | "kegg" | "keggPath" | "chebi" | "uniprot";
+
+const ALL_REGEXES: ReadonlySet<RegexKey> = new Set<RegexKey>([
+  "pmid",
+  "doi",
+  "kegg",
+  "keggPath",
+  "chebi",
+  "uniprot",
+]);
+
+/**
+ * Which regexes to apply per tool name. A C00022 that looks like a
+ * UniProt accession shouldn't be extracted as one when the provenance
+ * is a KEGG lookup. Tools not in this map fall back to running every
+ * regex (safe default for unknown / new tools).
+ */
+const REGEXES_BY_TOOL: Record<string, ReadonlySet<RegexKey>> = {
+  fetch_pubmed_live: new Set<RegexKey>(["pmid", "doi"]),
+  search_literature: new Set<RegexKey>(["pmid", "doi", "chebi"]),
+  web_search: new Set<RegexKey>(["pmid", "doi", "chebi"]),
+  fetch_kegg_live: new Set<RegexKey>(["kegg", "keggPath"]),
+  search_kegg: new Set<RegexKey>(["kegg", "keggPath"]),
+  fetch_uniprot: new Set<RegexKey>(["uniprot", "chebi"]),
+  fetch_pubchem: new Set<RegexKey>(["chebi"]),
+};
+
+function enabledFor(toolName: string): ReadonlySet<RegexKey> {
+  return REGEXES_BY_TOOL[toolName] ?? ALL_REGEXES;
+}
+
 // ---- Extraction ---------------------------------------------------------
 
-function extractFromText(text: string): Array<{ kind: CitationKind; id: string }> {
+function extractFromText(
+  text: string,
+  enabled: ReadonlySet<RegexKey>,
+): Array<{ kind: CitationKind; id: string }> {
   const hits: Array<{ kind: CitationKind; id: string }> = [];
   const p = patterns();
 
-  for (const m of Array.from(text.matchAll(p.pmid))) {
-    hits.push({ kind: "pmid", id: m[1] });
+  if (enabled.has("pmid")) {
+    for (const m of Array.from(text.matchAll(p.pmid))) {
+      hits.push({ kind: "pmid", id: m[1] });
+    }
   }
-  for (const m of Array.from(text.matchAll(p.kegg))) {
-    hits.push({ kind: keggKind(m[1]), id: m[1].toUpperCase() });
+  if (enabled.has("kegg")) {
+    for (const m of Array.from(text.matchAll(p.kegg))) {
+      hits.push({ kind: keggKind(m[1]), id: m[1].toUpperCase() });
+    }
   }
-  for (const m of Array.from(text.matchAll(p.keggPath))) {
-    hits.push({ kind: "kegg_pathway", id: m[1] });
+  if (enabled.has("keggPath")) {
+    for (const m of Array.from(text.matchAll(p.keggPath))) {
+      hits.push({ kind: "kegg_pathway", id: m[1] });
+    }
   }
-  for (const m of Array.from(text.matchAll(p.chebi))) {
-    hits.push({ kind: "chebi", id: m[1] });
+  if (enabled.has("chebi")) {
+    for (const m of Array.from(text.matchAll(p.chebi))) {
+      hits.push({ kind: "chebi", id: m[1] });
+    }
   }
-  for (const m of Array.from(text.matchAll(p.uniprot))) {
-    hits.push({ kind: "uniprot", id: m[1] });
+  if (enabled.has("uniprot")) {
+    for (const m of Array.from(text.matchAll(p.uniprot))) {
+      hits.push({ kind: "uniprot", id: m[1] });
+    }
   }
-  for (const m of Array.from(text.matchAll(p.doi))) {
-    hits.push({ kind: "doi", id: m[0] });
+  if (enabled.has("doi")) {
+    for (const m of Array.from(text.matchAll(p.doi))) {
+      hits.push({ kind: "doi", id: m[0] });
+    }
   }
 
   return hits;
@@ -127,7 +175,7 @@ export function extractCitations(activities: ToolActivity[]): Citation[] {
     const text = stringifyResult(a.result);
     if (!text) continue;
 
-    for (const hit of extractFromText(text)) {
+    for (const hit of extractFromText(text, enabledFor(a.name))) {
       const key = `${hit.kind}::${hit.id}`;
       const existing = map.get(key);
       if (existing) {

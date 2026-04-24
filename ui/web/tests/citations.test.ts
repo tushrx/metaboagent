@@ -138,6 +138,35 @@ describe("extractCitations", () => {
     expect(citations).toEqual([]);
   });
 
+  // ---- source-aware gating -------------------------------------------
+
+  it("KEGG result with C00022 does NOT extract as UniProt", () => {
+    const activity = makeActivity("fetch_kegg_live", {
+      kegg_id: "cpd:C00022",
+      formula: "C3H4O3",
+      pathways: "map00010 map00020",
+    });
+    const citations = extractCitations([activity]);
+    const uniprot = citations.filter((c) => c.kind === "uniprot");
+    expect(uniprot).toHaveLength(0);
+    // KEGG compound should still come through:
+    const compound = citations.find((c) => c.kind === "kegg_compound");
+    expect(compound?.id).toBe("C00022");
+  });
+
+  it("UniProt result with P05067 DOES extract as UniProt", () => {
+    const activity = makeActivity("fetch_uniprot", {
+      accession: "P05067",
+      protein_name: "Amyloid-beta precursor protein",
+    });
+    const citations = extractCitations([activity]);
+    const uniprot = citations.find((c) => c.kind === "uniprot");
+    expect(uniprot?.id).toBe("P05067");
+    expect(uniprot?.url).toBe(
+      "https://www.uniprot.org/uniprotkb/P05067/entry",
+    );
+  });
+
   it("dedupes citations seen in multiple tools and records both provenances", () => {
     const a = makeActivity("fetch_pubmed_live", {
       hits: [{ pmid: "12345678" }],
