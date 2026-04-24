@@ -77,6 +77,27 @@ It is produced from phosphoenolpyruvate by pyruvate kinase and can be further ox
     expect(p.source_message_id).toBe("m-none");
   });
 
+  it("normalizes LaTeX / HTML arrow renderings before parsing", () => {
+    // Real-world artifact: Gemma 4 keeps emitting $\rightarrow$ despite the
+    // system prompt asking for plain →. We normalize at the boundary.
+    const content = `Step 1: Acetyl-CoA $\\rightarrow$ Acetoacetyl-CoA
+    Reaction: R00238   EC 2.3.1.9
+    Enzyme: Thiolase (E. coli)
+
+Step 2: Acetoacetyl-CoA \\rightarrow HMG-CoA
+    Enzyme: HMG-CoA synthase
+
+Step 3: HMG-CoA &rarr; Mevalonate
+`;
+    const p = extractPathway(content, "m-latex");
+    expect(p.steps).toHaveLength(3);
+    expect(p.steps[0].substrate).toBe("Acetyl-CoA");
+    expect(p.steps[0].product).toBe("Acetoacetyl-CoA");
+    expect(p.steps[1].substrate).toBe("Acetoacetyl-CoA");
+    expect(p.steps[1].product).toBe("HMG-CoA");
+    expect(p.steps[2].product).toBe("Mevalonate");
+  });
+
   it("truncates to the first pathway when a second 'Step 1' appears", () => {
     const content = `Pathway A:
 Step 1: A1 → A2

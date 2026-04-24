@@ -49,11 +49,27 @@ const PMID_RE = /\bPMID[:\s]*(\d+)\b/i;
 
 // --- Extraction ----------------------------------------------------------
 
+/**
+ * Map known non-Unicode arrow renderings to the plain → the parser wants.
+ * Despite the system prompt telling the model to use →, Gemma 4 is fond
+ * of emitting ``$\rightarrow$`` inside scientific prose. Rather than
+ * widen the regex or duplicate arrow alternatives (which makes the
+ * grammar harder to reason about), we normalize at the input boundary.
+ * This is a pre-parser character substitution, not parser permissiveness.
+ */
+function normalizeArrows(content: string): string {
+  return content
+    .replace(/\$\\rightarrow\$/g, "→") //  $\rightarrow$ (LaTeX inline)
+    .replace(/\\rightarrow\b/g, "→") //   \rightarrow (raw LaTeX)
+    .replace(/&rarr;/gi, "→") //          HTML entity
+    .replace(/[⟶➡]/g, "→"); //            heavy arrows
+}
+
 export function extractPathway(
   content: string,
   sourceMessageId: string,
 ): PathwayData {
-  const lines = content.split(/\r?\n/);
+  const lines = normalizeArrows(content).split(/\r?\n/);
   const steps: PathwayStep[] = [];
   let current: PathwayStep | null = null;
   let truncated = false;
