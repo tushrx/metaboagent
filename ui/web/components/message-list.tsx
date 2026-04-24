@@ -4,7 +4,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Wrench, AlertCircle, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { ToolCallEvent } from "@/lib/api";
+import type { Attachment, ToolCallEvent } from "@/lib/api";
+import { Lightbox } from "./lightbox";
 
 export interface ChatMessage {
   id: string;
@@ -13,6 +14,7 @@ export interface ChatMessage {
   toolCalls?: ToolCallEvent[];
   error?: string;
   canceled?: boolean;
+  attachments?: Attachment[];
 }
 
 export interface StreamingState {
@@ -83,8 +85,15 @@ function MessageRow({
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl bg-blue-50 px-4 py-2.5 text-[15px] text-gray-900">
-          {message.content}
+        <div className="flex max-w-[85%] flex-col items-end gap-2">
+          {message.attachments && message.attachments.length > 0 && (
+            <AttachmentGrid attachments={message.attachments} />
+          )}
+          {message.content && (
+            <div className="whitespace-pre-wrap break-words rounded-2xl bg-blue-50 px-4 py-2.5 text-[15px] text-gray-900">
+              {message.content}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -142,6 +151,38 @@ function StreamingRow({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Thumbnails for images the user attached to a message. Click opens a
+ * lightbox. Max 3 per message — see lib/image-preprocess + input-area.
+ */
+export function AttachmentGrid({ attachments }: { attachments: Attachment[] }) {
+  const [open, setOpen] = useState<Attachment | null>(null);
+  return (
+    <>
+      <div className="flex flex-wrap justify-end gap-1.5">
+        {attachments.map((att, i) => (
+          <button
+            key={`${att.filename}-${i}`}
+            type="button"
+            onClick={() => setOpen(att)}
+            title={`Preview ${att.filename}`}
+            aria-label={`Preview ${att.filename}`}
+            className="focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element -- data: URI; next/image doesn't apply */}
+            <img
+              src={`data:${att.mime_type};base64,${att.thumbnail_base64}`}
+              alt={att.filename}
+              className="h-32 w-32 rounded-md border border-gray-200 object-cover"
+            />
+          </button>
+        ))}
+      </div>
+      {open && <Lightbox attachment={open} onClose={() => setOpen(null)} />}
+    </>
   );
 }
 
