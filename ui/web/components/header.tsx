@@ -23,6 +23,8 @@ interface HeaderProps {
   canClearConversation?: boolean;
   /** True while a /chat response is streaming — bumps polling cadence. */
   streaming?: boolean;
+  /** Receives every /health probe result; used by the demo-mode banner. */
+  onHealth?: (health: HealthResponse | null) => void;
 }
 
 function onlineCount(h: HealthResponse | null): number {
@@ -47,6 +49,7 @@ export function Header({
   onNewConversation,
   canClearConversation = false,
   streaming = false,
+  onHealth,
 }: HeaderProps) {
   const [status, setStatus] = useState<DotStatus>("pending");
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -84,10 +87,12 @@ export function Header({
         if (cancelled) return;
         setHealth(body);
         setStatus(body.overall ?? "down");
+        onHealth?.(body);
       } catch {
         if (cancelled) return;
         setHealth(null);
         setStatus("down");
+        onHealth?.(null);
       }
       if (cancelled) return;
       const next = streamingRef.current

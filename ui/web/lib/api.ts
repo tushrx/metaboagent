@@ -18,6 +18,12 @@ export interface HealthResponse {
   deep: "ok" | "down";
   max_rigor: "ok" | "down";
   overall: HealthOverall;
+  /**
+   * Phase 7 will set this true when external fetches are disabled and
+   * the agent runs against the indexed corpus only. Backend doesn't
+   * emit this field yet; the UI treats it as falsy when absent.
+   */
+  demo_mode?: boolean;
 }
 
 // --- Chat request --------------------------------------------------------

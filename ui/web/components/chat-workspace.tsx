@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatRequestError, streamChat } from "@/lib/sse";
 import type {
+  HealthResponse,
   MessageIn,
   Tier,
   ToolActivity,
@@ -13,6 +14,7 @@ import { Header } from "./header";
 import { MainPane } from "./main-pane";
 import { EvidenceRail, type EvidenceRailHandle } from "./evidence-rail";
 import { EvidenceDrawer } from "./evidence-drawer";
+import { DemoModeBanner } from "./demo-mode-banner";
 import type { InputAreaHandle } from "./input-area";
 import type { ChatMessage, StreamingState } from "./message-list";
 
@@ -78,6 +80,7 @@ export function ChatWorkspace() {
   const [toolActivity, setToolActivity] = useState<ToolActivity[]>([]);
   const [pathway, setPathway] = useState<PathwayData | null>(null);
   const [deepMode, setDeepMode] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
 
   // Hydrate message history from localStorage on mount.
   const hydratedRef = useRef(false);
@@ -288,6 +291,10 @@ export function ChatWorkspace() {
     railRef.current?.scrollToToolCall(id);
   }, []);
 
+  const handleHealth = useCallback((h: HealthResponse | null) => {
+    setDemoMode(h?.demo_mode === true);
+  }, []);
+
   const handleNewConversation = useCallback(() => {
     if (streaming) return;
     if (messages.length === 0) return;
@@ -309,15 +316,17 @@ export function ChatWorkspace() {
   }, [messages.length, streaming]);
 
   return (
-    <>
+    <div className="flex h-screen flex-col">
       <Header
         deepMode={deepMode}
         onDeepModeChange={setDeepMode}
         onNewConversation={handleNewConversation}
         canClearConversation={messages.length > 0 && !streaming}
         streaming={!!streaming}
+        onHealth={handleHealth}
       />
-      <div className="flex h-[calc(100vh-56px)]">
+      <DemoModeBanner visible={demoMode} />
+      <div className="flex min-h-0 flex-1">
         <MainPane
           messages={messages}
           streaming={streaming}
@@ -338,6 +347,6 @@ export function ChatWorkspace() {
         />
         <EvidenceDrawer toolActivity={toolActivity} pathway={pathway} />
       </div>
-    </>
+    </div>
   );
 }
