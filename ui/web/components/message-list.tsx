@@ -27,9 +27,10 @@ export interface StreamingState {
 interface Props {
   messages: ChatMessage[];
   streaming: StreamingState | null;
+  onToolCrumbClick?: (toolCallId: string) => void;
 }
 
-export function MessageList({ messages, streaming }: Props) {
+export function MessageList({ messages, streaming, onToolCrumbClick }: Props) {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   // Autoscroll on new messages or as tokens arrive.
@@ -40,15 +41,23 @@ export function MessageList({ messages, streaming }: Props) {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-8">
       {messages.map((m) => (
-        <MessageRow key={m.id} message={m} />
+        <MessageRow key={m.id} message={m} onToolCrumbClick={onToolCrumbClick} />
       ))}
-      {streaming && <StreamingRow state={streaming} />}
+      {streaming && (
+        <StreamingRow state={streaming} onToolCrumbClick={onToolCrumbClick} />
+      )}
       <div ref={bottomRef} />
     </div>
   );
 }
 
-function MessageRow({ message }: { message: ChatMessage }) {
+function MessageRow({
+  message,
+  onToolCrumbClick,
+}: {
+  message: ChatMessage;
+  onToolCrumbClick?: (id: string) => void;
+}) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
@@ -62,7 +71,10 @@ function MessageRow({ message }: { message: ChatMessage }) {
   return (
     <div className="flex flex-col gap-2">
       {message.toolCalls && message.toolCalls.length > 0 && (
-        <ToolCallStrip toolCalls={message.toolCalls} />
+        <ToolCrumbStrip
+          toolCalls={message.toolCalls}
+          onClick={onToolCrumbClick}
+        />
       )}
       <AssistantProse content={message.content} />
       {message.canceled && (
@@ -81,14 +93,25 @@ function MessageRow({ message }: { message: ChatMessage }) {
   );
 }
 
-function StreamingRow({ state }: { state: StreamingState }) {
+function StreamingRow({
+  state,
+  onToolCrumbClick,
+}: {
+  state: StreamingState;
+  onToolCrumbClick?: (id: string) => void;
+}) {
   return (
     <div
       className="flex flex-col gap-2"
       aria-live="polite"
       aria-label="Assistant response (streaming)"
     >
-      {state.toolCalls.length > 0 && <ToolCallStrip toolCalls={state.toolCalls} />}
+      {state.toolCalls.length > 0 && (
+        <ToolCrumbStrip
+          toolCalls={state.toolCalls}
+          onClick={onToolCrumbClick}
+        />
+      )}
       {state.text ? (
         <AssistantProse content={state.text} />
       ) : (
@@ -101,18 +124,30 @@ function StreamingRow({ state }: { state: StreamingState }) {
   );
 }
 
-function ToolCallStrip({ toolCalls }: { toolCalls: ToolCallEvent[] }) {
+/**
+ * Inline bread-crumb row that points at the tool-activity cards in the
+ * evidence rail. Small, muted, clickable — not the primary display.
+ */
+function ToolCrumbStrip({
+  toolCalls,
+  onClick,
+}: {
+  toolCalls: ToolCallEvent[];
+  onClick?: (id: string) => void;
+}) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {toolCalls.map((tc) => (
-        <span
+        <button
           key={tc.id}
-          className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 font-mono text-[12px] text-gray-700"
-          title={`args: ${JSON.stringify(tc.args)}`}
+          type="button"
+          onClick={() => onClick?.(tc.id)}
+          className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-[11px] text-gray-500 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+          title={`Jump to ${tc.name} in the evidence rail`}
         >
-          <Wrench size={12} className="text-gray-500" />
+          <Wrench size={10} />
           {tc.name}
-        </span>
+        </button>
       ))}
     </div>
   );

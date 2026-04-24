@@ -93,3 +93,23 @@ export type AgentEvent =
   | FinalAnswerEvent
   | ErrorEvent
   | DoneEvent;
+
+// --- UI-side aggregation -------------------------------------------------
+
+/**
+ * A running log of one tool_call -> tool_result/tool_error cycle, built
+ * up from the event stream and shown in the evidence rail. IDs match the
+ * server-assigned tool_call id so results can be stitched in out-of-order.
+ */
+export type ToolActivityStatus = "running" | "done" | "error";
+
+export interface ToolActivity {
+  id: string;
+  name: string;
+  args: Record<string, unknown>;
+  status: ToolActivityStatus;
+  result?: unknown;
+  error?: string;
+  startedAt: number;
+  endedAt?: number;
+}
