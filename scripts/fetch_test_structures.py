@@ -17,6 +17,14 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from rdkit import Chem
+from rdkit import RDLogger
+
+# RDKit chatters about valence/aromaticity on unusual ligand SMILES
+# (cobalamin's corrin, for example). Silence at the Python boundary —
+# a None mol is the only signal we care about here.
+RDLogger.DisableLog("rdApp.*")
+
 OUT_DIR = Path(__file__).resolve().parents[1] / "eval/scenarios/structures"
 
 # (cid, name, difficulty) — difficulty follows the Phase 6 spec.
@@ -90,13 +98,22 @@ def main() -> int:
             failures.append((cid, name, str(e)))
             continue
 
+        mol = Chem.MolFromSmiles(smiles)
+        inchi_key = Chem.MolToInchiKey(mol) if mol is not None else None
+        if not inchi_key:
+            inchi_key = None
+
         manifest[str(cid)] = {
             "name": name,
             "canonical_smiles": smiles,
+            "inchi_key": inchi_key,
             "difficulty": difficulty,
             "image": png_path.name,
         }
-        print(f"    ok: png={len(png)} bytes, smiles={smiles[:60]}{'…' if len(smiles) > 60 else ''}")
+        print(
+            f"    ok: png={len(png)} bytes, smiles={smiles[:50]}"
+            f"{'…' if len(smiles) > 50 else ''}, inchi_key={inchi_key}"
+        )
 
     (OUT_DIR / "ground_truth.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
