@@ -1,0 +1,181 @@
+{
+  "timestamp_utc": "20260424T171136Z",
+  "kind": "pathway_hallucination_baseline",
+  "flow": "two_turn",
+  "tier": "default",
+  "phase1_stats": {
+    "total_tokens_in": 0,
+    "total_tokens_out": 0,
+    "avg_duration_ms": 7949,
+    "plans_emitted": 3,
+    "plans_parse_failed": 2
+  },
+  "phase2_stats": {
+    "total_tokens_in": 0,
+    "total_tokens_out": 0,
+    "avg_duration_ms": 12748,
+    "phase2_runs": 3,
+    "no_ids_emitted": 1
+  },
+  "pathway_accuracy": {
+    "total_rids_extracted": 4,
+    "total_rids_hallucinated": 0,
+    "rid_hallucination_rate_pct": 0.0,
+    "total_ecs_extracted": 4,
+    "total_ecs_hallucinated": 0,
+    "ec_hallucination_rate_pct": 0.0
+  },
+  "per_prompt": [
+    {
+      "id": "mevalonate_ecoli",
+      "prompt": "Design a microbial synthesis route for mevalonate in E. coli. Show the pathway with KEGG reaction IDs and EC numbers.",
+      "phase1_final_answer": "It looks like you're looking to engineer *E. coli* to produce mevalonate ($\\text{C01107}$). Since mevalonate is a central intermediate in isoprenoid biosynthesis, the pathway is well-established, but engineering it for high yield requires careful selection of heterologous enzymes if the native pathway is insufficient or if you are aiming for a specific branch point.\n\nBased on the initial search, the KEGG entry for mevalonate ($\\text{C01107}$) is associated with several pathways, including $\\text{map00900}$ and $\\text{map01100}$. The retrosynthesis analysis confirms that while *E. coli* has native precursors, the full mevalonate pathway might require augmentation depending on the specific metabolic flux you are targeting.\n\nSince this is a design request, I will propose a synthesis plan.\n\n<plan>\n[\n{\"id\": \"A\", \"title\": \"Native Pathway Optimization\", \"route\": \"microbial\", \"host\": \"ecoli\", \"summary\": \"Optimize native mevalonate pathway flux in E. coli using genetic tuning.\", \"est_difficulty\": \"medium\", \"est_confidence\": 0.85},\n{\"id\": \"B\", \"title\": \"Heterologous Pathway Introduction\", \"route\": \"microbial\", \"host\": \"ecoli\", \"summary\": \"Introduce a complete mevalonate pathway from a high-producing organism.\", \"est_difficulty\": \"medium\", \"est_confidence\": 0.90},\n{\"id\": \"C\", \"title\": \"Enzymatic Conversion (In Vitro)\", \"route\": \"enzymatic\", \"host\": null, \"summary\": \"Use purified enzymes in a cell-free system for high purity.\", \"est_difficulty\": \"high\", \"est_confidence\": 0.75}\n]\n</plan>\n\nPick an approach (A, B, or C) and I'll produce the full design.",
+      "phase1_tokens_in": 0,
+      "phase1_tokens_out": 0,
+      "phase1_duration_ms": 11617,
+      "phase1_iterations": 3,
+      "phase1_plan_ids": [
+        "A",
+        "B",
+        "C"
+      ],
+      "followup_sent": "A",
+      "phase2_final_answer": "Since you chose **Approach A: Native Pathway Optimization**, the goal is to maximize the flux through the existing mevalonate pathway in *E. coli*. This typically involves knocking out competing pathways and overexpressing key rate-limiting enzymes.\n\nHere is the full design for optimizing the native mevalonate pathway in *E. coli*.\n\n**Target:** Mevalonate ($\\text{C01107}$)\n**Host:** *Escherichia coli*\n**Rationale for Host:** *E. coli* is a robust, well-characterized chassis with extensive genetic tools available for metabolic engineering, making it ideal for pathway optimization studies.\n\n### Pathway Steps (Native Mevalonate Synthesis)\n\nThe pathway starts from Acetyl-CoA, which is the central hub of carbon metabolism. The key steps leading to mevalonate are:\n\n**Step 1: Acetyl-CoA $\\rightarrow$ Acetoacetyl-CoA**\n    Reaction: $\\text{R00012}$ EC 2.3.1.16\n    Enzyme: $\\text{Thiolase}$ (*E. coli*) PMID:3456789\n    *Note: This is a core fatty acid synthesis step, but it feeds into the pathway.*\n\n**Step 2: Acetoacetyl-CoA $\\rightarrow$ HMG-CoA**\n    Reaction: $\\text{R00013}$ EC 2.3.1.17\n    Enzyme: $\\text{HMG-CoA Synthase}$ (*E. coli*) PMID:1234567\n    *Note: This step is often a major bottleneck.*\n\n**Step 3: HMG-CoA $\\rightarrow$ Mevalonate**\n    Reaction: $\\text{R00014}$ EC 2.3.1.5\n    Enzyme: $\\text{HMG-CoA Reductase}$ (*E. coli*) PMID:9876543\n    *Note: This is the committed, rate-limiting step for mevalonate production.*\n\n### Genetic Modifications for Optimization\n\nTo push flux towards mevalonate, the following modifications are recommended:\n\n1.  **Overexpression of $\\text{HMG-CoA Reductase}$ ($\\text{HMGCR}$):** Overexpress the gene encoding $\\text{HMGCR}$ using a strong, inducible promoter (e.g., $\\text{P}_{tac}$ or $\\text{P}_{T7}$) to increase the conversion rate of HMG-CoA to mevalonate.\n2.  **Knockout of Competing Pathways:** Delete genes responsible for diverting Acetyl-CoA or HMG-CoA into competing products (e.g., certain fatty acid synthesis genes or acetate production pathways) to increase precursor availability.\n3.  **Precursor Supply Enhancement:** Engineer the central carbon metabolism to increase the pool of Acetyl-CoA, potentially by optimizing glycolysis or pyruvate dehydrogenase activity.\n\n**Confidence: 0.85 —** The pathway steps are well-documented in *E. coli* metabolism ($\\text{KEGG}$ $\\text{R00012-R00014}$). The confidence is slightly below 0.90 because \"optimization\" is highly dependent on specific strain background and growth conditions, which are not specified.\n\n***\n\nWould you like me to go deeper into any of these aspects? For example, I can:\n1.  **Find specific literature** on successful flux optimization of this pathway in *E. coli* ($\\text{PMID}$ search).\n2.  **Design an expression vector** for the $\\text{HMGCR}$ gene in *E. coli* ($\\text{design\\_expression\\_vector}$).\n3.  **Search for alternative, high-activity $\\text{HMGCR}$ enzymes** from other organisms ($\\text{rank\\_enzymes}$).",
+      "phase2_tokens_in": 0,
+      "phase2_tokens_out": 0,
+      "phase2_duration_ms": 12946,
+      "phase2_iterations": 1,
+      "rids": [
+        {
+          "id": "R00012",
+          "verified": true,
+          "context": "are:  **Step 1: Acetyl-CoA $\\rightarrow$ Acetoacetyl-CoA**     Reaction: $\\text{R00012}$ EC 2.3.1.16     Enzyme: $\\text{Thiolase}$ (*E. coli*) PMID:3456789     *Note:"
+        },
+        {
+          "id": "R00013",
+          "verified": true,
+          "context": "thway.*  **Step 2: Acetoacetyl-CoA $\\rightarrow$ HMG-CoA**     Reaction: $\\text{R00013}$ EC 2.3.1.17     Enzyme: $\\text{HMG-CoA Synthase}$ (*E. coli*) PMID:1234567"
+        },
+        {
+          "id": "R00014",
+          "verified": true,
+          "context": "bottleneck.*  **Step 3: HMG-CoA $\\rightarrow$ Mevalonate**     Reaction: $\\text{R00014}$ EC 2.3.1.5     Enzyme: $\\text{HMG-CoA Reductase}$ (*E. coli*) PMID:9876543"
+        }
+      ],
+      "ecs": [
+        {
+          "id": "2.3.1.16",
+          "verified": true,
+          "context": "tep 1: Acetyl-CoA $\\rightarrow$ Acetoacetyl-CoA**     Reaction: $\\text{R00012}$ EC 2.3.1.16     Enzyme: $\\text{Thiolase}$ (*E. coli*) PMID:3456789     *Note: This is a cor"
+        },
+        {
+          "id": "2.3.1.17",
+          "verified": true,
+          "context": "**Step 2: Acetoacetyl-CoA $\\rightarrow$ HMG-CoA**     Reaction: $\\text{R00013}$ EC 2.3.1.17     Enzyme: $\\text{HMG-CoA Synthase}$ (*E. coli*) PMID:1234567     *Note: This"
+        },
+        {
+          "id": "2.3.1.5",
+          "verified": true,
+          "context": "k.*  **Step 3: HMG-CoA $\\rightarrow$ Mevalonate**     Reaction: $\\text{R00014}$ EC 2.3.1.5     Enzyme: $\\text{HMG-CoA Reductase}$ (*E. coli*) PMID:9876543     *Note: This"
+        }
+      ],
+      "status": "ok"
+    },
+    {
+      "id": "artemisinic_yeast",
+      "prompt": "How would you engineer S. cerevisiae to produce artemisinic acid? Show the pathway with KEGG R-IDs and EC numbers.",
+      "phase1_final_answer": "",
+      "phase1_tokens_in": 0,
+      "phase1_tokens_out": 0,
+      "phase1_duration_ms": 2226,
+      "phase1_iterations": 2,
+      "phase1_plan_ids": [],
+      "followup_sent": null,
+      "phase2_final_answer": null,
+      "phase2_tokens_in": 0,
+      "phase2_tokens_out": 0,
+      "phase2_duration_ms": 0,
+      "phase2_iterations": 0,
+      "rids": [],
+      "ecs": [],
+      "status": "plan_parse_failed"
+    },
+    {
+      "id": "vanillin_ferulic",
+      "prompt": "Design a biosynthesis route for vanillin from ferulic acid. Include KEGG reaction IDs and EC numbers for each step.",
+      "phase1_final_answer": "<plan>\n[\n  {\n    \"id\": \"A\",\n    \"title\": \"Direct Ferulic Acid Conversion\",\n    \"route\": \"enzymatic\",\n    \"host\": null,\n    \"summary\": \"Identify enzymes that directly convert ferulic acid or its CoA derivative to vanillin.\",\n    \"est_difficulty\": \"medium\",\n    \"est_confidence\": 0.85\n  },\n  {\n    \"id\": \"B\",\n    \"title\": \"Pathway Reconstruction from Precursors\",\n    \"route\": \"microbial\",\n    \"host\": \"ecoli\",\n    \"summary\": \"Design a pathway starting from common precursors (e.g., ferulic acid pathway intermediates) in E. coli.\",\n    \"est_difficulty\": \"high\",\n    \"est_confidence\": 0.75\n  },\n  {\n    \"id\": \"C\",\n    \"title\": \"Chemical Synthesis Route\",\n    \"route\": \"chemical\",\n    \"host\": null,\n    \"summary\": \"Outline a non-biological, chemical synthesis route for comparison.\",\n    \"est_difficulty\": \"low\",\n    \"est_confidence\": 0.90\n  }\n]\n</plan>\nPick an approach and I'll produce the full design.",
+      "phase1_tokens_in": 0,
+      "phase1_tokens_out": 0,
+      "phase1_duration_ms": 6155,
+      "phase1_iterations": 2,
+      "phase1_plan_ids": [
+        "A",
+        "B",
+        "C"
+      ],
+      "followup_sent": "A",
+      "phase2_final_answer": "The direct conversion of ferulic acid to vanillin is not a single, universally documented reaction in the KEGG database, but the search results point toward several key enzymatic steps involving feruloyl-CoA derivatives.\n\nThe most relevant reaction identified is **R12566**, which is described as a \"feruloyl-CoA hydro-lyase/vanillin-lyase\" with the EC number **4.1.2.61**. This enzyme is the most direct candidate for the desired transformation, converting feruloyl-CoA (a derivative of ferulic acid) into vanillin (C03057) and acetyl-CoA (C00024).\n\nHere is the breakdown of the proposed enzymatic step:\n\n**Step 1: Feruloyl-CoA to Vanillin**\n*   **Substrate $\\rightarrow$ Product:** Feruloyl-CoA $\\rightarrow$ Vanillin\n*   **Reaction:** R12566 EC 4.1.2.61\n*   **Enzyme:** Feruloyl-CoA hydro-lyase/vanillin-lyase (Organism not specified in the reaction record) PMID:N/A\n\nThis reaction suggests that the key is to first activate ferulic acid into its CoA ester form, which is then cleaved by the lyase.\n\nWould you like me to proceed with a deep-dive design based on this enzymatic step (Approach A), or would you prefer to explore the microbial pathway reconstruction (Approach B) or the chemical synthesis route (Approach C)?",
+      "phase2_tokens_in": 0,
+      "phase2_tokens_out": 0,
+      "phase2_duration_ms": 5693,
+      "phase2_iterations": 2,
+      "rids": [
+        {
+          "id": "R12566",
+          "verified": true,
+          "context": "involving feruloyl-CoA derivatives.  The most relevant reaction identified is **R12566**, which is described as a \"feruloyl-CoA hydro-lyase/vanillin-lyase\" with the E"
+        }
+      ],
+      "ecs": [
+        {
+          "id": "4.1.2.61",
+          "verified": true,
+          "context": "tarrow$ Product:** Feruloyl-CoA $\\rightarrow$ Vanillin *   **Reaction:** R12566 EC 4.1.2.61 *   **Enzyme:** Feruloyl-CoA hydro-lyase/vanillin-lyase (Organism not specified"
+        }
+      ],
+      "status": "ok"
+    },
+    {
+      "id": "lycopene_ecoli",
+      "prompt": "Show me a heterologous pathway for lycopene production in E. coli, with KEGG R-IDs and ECs.",
+      "phase1_final_answer": "The literature search indicates that while there is significant work on carotenoid biosynthesis in yeasts like *Yarrowia lipolytica* and *Pichia pastoris*, direct, detailed protocols for **heterologous lycopene production specifically in *E. coli*** with all the necessary KEGG R-IDs and ECs are not immediately surfaced in the top results. The initial KEGG search pointed to a reaction involving farnesyl diphosphate, which is a key precursor.\n\nTo provide you with a concrete pathway design, I need to synthesize the known biochemical steps for carotenoid synthesis and map them to the *E. coli* metabolic context. Since you are asking for a pathway, I will proceed with the structured proposal phase.\n\nHere is a proposal for a heterologous pathway for lycopene production in *E. coli*.\n\n<plan>\n[\n  {\n    \"id\": \"A\",\n    \"title\": \"Isoprenoid Precursor Supply & Cyclization\",\n    \"route\": \"microbial\",\n    \"host\": \"ecoli\",\n    \"summary\": \"Engineer *E. coli* to overproduce the C15 precursor (Farnesyl Diphosphate, FPP) and introduce the cyclization enzyme.\",\n    \"est_difficulty\": \"medium\",\n    \"est_confidence\": 0.85\n  },\n  {\n    \"id\": \"B\",\n    \"title\": \"Full Carotenoid Pathway Assembly\",\n    \"route\": \"microbial\",\n    \"host\": \"ecoli\",\n    \"summary\": \"Introduce the complete set of desaturase and cyclase genes from a known carotenogenic organism.\",\n    \"est_difficulty\": \"high\",\n    \"est_confidence\": 0.75\n  },\n  {\n    \"id\": \"C\",\n    \"title\": \"Chemical Synthesis of Precursors\",\n    \"route\": \"chemical\",\n    \"host\": null,\n    \"summary\": \"Synthesize key isoprenoid precursors chemically and feed them into the engineered *E. coli* strain.\",\n    \"est_difficulty\": \"medium\",\n    \"est_confidence\": 0.60\n  }\n]\n</plan>\nPick an approach and I'll produce the full design.",
+      "phase1_tokens_in": 0,
+      "phase1_tokens_out": 0,
+      "phase1_duration_ms": 8676,
+      "phase1_iterations": 3,
+      "phase1_plan_ids": [
+        "A",
+        "B",
+        "C"
+      ],
+      "followup_sent": "A",
+      "phase2_final_answer": "Since you selected **Approach A: Isoprenoid Precursor Supply & Cyclization**, I will now generate the full design for heterologous lycopene production in *E. coli*.\n\n### Full Pathway Design: Lycopene Production in *E. coli*\n\n**Target Molecule:** Lycopene (a $\\text{C}_{40}$ carotenoid)\n**Host Chassis:** *Escherichia coli*\n\n#### Rationale for Host Selection (*E. coli*)\n*E. coli* is chosen for its well-characterized genetics, rapid growth rate, and established protocols for metabolic engineering. The primary challenge is that the native isoprenoid pathway in *E. coli* primarily produces isopentenyl diphosphate (IPP) and dimethylallyl diphosphate (DMAPP), which are precursors to sterols and terpenoids, but the specific enzymes for the long-chain condensation leading to FPP and subsequent cyclization are often absent or inefficient for high-level carotenoid flux.\n\n#### Pathway Steps and Genetic Modifications\n\nThe pathway is divided into two main phases: **Precursor Supply** and **Cyclization**.\n\n**Phase 1: Precursor Supply (Farnesyl Diphosphate - FPP)**\n\n1.  **Goal:** Ensure high flux towards $\\text{C}_{15}$ precursors (FPP).\n    *   **Modification:** Overexpress key enzymes in the MEP (Methylerythritol Phosphate) pathway or the MVA (Mevalonate) pathway, depending on the chosen route, to maximize IPP/DMAPP availability.\n    *   **Evidence:** The synthesis of FPP from IPP/DMAPP is a known bottleneck in heterologous systems. Literature supports engineering *E. coli* to enhance terpene production (PMID:3456789).\n\n2.  **Goal:** Convert $\\text{C}_{15}$ precursors to $\\text{C}_{30}$ (Geranylgeranyl Diphosphate - GGPP) and then to $\\text{C}_{40}$ (Lycopene).\n    *   **Modification:** Introduce a Farnesyl Diphosphate Synthase (FPPS) or Geranylgeranyl Diphosphate Synthase (GGPS) gene from a carotenogenic organism (e.g., *Pantoea* or *Yarrowia*) into *E. coli*.\n    *   **Reaction:** $\\text{C}_{15} \\rightarrow \\text{C}_{30}$ (GGPP)\n    *   **Enzyme:** GGPS (from donor organism)\n    *   **KEGG/EC:** The specific reaction for GGPS would need to be mapped from the donor organism's KEGG entry, but the general reaction type is a prenyl transferase.\n\n**Phase 2: Cyclization (Lycopene Formation)**\n\n3.  **Goal:** Cyclize the linear $\\text{C}_{40}$ precursor (e.g., $\\zeta$-carotene or a related intermediate) into lycopene.\n    *   **Modification:** Introduce the Lycopene Cyclase gene (LCY) from a high-producing organism.\n    *   **Reaction:** Linear Carotene Precursor $\\rightarrow$ Lycopene\n    *   **Enzyme:** Lycopene Cyclase (LCY)\n    *   **KEGG/EC:** The specific reaction ID for this cyclization step must be sourced from the donor organism's KEGG pathway.\n\n***\n\n#### Pathway Diagram Rendering (Conceptual)\n\nSince the exact KEGG R-IDs and ECs for the heterologous enzymes (GGPS, LCY) are dependent on the specific donor organism chosen, I will render the general steps based on the known biochemistry:\n\n**Step 1: $\\text{C}_{15}$ Precursor $\\rightarrow \\text{C}_{30}$ Precursor (GGPP)**\n    Reaction: $\\text{C}_{15} \\rightarrow \\text{C}_{30}$\n    Enzyme: GGPS (Donor Organism)\n    PMID: [Requires specific literature search for the chosen enzyme]\n\n**Step 2: $\\text{C}_{30}$ Precursor $\\rightarrow \\text{C}_{40}$ Precursor (e.g., $\\zeta$-carotene)**\n    Reaction: $\\text{C}_{30} \\rightarrow \\text{C}_{40}$\n    Enzyme: Carotene Desaturase/Condensing Enzyme (Donor Organism)\n    PMID: [Requires specific literature search for the chosen enzyme]\n\n**Step 3: $\\text{C}_{40}$ Precursor $\\rightarrow$ Lycopene**\n    Reaction: $\\text{C}_{40} \\rightarrow \\text{Lycopene}$\n    Enzyme: Lycopene Cyclase (LCY) (Donor Organism)\n    PMID: [Requires specific literature search for the chosen enzyme]\n\n***\n\n**Confidence: 0.85 —** The confidence is high because the general metabolic logic (Precursor $\\rightarrow$ $\\text{C}_{30}$ $\\rightarrow$ $\\text{C}_{40}$ $\\rightarrow$ Lycopene) is biochemically sound and supported by literature on carotenoid biosynthesis. The confidence is slightly reduced because the specific, validated KEGG R-IDs and EC numbers for the *heterologous* enzymes (GGPS and LCY) must be retrieved from the specific donor organism's database entry, which requires a targeted literature/database search.\n\n**Next Steps:** To move to Phase 2 (Deep-dive), please specify:\n1.  **Which donor organism** you would like me to use for the genes (e.g., *Pantoea*, *Yarrowia*, or a specific strain mentioned in literature)?\n2.  If you have a specific **KEGG ID** for a related carotenoid pathway, I can use that to anchor the design.",
+      "phase2_tokens_in": 0,
+      "phase2_tokens_out": 0,
+      "phase2_duration_ms": 19604,
+      "phase2_iterations": 1,
+      "rids": [],
+      "ecs": [],
+      "status": "no_ids_emitted"
+    },
+    {
+      "id": "glucose_shikimate",
+      "prompt": "Design a three-step enzymatic route from glucose to shikimate. Include KEGG R-IDs and EC numbers.",
+      "phase1_final_answer": "The search results confirm that the shikimate pathway is complex and involves multiple branches, but they do not provide a direct, three-step route starting *from* glucose. The shikimate pathway itself typically starts from **Erythrose-4-phosphate** and **Phosphoenolpyruvate (PEP)**, which are derived from glycolysis (the pathway that starts with glucose).\n\nTo meet your request for a **three-step enzymatic route from glucose to shikimate**, I must first establish the necessary precursor steps from glucose to the shikimate pathway entry points (like PEP and E4P), and then map the initial steps of the shikimate pathway itself.\n\nGiven the complexity, I will propose a route that leverages the central metabolism of glucose to feed into the shikimate pathway.\n\n### Proposed Three-Step Enzymatic Route (Conceptual)\n\nSince a direct, three-step conversion is chemically unlikely without massive pathway engineering, I will structure this as:\n**Step 1:** Glucose $\\rightarrow$ Glycolytic Intermediate (e.g., PEP)\n**Step 2:** Glycolytic Intermediate $\\rightarrow$ Shikimate Pathway Entry Point (e.g., E4P)\n**Step 3:** Shikimate Pathway Entry Point $\\rightarrow$ Shikimate\n\nTo provide the specific KEGG R-IDs and EC numbers you requested, I need to focus on the known reactions. I will use the general knowledge of glycolysis and the shikimate pathway.\n\nHere is a plan to generate the detailed design:\n\n<plan>\n{\"id\": \"A\", \"title\": \"Glycolysis to PEP/E4P\", \"route\": \"microbial\", \"host\": \"ecoli\", \"summary\": \"Convert glucose via glycolysis to PEP and E4P, the shikimate precursors.\", \"est_difficulty\": \"low\", \"est_confidence\": 0.95}\n{\"id\": \"B\", \"title\": \"Shikimate Pathway Initiation\", \"route\": \"microbial\", \"host\": \"ecoli\", \"summary\": \"Convert PEP and E4P into DAHP, the first committed shikimate intermediate.\", \"est_difficulty\": \"medium\", \"est_confidence\": 0.90}\n{\"id\": \"C\", \"title\": \"Shikimate Formation\", \"route\": \"microbial\", \"host\": \"ecoli\", \"summary\": \"Convert DAHP through subsequent reactions to form the final shikimate product.\", \"est_difficulty\": \"medium\", \"est_confidence\": 0.85}\n</plan>\n\nPick an approach and I'll produce the full design.",
+      "phase1_tokens_in": 0,
+      "phase1_tokens_out": 0,
+      "phase1_duration_ms": 11069,
+      "phase1_iterations": 3,
+      "phase1_plan_ids": [],
+      "followup_sent": null,
+      "phase2_final_answer": null,
+      "phase2_tokens_in": 0,
+      "phase2_tokens_out": 0,
+      "phase2_duration_ms": 0,
+      "phase2_iterations": 0,
+      "rids": [],
+      "ecs": [],
+      "status": "plan_parse_failed"
+    }
+  ]
+}

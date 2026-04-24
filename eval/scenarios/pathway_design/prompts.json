@@ -1,0 +1,22 @@
+[
+  {
+    "id": "mevalonate_ecoli",
+    "prompt": "Design a microbial synthesis route for mevalonate in E. coli. Show the pathway with KEGG reaction IDs and EC numbers."
+  },
+  {
+    "id": "artemisinic_yeast",
+    "prompt": "How would you engineer S. cerevisiae to produce artemisinic acid? Show the pathway with KEGG R-IDs and EC numbers."
+  },
+  {
+    "id": "vanillin_ferulic",
+    "prompt": "Design a biosynthesis route for vanillin from ferulic acid. Include KEGG reaction IDs and EC numbers for each step."
+  },
+  {
+    "id": "lycopene_ecoli",
+    "prompt": "Show me a heterologous pathway for lycopene production in E. coli, with KEGG R-IDs and ECs."
+  },
+  {
+    "id": "glucose_shikimate",
+    "prompt": "Design a three-step enzymatic route from glucose to shikimate. Include KEGG R-IDs and EC numbers."
+  }
+]
