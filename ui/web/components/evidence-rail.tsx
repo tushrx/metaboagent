@@ -6,6 +6,7 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   ChevronDown,
   ChevronUp,
   ExternalLink,
@@ -114,11 +115,20 @@ function ToolsRunSection({
   );
 }
 
+const EXPERIMENTAL_TOOLS = new Set(["parse_structure_image"]);
+const EXPERIMENTAL_TOOLTIP =
+  "Experimental: Gemma 4 structure extraction is ~5% accurate on a 20-molecule benchmark. Always verify manually.";
+
 function ToolActivityCard({ activity }: { activity: ToolActivity }) {
   const [expanded, setExpanded] = useState(false);
   const args = argsSummary(activity.args);
   const duration = formatDuration(activity);
   const contentId = `tool-activity-${activity.id}`;
+  const isExperimental = EXPERIMENTAL_TOOLS.has(activity.name);
+  const structuredResult =
+    activity.name === "parse_structure_image" && activity.status === "done"
+      ? parseStructureImageResult(activity.result)
+      : null;
 
   return (
     <article
@@ -139,6 +149,7 @@ function ToolActivityCard({ activity }: { activity: ToolActivity }) {
             <span className="truncate font-mono text-[13px] font-medium text-gray-900">
               {activity.name}
             </span>
+            {isExperimental && <ExperimentalBadge />}
           </div>
           {args && (
             <p className="truncate font-mono text-[11px] text-gray-500">
@@ -162,6 +173,13 @@ function ToolActivityCard({ activity }: { activity: ToolActivity }) {
           id={contentId}
           className="border-t border-gray-100 px-3 py-2.5"
         >
+          {isExperimental && (
+            <div className="mb-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-[11px] leading-relaxed text-amber-900">
+              <AlertTriangle size={12} className="mt-0.5 shrink-0 text-amber-700" />
+              <span>{EXPERIMENTAL_TOOLTIP}</span>
+            </div>
+          )}
+
           <div className="mb-2">
             <h4 className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
               Args
@@ -177,10 +195,14 @@ function ToolActivityCard({ activity }: { activity: ToolActivity }) {
             </p>
           )}
 
+          {structuredResult && (
+            <StructureImageResultView result={structuredResult} />
+          )}
+
           {activity.status === "done" && activity.result !== undefined && (
             <div>
               <h4 className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                Result
+                {structuredResult ? "Raw result" : "Result"}
               </h4>
               <pre className="max-h-64 overflow-auto rounded bg-gray-50 p-2 font-mono text-[11px] leading-relaxed text-gray-800 whitespace-pre-wrap break-words">
                 {formatResult(activity.result)}
@@ -199,6 +221,178 @@ function ToolActivityCard({ activity }: { activity: ToolActivity }) {
         </div>
       )}
     </article>
+  );
+}
+
+function ExperimentalBadge() {
+  return (
+    <span
+      title={EXPERIMENTAL_TOOLTIP}
+      aria-label={EXPERIMENTAL_TOOLTIP}
+      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-800"
+    >
+      <AlertTriangle size={9} />
+      experimental
+    </span>
+  );
+}
+
+interface StructureResult {
+  smiles: string | null;
+  confidence: "high" | "medium" | "low" | null;
+  rdkitCanonical: string | null;
+  inchiKey: string | null;
+  formula: string | null;
+  notes: string;
+  alternativeSmiles: string[];
+}
+
+function parseStructureImageResult(raw: unknown): StructureResult | null {
+  if (!raw) return null;
+  const obj: Record<string, unknown> | null =
+    typeof raw === "string"
+      ? safeJsonParse(raw)
+      : typeof raw === "object"
+        ? (raw as Record<string, unknown>)
+        : null;
+  if (!obj) return null;
+  const hasAny =
+    "smiles" in obj ||
+    "rdkit_canonical" in obj ||
+    "inchi_key" in obj ||
+    "formula" in obj ||
+    "confidence" in obj;
+  if (!hasAny) return null;
+
+  const conf = obj.confidence;
+  const normConf: StructureResult["confidence"] =
+    conf === "high" || conf === "medium" || conf === "low" ? conf : null;
+  const alt = Array.isArray(obj.alternative_smiles)
+    ? obj.alternative_smiles.filter((s): s is string => typeof s === "string")
+    : [];
+  return {
+    smiles: typeof obj.smiles === "string" ? obj.smiles : null,
+    confidence: normConf,
+    rdkitCanonical:
+      typeof obj.rdkit_canonical === "string" ? obj.rdkit_canonical : null,
+    inchiKey: typeof obj.inchi_key === "string" ? obj.inchi_key : null,
+    formula: typeof obj.formula === "string" ? obj.formula : null,
+    notes: typeof obj.notes === "string" ? obj.notes : "",
+    alternativeSmiles: alt,
+  };
+}
+
+function safeJsonParse(s: string): Record<string, unknown> | null {
+  try {
+    const v = JSON.parse(s);
+    return v && typeof v === "object" ? (v as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+function StructureImageResultView({ result }: { result: StructureResult }) {
+  const primary = result.rdkitCanonical || result.smiles;
+  return (
+    <div className="mb-3 rounded-md border border-gray-200 bg-white p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h4 className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+          Extracted structure
+        </h4>
+        {result.confidence && (
+          <ConfidenceBadge confidence={result.confidence} />
+        )}
+      </div>
+
+      {primary ? (
+        <div className="mb-2">
+          <div className="text-[10px] uppercase tracking-wider text-gray-500">
+            SMILES
+          </div>
+          <code className="mt-0.5 block break-all rounded bg-gray-50 px-2 py-1 font-mono text-[12px] text-gray-900">
+            {primary}
+          </code>
+          {result.rdkitCanonical &&
+            result.smiles &&
+            result.smiles !== result.rdkitCanonical && (
+              <p className="mt-1 text-[11px] text-gray-500">
+                Model output <code>{result.smiles}</code> — canonicalized above
+                by RDKit.
+              </p>
+            )}
+        </div>
+      ) : (
+        <p className="mb-2 text-[12px] text-gray-500">
+          No valid SMILES was extracted.
+        </p>
+      )}
+
+      {(result.formula || result.inchiKey) && (
+        <div className="mb-2 grid grid-cols-1 gap-1 text-[11px] text-gray-700">
+          {result.formula && (
+            <div>
+              <span className="font-medium text-gray-500">Formula:</span>{" "}
+              <code className="font-mono">{result.formula}</code>
+            </div>
+          )}
+          {result.inchiKey && (
+            <div>
+              <span className="font-medium text-gray-500">InChIKey:</span>{" "}
+              <code className="break-all font-mono">{result.inchiKey}</code>
+            </div>
+          )}
+        </div>
+      )}
+
+      {result.alternativeSmiles.length > 0 && (
+        <div className="mb-2">
+          <div className="text-[10px] uppercase tracking-wider text-gray-500">
+            Alternative interpretations
+          </div>
+          <ul className="mt-1 flex flex-col gap-0.5">
+            {result.alternativeSmiles.map((s, i) => (
+              <li key={i}>
+                <code className="block break-all rounded bg-gray-50 px-2 py-0.5 font-mono text-[11px] text-gray-800">
+                  {s}
+                </code>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {result.notes && (
+        <div>
+          <div className="text-[10px] uppercase tracking-wider text-gray-500">
+            Notes
+          </div>
+          <p className="mt-0.5 text-[12px] leading-relaxed text-gray-700">
+            {result.notes}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ConfidenceBadge({
+  confidence,
+}: {
+  confidence: "high" | "medium" | "low";
+}) {
+  const cls =
+    confidence === "high"
+      ? "border-green-200 bg-green-50 text-green-800"
+      : confidence === "medium"
+        ? "border-amber-200 bg-amber-50 text-amber-800"
+        : "border-gray-200 bg-gray-50 text-gray-700";
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide ${cls}`}
+      title="Self-reported by the vision model; uncorrelated with accuracy in our benchmark."
+    >
+      confidence: {confidence}
+    </span>
   );
 }
 
