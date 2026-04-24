@@ -6,7 +6,12 @@ import { useEffect, useRef, useState } from "react";
 import type { HealthOverall, HealthResponse } from "@/lib/api";
 import { StatusDot } from "./status-dot";
 
-const POLL_INTERVAL_MS = 15_000;
+// Adaptive polling cadence. Streaming is the "user cares right now"
+// signal — poll faster. Idle = background, cheap. A down status also
+// reverts to the shorter cadence so recovery shows up promptly.
+const POLL_ACTIVE_MS = 5_000;
+const POLL_IDLE_MS = 60_000;
+const POLL_DOWN_MS = 15_000;
 const DEEP_MODE_HELPER_TIMEOUT_MS = 10_000;
 
 type DotStatus = HealthOverall | "pending";
@@ -16,6 +21,8 @@ interface HeaderProps {
   onDeepModeChange: (on: boolean) => void;
   onNewConversation?: () => void;
   canClearConversation?: boolean;
+  /** True while a /chat response is streaming — bumps polling cadence. */
+  streaming?: boolean;
 }
 
 function onlineCount(h: HealthResponse | null): number {
@@ -39,11 +46,14 @@ export function Header({
   onDeepModeChange,
   onNewConversation,
   canClearConversation = false,
+  streaming = false,
 }: HeaderProps) {
   const [status, setStatus] = useState<DotStatus>("pending");
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [showHelper, setShowHelper] = useState(true);
   const interactedRef = useRef(false);
+  const streamingRef = useRef(streaming);
+  const statusRef = useRef<DotStatus>(status);
 
   // Fade out the deep-mode helper text after 10s or on first toggle.
   useEffect(() => {
@@ -54,10 +64,20 @@ export function Header({
     return () => clearTimeout(t);
   }, []);
 
+  // Keep refs fresh so the single self-rescheduling probe loop reads
+  // the latest streaming / status without re-mounting its interval.
+  useEffect(() => {
+    streamingRef.current = streaming;
+  }, [streaming]);
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
+
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
 
-    async function probe() {
+    const probe = async () => {
       try {
         const res = await fetch("/api/health-proxy", { cache: "no-store" });
         const body = (await res.json()) as HealthResponse;
@@ -69,13 +89,19 @@ export function Header({
         setHealth(null);
         setStatus("down");
       }
-    }
+      if (cancelled) return;
+      const next = streamingRef.current
+        ? POLL_ACTIVE_MS
+        : statusRef.current === "down"
+          ? POLL_DOWN_MS
+          : POLL_IDLE_MS;
+      timer = setTimeout(probe, next);
+    };
 
     probe();
-    const id = setInterval(probe, POLL_INTERVAL_MS);
     return () => {
       cancelled = true;
-      clearInterval(id);
+      if (timer) clearTimeout(timer);
     };
   }, []);
 

@@ -315,6 +315,7 @@ export function ChatWorkspace() {
         onDeepModeChange={setDeepMode}
         onNewConversation={handleNewConversation}
         canClearConversation={messages.length > 0 && !streaming}
+        streaming={!!streaming}
       />
       <div className="flex h-[calc(100vh-56px)]">
         <MainPane
