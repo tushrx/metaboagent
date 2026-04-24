@@ -4,10 +4,12 @@ import { useCallback, useRef, useState } from "react";
 import { ChatRequestError, streamChat } from "@/lib/sse";
 import type {
   MessageIn,
+  Tier,
   ToolActivity,
   ToolCallEvent,
 } from "@/lib/api";
 import { extractPathway, type PathwayData } from "@/lib/pathway";
+import { Header } from "./header";
 import { MainPane } from "./main-pane";
 import { EvidenceRail, type EvidenceRailHandle } from "./evidence-rail";
 import { EvidenceDrawer } from "./evidence-drawer";
@@ -29,6 +31,7 @@ export function ChatWorkspace() {
   const [lastError, setLastError] = useState<string | null>(null);
   const [toolActivity, setToolActivity] = useState<ToolActivity[]>([]);
   const [pathway, setPathway] = useState<PathwayData | null>(null);
+  const [deepMode, setDeepMode] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<InputAreaHandle | null>(null);
@@ -39,7 +42,7 @@ export function ChatWorkspace() {
   }, []);
 
   const runChat = useCallback(
-    async (history: ChatMessage[], assistantId: string) => {
+    async (history: ChatMessage[], assistantId: string, tier: Tier) => {
       let accumulatedText = "";
       const accumulatedTools: ToolCallEvent[] = [];
       let errorMessage: string | null = null;
@@ -51,6 +54,7 @@ export function ChatWorkspace() {
       try {
         for await (const ev of streamChat(toMessageIn(history), {
           signal: ctrl.signal,
+          tier,
         })) {
           switch (ev.type) {
             case "token":
@@ -200,8 +204,8 @@ export function ChatWorkspace() {
     setLastError(null);
     setStreaming({ id: assistantId, text: "", toolCalls: [] });
 
-    await runChat(nextHistory, assistantId);
-  }, [input, messages, streaming, runChat]);
+    await runChat(nextHistory, assistantId, deepMode ? "deep" : "default");
+  }, [input, messages, streaming, runChat, deepMode]);
 
   const handleRetry = useCallback(async () => {
     if (streaming || messages.length === 0) return;
@@ -211,8 +215,8 @@ export function ChatWorkspace() {
     setLastError(null);
     const assistantId = newId();
     setStreaming({ id: assistantId, text: "", toolCalls: [] });
-    await runChat(messages, assistantId);
-  }, [messages, streaming, runChat]);
+    await runChat(messages, assistantId, deepMode ? "deep" : "default");
+  }, [messages, streaming, runChat, deepMode]);
 
   const fillInput = useCallback((prompt: string) => {
     setInput(prompt);
@@ -224,26 +228,29 @@ export function ChatWorkspace() {
   }, []);
 
   return (
-    <div className="flex h-[calc(100vh-56px)]">
-      <MainPane
-        messages={messages}
-        streaming={streaming}
-        input={input}
-        onInputChange={setInput}
-        onSubmit={handleSubmit}
-        onAbort={handleAbort}
-        onPickPrompt={fillInput}
-        onRetry={handleRetry}
-        lastError={lastError}
-        inputRef={inputRef}
-        onToolCrumbClick={handleToolCrumbClick}
-      />
-      <EvidenceRail
-        ref={railRef}
-        toolActivity={toolActivity}
-        pathway={pathway}
-      />
-      <EvidenceDrawer toolActivity={toolActivity} pathway={pathway} />
-    </div>
+    <>
+      <Header deepMode={deepMode} onDeepModeChange={setDeepMode} />
+      <div className="flex h-[calc(100vh-56px)]">
+        <MainPane
+          messages={messages}
+          streaming={streaming}
+          input={input}
+          onInputChange={setInput}
+          onSubmit={handleSubmit}
+          onAbort={handleAbort}
+          onPickPrompt={fillInput}
+          onRetry={handleRetry}
+          lastError={lastError}
+          inputRef={inputRef}
+          onToolCrumbClick={handleToolCrumbClick}
+        />
+        <EvidenceRail
+          ref={railRef}
+          toolActivity={toolActivity}
+          pathway={pathway}
+        />
+        <EvidenceDrawer toolActivity={toolActivity} pathway={pathway} />
+      </div>
+    </>
   );
 }

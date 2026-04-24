@@ -1,13 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { HealthOverall, HealthResponse } from "@/lib/api";
 import { StatusDot } from "./status-dot";
 
 const POLL_INTERVAL_MS = 15_000;
+const DEEP_MODE_HELPER_TIMEOUT_MS = 10_000;
 
 type DotStatus = HealthOverall | "pending";
+
+interface HeaderProps {
+  deepMode: boolean;
+  onDeepModeChange: (on: boolean) => void;
+}
 
 function onlineCount(h: HealthResponse | null): number {
   if (!h) return 0;
@@ -25,9 +31,20 @@ function statusLabel(status: DotStatus, h: HealthResponse | null): string {
   return `${count}/3 tiers online`;
 }
 
-export function Header() {
+export function Header({ deepMode, onDeepModeChange }: HeaderProps) {
   const [status, setStatus] = useState<DotStatus>("pending");
   const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [showHelper, setShowHelper] = useState(true);
+  const interactedRef = useRef(false);
+
+  // Fade out the deep-mode helper text after 10s or on first toggle.
+  useEffect(() => {
+    const t = setTimeout(
+      () => setShowHelper(false),
+      DEEP_MODE_HELPER_TIMEOUT_MS,
+    );
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,9 +71,17 @@ export function Header() {
     };
   }, []);
 
+  const handleToggle = (next: boolean) => {
+    onDeepModeChange(next);
+    if (!interactedRef.current) {
+      interactedRef.current = true;
+      setShowHelper(false);
+    }
+  };
+
   return (
-    <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-5">
-      <div className="flex items-center gap-3">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-5">
+      <div className="flex min-w-0 items-center gap-3">
         <Image
           src="/branding/hbsu.png"
           alt="HBSU"
@@ -64,7 +89,7 @@ export function Header() {
           height={40}
           priority
           title="Team from Homi Bhabha State University, Mumbai"
-          className="rounded"
+          className="shrink-0 rounded"
         />
         <div className="flex flex-col leading-tight">
           <span className="text-[17px] font-semibold tracking-tight text-gray-900">
@@ -77,21 +102,47 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2"
+          title={statusLabel(status, health)}
+        >
           <StatusDot status={status} label={statusLabel(status, health)} />
           <span className="text-sm text-gray-600">Backend</span>
         </div>
 
-        <label
-          className="flex cursor-not-allowed items-center gap-2 opacity-60"
-          title="Deep mode — wiring comes in Phase 5.5"
-        >
-          <span className="text-sm text-gray-600">Deep mode</span>
-          <span className="relative inline-flex h-5 w-9 items-center rounded-full bg-gray-200">
-            <span className="ml-0.5 inline-block h-4 w-4 rounded-full bg-white shadow" />
-          </span>
-          <input type="checkbox" disabled className="sr-only" />
-        </label>
+        <div className="relative flex items-center">
+          <button
+            type="button"
+            onClick={() => handleToggle(!deepMode)}
+            role="switch"
+            aria-checked={deepMode}
+            aria-label="Toggle deep mode"
+            title={
+              deepMode
+                ? "Deep mode ON — 26B tier"
+                : "Deep mode OFF — E4B default"
+            }
+            className="flex items-center gap-2 focus:outline-none"
+          >
+            <span className="text-sm text-gray-600">Deep mode</span>
+            <span
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                deepMode ? "bg-blue-600" : "bg-gray-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                  deepMode ? "translate-x-[18px]" : "translate-x-0.5"
+                }`}
+              />
+            </span>
+          </button>
+          {showHelper && (
+            <div className="pointer-events-none absolute right-0 top-full z-10 mt-2 w-[240px] rounded-md border border-gray-200 bg-white px-3 py-2 text-[12px] text-gray-600 shadow-sm">
+              Deep mode routes to the 26B model. Slower, more thorough.
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
