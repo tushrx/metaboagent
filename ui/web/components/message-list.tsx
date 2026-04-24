@@ -3,6 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Wrench, AlertCircle, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { ToolCallEvent } from "@/lib/api";
 
 export interface ChatMessage {
@@ -40,6 +41,34 @@ export function MessageList({ messages, streaming, onToolCrumbClick }: Props) {
       {streaming && (
         <StreamingRow state={streaming} onToolCrumbClick={onToolCrumbClick} />
       )}
+      <ThrottledAriaAnnouncer streaming={!!streaming} />
+    </div>
+  );
+}
+
+/**
+ * Separate, visually-hidden aria-live region that emits
+ * "New content from assistant" every ~3 s while streaming. The visible
+ * streaming row deliberately does NOT have aria-live, because per-token
+ * re-renders would spam assistive tech.
+ */
+function ThrottledAriaAnnouncer({ streaming }: { streaming: boolean }) {
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!streaming) return;
+    const id = setInterval(() => setTick((t) => t + 1), 3000);
+    return () => clearInterval(id);
+  }, [streaming]);
+
+  return (
+    <div
+      className="sr-only"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {streaming ? `New content from assistant (${tick})` : ""}
     </div>
   );
 }
@@ -96,7 +125,6 @@ function StreamingRow({
   return (
     <div
       className="flex flex-col gap-2"
-      aria-live="polite"
       aria-label="Assistant response (streaming)"
     >
       {state.toolCalls.length > 0 && (
