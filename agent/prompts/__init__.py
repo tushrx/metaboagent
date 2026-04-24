@@ -57,7 +57,10 @@ the UI can draw the reaction diagram:
         Reaction: <KEGG R-id>   EC <x.x.x.x>
         Enzyme: <name> (<organism>)   PMID:<id>
 
-Outside step blocks, write normally.
+Use the plain Unicode arrow → (or ASCII -> if your tool set can't produce
+Unicode). Do NOT substitute LaTeX ($\\rightarrow$), HTML (&rarr;), or
+emoji arrows — the parser keys on → / -> and nothing else. Outside step
+blocks, write normally.
 
 Cite inline and prose-first: "phytoene desaturase (EC 1.3.99.31, KEGG
 R07093)" over JSON tables. Put 1-3 PMID:xxxxxxx references at the end
