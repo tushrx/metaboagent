@@ -1,7 +1,14 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef } from "react";
-import { Wrench, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import {
+  Wrench,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import type { ToolActivity } from "@/lib/api";
 
 export interface EvidenceRailHandle {
@@ -92,37 +99,108 @@ function ToolsRunSection({
 }
 
 function ToolActivityCard({ activity }: { activity: ToolActivity }) {
+  const [expanded, setExpanded] = useState(false);
   const args = argsSummary(activity.args);
   const duration = formatDuration(activity);
+  const contentId = `tool-activity-${activity.id}`;
 
   return (
     <article
       role="article"
       aria-label={`Tool ${activity.name}, status ${activity.status}`}
-      className="rounded-lg border border-gray-200 bg-white p-3 transition-shadow hover:shadow-sm"
+      className="rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-sm"
     >
-      <header className="flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <Wrench size={14} className="shrink-0 text-gray-500" />
-          <span className="truncate font-mono text-[13px] font-medium text-gray-900">
-            {activity.name}
-          </span>
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        aria-controls={contentId}
+        className="flex w-full items-center justify-between gap-2 rounded-lg p-3 text-left focus:outline-none focus:ring-2 focus:ring-blue-400/40"
+      >
+        <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <Wrench size={14} className="shrink-0 text-gray-500" />
+            <span className="truncate font-mono text-[13px] font-medium text-gray-900">
+              {activity.name}
+            </span>
+          </div>
+          {args && (
+            <p className="truncate font-mono text-[11px] text-gray-500">
+              {args}
+            </p>
+          )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <StatusBadge status={activity.status} />
           <span className="font-mono text-[11px] text-gray-500">{duration}</span>
+          {expanded ? (
+            <ChevronUp size={14} className="text-gray-400" />
+          ) : (
+            <ChevronDown size={14} className="text-gray-400" />
+          )}
         </div>
-      </header>
-      {args && (
-        <p className="mt-1.5 truncate font-mono text-[11px] text-gray-500">
-          {args}
-        </p>
-      )}
-      {activity.error && (
-        <p className="mt-1.5 text-[12px] text-red-600">{activity.error}</p>
+      </button>
+
+      {expanded && (
+        <div
+          id={contentId}
+          className="border-t border-gray-100 px-3 py-2.5"
+        >
+          <div className="mb-2">
+            <h4 className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+              Args
+            </h4>
+            <pre className="max-h-40 overflow-auto rounded bg-gray-50 p-2 font-mono text-[11px] leading-relaxed text-gray-800">
+              {JSON.stringify(activity.args, null, 2)}
+            </pre>
+          </div>
+
+          {activity.status === "running" && (
+            <p className="text-[12px] text-gray-500">
+              Waiting for result…
+            </p>
+          )}
+
+          {activity.status === "done" && activity.result !== undefined && (
+            <div>
+              <h4 className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                Result
+              </h4>
+              <pre className="max-h-64 overflow-auto rounded bg-gray-50 p-2 font-mono text-[11px] leading-relaxed text-gray-800 whitespace-pre-wrap break-words">
+                {formatResult(activity.result)}
+              </pre>
+            </div>
+          )}
+
+          {activity.status === "error" && activity.error && (
+            <div>
+              <h4 className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-red-600">
+                Error
+              </h4>
+              <p className="text-[12px] text-red-700">{activity.error}</p>
+            </div>
+          )}
+        </div>
       )}
     </article>
   );
+}
+
+function formatResult(result: unknown): string {
+  if (typeof result === "string") {
+    // If it parses as JSON, pretty-print; else show raw.
+    try {
+      const parsed = JSON.parse(result);
+      return JSON.stringify(parsed, null, 2);
+    } catch {
+      return result;
+    }
+  }
+  try {
+    return JSON.stringify(result, null, 2);
+  } catch {
+    return String(result);
+  }
 }
 
 function StatusBadge({
