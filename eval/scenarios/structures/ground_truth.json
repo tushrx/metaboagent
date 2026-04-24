@@ -1,0 +1,122 @@
+{
+  "1060": {
+    "canonical_smiles": "CC(=O)C(=O)O",
+    "difficulty": "medium",
+    "image": "1060_pyruvate.png",
+    "name": "pyruvate"
+  },
+  "1183": {
+    "canonical_smiles": "COC1=C(C=CC(=C1)C=O)O",
+    "difficulty": "medium",
+    "image": "1183_vanillin.png",
+    "name": "vanillin"
+  },
+  "12560": {
+    "canonical_smiles": "CCC1C(C(C(C(=O)C(CC(C(C(C(C(C(=O)O1)C)OC2CC(C(C(O2)C)O)(C)OC)C)OC3C(C(CC(O3)C)N(C)C)O)(C)O)C)C)O)(C)O",
+    "difficulty": "very_hard",
+    "image": "12560_erythromycin.png",
+    "name": "erythromycin"
+  },
+  "2244": {
+    "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+    "difficulty": "simple",
+    "image": "2244_aspirin.png",
+    "name": "aspirin"
+  },
+  "2519": {
+    "canonical_smiles": "CN1C=NC2=C1C(=O)N(C(=O)N2C)C",
+    "difficulty": "simple",
+    "image": "2519_caffeine.png",
+    "name": "caffeine"
+  },
+  "36314": {
+    "canonical_smiles": "CC1=C2C(C(=O)C3(C(CC4C(C3C(C(C2(C)C)(CC1OC(=O)C(C(C5=CC=CC=C5)NC(=O)C6=CC=CC=C6)O)O)OC(=O)C7=CC=CC=C7)(CO4)OC(=O)C)O)C)OC(=O)C",
+    "difficulty": "hard",
+    "image": "36314_taxol.png",
+    "name": "taxol"
+  },
+  "3672": {
+    "canonical_smiles": "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",
+    "difficulty": "medium",
+    "image": "3672_ibuprofen.png",
+    "name": "ibuprofen"
+  },
+  "439230": {
+    "canonical_smiles": "CC(CCO)(CC(=O)O)O",
+    "difficulty": "hard",
+    "image": "439230_mevalonate.png",
+    "name": "mevalonate"
+  },
+  "444493": {
+    "canonical_smiles": "CC(=O)SCCNC(=O)CCNC(=O)C(C(C)(C)COP(=O)(O)OP(=O)(O)OCC1C(C(C(O1)N2C=NC3=C(N=CN=C32)N)O)OP(=O)(O)O)O",
+    "difficulty": "medium",
+    "image": "444493_acetyl_coa.png",
+    "name": "acetyl_coa"
+  },
+  "446925": {
+    "canonical_smiles": "CC(=CCCC(=CC=CC(=CC=CC(=CC=CC=C(C)C=CC=C(C)C=CC=C(C)CCC=C(C)C)C)C)C)C",
+    "difficulty": "hard",
+    "image": "446925_lycopene.png",
+    "name": "lycopene"
+  },
+  "5284616": {
+    "canonical_smiles": "CC1CCC2CC(C(=CC=CC=CC(CC(C(=O)C(C(C(=CC(C(=O)CC(OC(=O)C3CCCCN3C(=O)C(=O)C1(O2)O)C(C)CC4CCC(C(C4)OC)O)C)C)O)OC)C)C)C)OC",
+    "difficulty": "very_hard",
+    "image": "5284616_rapamycin.png",
+    "name": "rapamycin"
+  },
+  "5311498": {
+    "canonical_smiles": "CC1=CC2=C(C=C1C)N(C=N2)C3C(C(C(O3)CO)OP(=O)([O-])OC(C)CNC(=O)CCC4(C(C5C6(C(C(C(=C(C7=NC(=CC8=NC(=C(C4=N5)C)C(C8(C)C)CCC(=O)N)C(C7(C)CC(=O)N)CCC(=O)N)C)[N-]6)CCC(=O)N)(C)CC(=O)N)C)CC(=O)N)C)O.[C-]#N.[Co+3]",
+    "difficulty": "hard",
+    "image": "5311498_coenzyme_b12.png",
+    "name": "coenzyme_b12"
+  },
+  "5793": {
+    "canonical_smiles": "C(C1C(C(C(C(O1)O)O)O)O)O",
+    "difficulty": "simple",
+    "image": "5793_glucose.png",
+    "name": "glucose"
+  },
+  "5957": {
+    "canonical_smiles": "C1=NC(=C2C(=N1)N(C=N2)C3C(C(C(O3)COP(=O)(O)OP(=O)(O)OP(=O)(O)O)O)O)N",
+    "difficulty": "medium",
+    "image": "5957_atp.png",
+    "name": "atp"
+  },
+  "5997": {
+    "canonical_smiles": "CC(C)CCCC(C)C1CCC2C1(CCC3C2CC=C4C3(CCC(C4)O)C)C",
+    "difficulty": "medium",
+    "image": "5997_cholesterol.png",
+    "name": "cholesterol"
+  },
+  "643975": {
+    "canonical_smiles": "CC1=CC2=C(C=C1C)N(C3=NC(=O)NC(=O)C3=N2)CC(C(C(COP(=O)(O)OP(=O)(O)OCC4C(C(C(O4)N5C=NC6=C(N=CN=C65)N)O)O)O)O)O",
+    "difficulty": "hard",
+    "image": "643975_fad.png",
+    "name": "fad"
+  },
+  "68827": {
+    "canonical_smiles": "CC1CCC2C(C(=O)OC3C24C1CCC(O3)(OO4)C)C",
+    "difficulty": "medium",
+    "image": "68827_artemisinin.png",
+    "name": "artemisinin"
+  },
+  "702": {
+    "canonical_smiles": "CCO",
+    "difficulty": "simple",
+    "image": "702_ethanol.png",
+    "name": "ethanol"
+  },
+  "750": {
+    "canonical_smiles": "C(C(=O)O)N",
+    "difficulty": "simple",
+    "image": "750_glycine.png",
+    "name": "glycine"
+  },
+  "925": {
+    "canonical_smiles": "C1=CC(=C[N+](=C1)C2C(C(C(O2)COP(=O)([O-])OP(=O)(O)OCC3C(C(C(O3)N4C=NC5=C(N=CN=C54)N)O)O)O)O)C(=O)N",
+    "difficulty": "medium",
+    "image": "925_nad_plus.png",
+    "name": "nad_plus"
+  }
+}
