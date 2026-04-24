@@ -40,6 +40,8 @@ export async function* streamChat(
 ): AsyncGenerator<AgentEvent, void, void> {
   const { tier = "default", maxIterations, temperature, signal } = options;
 
+  // messages may carry `attachments` (Phase 5.6); JSON.stringify passes
+  // them through verbatim. Backend clamps at ≤3/msg + mime allowlist.
   const body: Record<string, unknown> = { messages, tier };
   if (maxIterations !== undefined) body.max_iterations = maxIterations;
   if (temperature !== undefined) body.temperature = temperature;

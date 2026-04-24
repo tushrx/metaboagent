@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatRequestError, streamChat } from "@/lib/sse";
 import type {
+  Attachment,
   HealthResponse,
   MessageIn,
   Tier,
@@ -10,11 +11,17 @@ import type {
   ToolCallEvent,
 } from "@/lib/api";
 import { extractPathway, type PathwayData } from "@/lib/pathway";
+import {
+  preprocessImage,
+  MAX_FILE_BYTES,
+} from "@/lib/image-preprocess";
+import { MAX_ATTACHMENTS } from "./input-area";
 import { Header } from "./header";
 import { MainPane } from "./main-pane";
 import { EvidenceRail, type EvidenceRailHandle } from "./evidence-rail";
 import { EvidenceDrawer } from "./evidence-drawer";
 import { DemoModeBanner } from "./demo-mode-banner";
+import { ToastProvider, useToast } from "./toast";
 import type { InputAreaHandle } from "./input-area";
 import type { ChatMessage, StreamingState } from "./message-list";
 
@@ -25,15 +32,28 @@ function newId(): string {
 }
 
 function toMessageIn(messages: ChatMessage[]): MessageIn[] {
-  return messages.map((m) => ({ role: m.role, content: m.content }));
+  return messages.map((m) => {
+    const base: MessageIn = { role: m.role, content: m.content };
+    // Only forward attachments whose full-resolution bytes are still
+    // present. After a localStorage restore data_base64 is null — those
+    // messages ride along as text-only context.
+    if (m.attachments && m.attachments.length > 0) {
+      const live = m.attachments.filter(
+        (a): a is Attachment & { data_base64: string } =>
+          typeof a.data_base64 === "string" && a.data_base64.length > 0,
+      );
+      if (live.length > 0) base.attachments = live;
+    }
+    return base;
+  });
 }
 
 /**
- * Persisted shape is just the prose — role, content, id, and the
- * stable-ish error/canceled markers. We deliberately drop toolCalls
- * (bulky, stale by the time a page reloads) and pathway/toolActivity
- * (session-only state). The user gets their message thread back; they
- * don't get every tool result frozen in amber, which would be noise.
+ * Persisted shape is the prose plus small thumbnail previews for any
+ * attachments. We deliberately drop toolCalls (bulky, stale by the
+ * time a page reloads) and pathway/toolActivity (session-only state),
+ * and we null out attachment.data_base64 so a handful of full-resolution
+ * images don't blow past the ~5 MB localStorage budget.
  */
 function loadMessages(): ChatMessage[] {
   if (typeof window === "undefined") return [];
@@ -65,6 +85,15 @@ function saveMessages(messages: ChatMessage[]) {
       content: m.content,
       error: m.error,
       canceled: m.canceled,
+      attachments: m.attachments?.map((a) => ({
+        kind: a.kind,
+        mime_type: a.mime_type,
+        filename: a.filename,
+        // Drop the full-resolution payload on persistence; thumbnails
+        // are enough for history rendering and fit inside localStorage.
+        data_base64: null,
+        thumbnail_base64: a.thumbnail_base64,
+      })),
     }));
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
   } catch {
@@ -73,6 +102,16 @@ function saveMessages(messages: ChatMessage[]) {
 }
 
 export function ChatWorkspace() {
+  return (
+    <ToastProvider>
+      <ChatWorkspaceInner />
+    </ToastProvider>
+  );
+}
+
+function ChatWorkspaceInner() {
+  const toast = useToast();
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState<StreamingState | null>(null);
@@ -81,8 +120,8 @@ export function ChatWorkspace() {
   const [pathway, setPathway] = useState<PathwayData | null>(null);
   const [deepMode, setDeepMode] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
 
-  // Hydrate message history from localStorage on mount.
   const hydratedRef = useRef(false);
   useEffect(() => {
     if (hydratedRef.current) return;
@@ -91,7 +130,6 @@ export function ChatWorkspace() {
     if (saved.length > 0) setMessages(saved);
   }, []);
 
-  // Persist message history on every change (after hydration).
   useEffect(() => {
     if (!hydratedRef.current) return;
     saveMessages(messages);
@@ -103,6 +141,52 @@ export function ChatWorkspace() {
 
   const handleAbort = useCallback(() => {
     abortRef.current?.abort();
+  }, []);
+
+  const handleSelectFiles = useCallback(
+    async (files: File[]) => {
+      const current = pendingAttachments.length;
+      const remaining = MAX_ATTACHMENTS - current;
+      if (remaining <= 0) {
+        toast.push(
+          `Already at the ${MAX_ATTACHMENTS}-image limit for this message.`,
+          "info",
+        );
+        return;
+      }
+      const overflow = files.length > remaining;
+      const take = overflow ? files.slice(0, remaining) : files;
+      if (overflow) {
+        toast.push(
+          `Attached first ${remaining}; 5.6 limits ${MAX_ATTACHMENTS} per message.`,
+          "info",
+        );
+      }
+
+      const results = await Promise.all(take.map((f) => preprocessImage(f)));
+      const accepted: Attachment[] = [];
+      results.forEach((r, i) => {
+        if (r.ok) {
+          accepted.push({
+            kind: "image",
+            mime_type: r.image.mime_type,
+            filename: r.image.filename,
+            data_base64: r.image.data_base64,
+            thumbnail_base64: r.image.thumbnail_base64,
+          });
+        } else {
+          toast.push(`${take[i].name}: ${r.reason}`);
+        }
+      });
+      if (accepted.length > 0) {
+        setPendingAttachments((prev) => [...prev, ...accepted]);
+      }
+    },
+    [pendingAttachments.length, toast],
+  );
+
+  const handleRemoveAttachment = useCallback((index: number) => {
+    setPendingAttachments((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const runChat = useCallback(
@@ -186,10 +270,6 @@ export function ChatWorkspace() {
                     : s,
                 );
               }
-              // Try to extract a pathway from the final answer. Only
-              // replace pathway state if we found at least one step —
-              // otherwise we'd clobber a useful pathway from an earlier
-              // turn with nothing.
               const extracted = extractPathway(
                 accumulatedText,
                 assistantId,
@@ -217,9 +297,6 @@ export function ChatWorkspace() {
         abortRef.current = null;
       }
 
-      // Any tool calls still "running" mean we aborted or errored before
-      // their result arrived — mark them as errored with a "canceled" note
-      // so the rail doesn't keep spinners forever.
       if (wasAborted || errorMessage) {
         setToolActivity((prev) =>
           prev.map((a) =>
@@ -253,29 +330,29 @@ export function ChatWorkspace() {
 
   const handleSubmit = useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed || streaming) return;
+    const attachments = pendingAttachments;
+    if ((!trimmed && attachments.length === 0) || streaming) return;
 
     const userMsg: ChatMessage = {
       id: newId(),
       role: "user",
       content: trimmed,
+      attachments: attachments.length > 0 ? attachments : undefined,
     };
     const assistantId = newId();
     const nextHistory = [...messages, userMsg];
 
     setMessages(nextHistory);
     setInput("");
+    setPendingAttachments([]);
     setLastError(null);
     setStreaming({ id: assistantId, text: "", toolCalls: [] });
 
     await runChat(nextHistory, assistantId, deepMode ? "deep" : "default");
-  }, [input, messages, streaming, runChat, deepMode]);
+  }, [input, messages, pendingAttachments, streaming, runChat, deepMode]);
 
   const handleRetry = useCallback(async () => {
     if (streaming || messages.length === 0) return;
-    // Retry replays the history we already have (last message should be
-    // the canceled/errored assistant turn; the agent re-runs from the
-    // preceding user message).
     setLastError(null);
     const assistantId = newId();
     setStreaming({ id: assistantId, text: "", toolCalls: [] });
@@ -306,6 +383,7 @@ export function ChatWorkspace() {
     setToolActivity([]);
     setPathway(null);
     setLastError(null);
+    setPendingAttachments([]);
     if (typeof window !== "undefined") {
       try {
         window.localStorage.removeItem(STORAGE_KEY);
@@ -339,6 +417,9 @@ export function ChatWorkspace() {
           lastError={lastError}
           inputRef={inputRef}
           onToolCrumbClick={handleToolCrumbClick}
+          attachments={pendingAttachments}
+          onSelectFiles={handleSelectFiles}
+          onRemoveAttachment={handleRemoveAttachment}
         />
         <EvidenceRail
           ref={railRef}
@@ -350,3 +431,6 @@ export function ChatWorkspace() {
     </div>
   );
 }
+
+// Re-export for modules that only want the raw limit constant.
+export { MAX_FILE_BYTES };

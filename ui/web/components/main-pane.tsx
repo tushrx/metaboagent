@@ -8,6 +8,7 @@ import { InputArea, type InputAreaHandle } from "./input-area";
 import { SuggestedPrompts } from "./suggested-prompts";
 import { Footer } from "./footer";
 import type { Ref } from "react";
+import type { Attachment } from "@/lib/api";
 
 const BOTTOM_THRESHOLD_PX = 40;
 
@@ -23,6 +24,9 @@ interface Props {
   lastError: string | null;
   inputRef: Ref<InputAreaHandle>;
   onToolCrumbClick?: (toolCallId: string) => void;
+  attachments: Attachment[];
+  onSelectFiles: (files: File[]) => void;
+  onRemoveAttachment: (index: number) => void;
 }
 
 export function MainPane({
@@ -37,6 +41,9 @@ export function MainPane({
   lastError,
   inputRef,
   onToolCrumbClick,
+  attachments,
+  onSelectFiles,
+  onRemoveAttachment,
 }: Props) {
   const isEmpty = messages.length === 0 && !streaming;
 
@@ -136,6 +143,9 @@ export function MainPane({
         onSubmit={onSubmit}
         onAbort={onAbort}
         streaming={!!streaming}
+        attachments={attachments}
+        onSelectFiles={onSelectFiles}
+        onRemoveAttachment={onRemoveAttachment}
       />
       <Footer />
     </section>
