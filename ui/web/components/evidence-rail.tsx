@@ -18,6 +18,8 @@ import {
   extractCitations,
   groupCitations,
 } from "@/lib/citations";
+import type { PathwayData } from "@/lib/pathway";
+import { PathwayDiagram } from "./pathway-diagram";
 
 export interface EvidenceRailHandle {
   /** Scroll a specific tool-activity card into view. */
@@ -26,12 +28,13 @@ export interface EvidenceRailHandle {
 
 interface Props {
   toolActivity: ToolActivity[];
+  pathway: PathwayData | null;
   /** If true, the rail is inside the mobile drawer; skip the desktop-only hide. */
   embedded?: boolean;
 }
 
 export const EvidenceRail = forwardRef<EvidenceRailHandle, Props>(
-  function EvidenceRail({ toolActivity, embedded = false }, ref) {
+  function EvidenceRail({ toolActivity, pathway, embedded = false }, ref) {
     const listRef = useRef<HTMLOListElement>(null);
 
     useImperativeHandle(ref, () => ({
@@ -66,7 +69,7 @@ export const EvidenceRail = forwardRef<EvidenceRailHandle, Props>(
         <div className="flex-1 overflow-y-auto">
           <ToolsRunSection toolActivity={toolActivity} listRef={listRef} />
           <CitationsSection citations={citations} />
-          <PathwaySection />
+          <PathwaySection pathway={pathway} />
         </div>
       </aside>
     );
@@ -361,17 +364,20 @@ function hostOf(url: string): string {
   }
 }
 
-// --- Pathway (Phase 5.4) -------------------------------------------------
+// --- Pathway -------------------------------------------------------------
 
-function PathwaySection() {
+function PathwaySection({ pathway }: { pathway: PathwayData | null }) {
   return (
     <section className="px-4 py-3">
-      <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-        Pathway
-      </h3>
-      <p className="text-sm text-gray-400">
-        Pathway visualization arrives in 5.4 when the agent emits pathway steps.
-      </p>
+      <header className="mb-2 flex items-center justify-between">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+          Pathway
+        </h3>
+        <span className="text-[11px] text-gray-400">
+          {pathway && pathway.steps.length > 0 ? pathway.steps.length : null}
+        </span>
+      </header>
+      <PathwayDiagram pathway={pathway} />
     </section>
   );
 }

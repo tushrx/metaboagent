@@ -4,10 +4,12 @@ import { Layers, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { ToolActivity } from "@/lib/api";
 import { extractCitations } from "@/lib/citations";
+import type { PathwayData } from "@/lib/pathway";
 import { EvidenceRail } from "./evidence-rail";
 
 interface Props {
   toolActivity: ToolActivity[];
+  pathway: PathwayData | null;
 }
 
 /**
@@ -16,7 +18,7 @@ interface Props {
  * holding the same EvidenceRail content. The desktop rail is always
  * visible at lg+; this drawer is the narrow-viewport equivalent.
  */
-export function EvidenceDrawer({ toolActivity }: Props) {
+export function EvidenceDrawer({ toolActivity, pathway }: Props) {
   const [open, setOpen] = useState(false);
   const citationCount = extractCitations(toolActivity).length;
   const badgeCount = toolActivity.length + citationCount;
@@ -83,7 +85,11 @@ export function EvidenceDrawer({ toolActivity }: Props) {
           </button>
         </header>
         <div className="flex-1 overflow-hidden">
-          <EvidenceRail toolActivity={toolActivity} embedded />
+          <EvidenceRail
+            toolActivity={toolActivity}
+            pathway={pathway}
+            embedded
+          />
         </div>
       </div>
     </>

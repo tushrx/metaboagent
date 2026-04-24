@@ -7,6 +7,7 @@ import type {
   ToolActivity,
   ToolCallEvent,
 } from "@/lib/api";
+import { extractPathway, type PathwayData } from "@/lib/pathway";
 import { MainPane } from "./main-pane";
 import { EvidenceRail, type EvidenceRailHandle } from "./evidence-rail";
 import { EvidenceDrawer } from "./evidence-drawer";
@@ -27,6 +28,7 @@ export function ChatWorkspace() {
   const [streaming, setStreaming] = useState<StreamingState | null>(null);
   const [lastError, setLastError] = useState<string | null>(null);
   const [toolActivity, setToolActivity] = useState<ToolActivity[]>([]);
+  const [pathway, setPathway] = useState<PathwayData | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
   const inputRef = useRef<InputAreaHandle | null>(null);
@@ -104,7 +106,7 @@ export function ChatWorkspace() {
                 ),
               );
               break;
-            case "final_answer":
+            case "final_answer": {
               if (
                 ev.content &&
                 ev.content.length > accumulatedText.length
@@ -116,7 +118,17 @@ export function ChatWorkspace() {
                     : s,
                 );
               }
+              // Try to extract a pathway from the final answer. Only
+              // replace pathway state if we found at least one step —
+              // otherwise we'd clobber a useful pathway from an earlier
+              // turn with nothing.
+              const extracted = extractPathway(
+                accumulatedText,
+                assistantId,
+              );
+              if (extracted.steps.length > 0) setPathway(extracted);
               break;
+            }
             case "error":
               errorMessage = `${ev.where}: ${ev.message}`;
               break;
@@ -226,8 +238,12 @@ export function ChatWorkspace() {
         inputRef={inputRef}
         onToolCrumbClick={handleToolCrumbClick}
       />
-      <EvidenceRail ref={railRef} toolActivity={toolActivity} />
-      <EvidenceDrawer toolActivity={toolActivity} />
+      <EvidenceRail
+        ref={railRef}
+        toolActivity={toolActivity}
+        pathway={pathway}
+      />
+      <EvidenceDrawer toolActivity={toolActivity} pathway={pathway} />
     </div>
   );
 }
