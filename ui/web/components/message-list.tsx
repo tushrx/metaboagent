@@ -3,7 +3,6 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Wrench, AlertCircle, XCircle } from "lucide-react";
-import { useEffect, useRef } from "react";
 import type { ToolCallEvent } from "@/lib/api";
 
 export interface ChatMessage {
@@ -31,13 +30,8 @@ interface Props {
 }
 
 export function MessageList({ messages, streaming, onToolCrumbClick }: Props) {
-  const bottomRef = useRef<HTMLDivElement | null>(null);
-
-  // Autoscroll on new messages or as tokens arrive.
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
-  }, [messages.length, streaming?.text.length, streaming?.toolCalls.length]);
-
+  // Scroll control lives in the MainPane parent now — it owns the
+  // scrollable viewport. We just render content.
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-8">
       {messages.map((m) => (
@@ -46,7 +40,6 @@ export function MessageList({ messages, streaming, onToolCrumbClick }: Props) {
       {streaming && (
         <StreamingRow state={streaming} onToolCrumbClick={onToolCrumbClick} />
       )}
-      <div ref={bottomRef} />
     </div>
   );
 }
