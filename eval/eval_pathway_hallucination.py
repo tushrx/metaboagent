@@ -53,6 +53,10 @@ KEGG_TIMEOUT_S = 10.0
 RID_RE = re.compile(r"\bR\d{5}\b")
 EC_RE = re.compile(r"\bEC\s?(\d+\.\d+\.\d+\.\d+)\b")
 PLAN_BLOCK_RE = re.compile(r"<plan>\s*(.*?)\s*</plan>", re.DOTALL | re.IGNORECASE)
+# "Step 1:", optionally markdown-bold-wrapped ("**Step 1:**") at line start.
+STEP_LINE_RE = re.compile(r"(?im)^\s*\**\s*Step\s+\d+\s*[:.]")
+# Marker for Phase 6.5.c's nudge thinking event.
+_NUDGE_MARKER = "Empty completion detected"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -172,6 +176,11 @@ async def _drain_turn(messages_payload: list[Any], max_iterations: int) -> dict[
     # run_agent reports its own ms; fall back to wallclock if zero.
     if not duration_ms:
         duration_ms = elapsed_ms
+    nudge_count = sum(
+        1 for ev in events
+        if ev.get("type") == "thinking"
+        and _NUDGE_MARKER in (ev.get("content") or "")
+    )
     return {
         "events": events,
         "final_answer": final_answer,
@@ -179,6 +188,7 @@ async def _drain_turn(messages_payload: list[Any], max_iterations: int) -> dict[
         "tokens_out": tokens_out,
         "duration_ms": duration_ms,
         "iterations": iterations,
+        "nudge_count": nudge_count,
     }
 
 
@@ -213,6 +223,9 @@ async def _run_one(prompt_spec: dict, max_iterations: int) -> dict[str, Any]:
         "phase2_tokens_out": 0,
         "phase2_duration_ms": 0,
         "phase2_iterations": 0,
+        "phase1_nudge_count": phase1.get("nudge_count", 0),
+        "phase2_nudge_count": 0,
+        "step_convention_ok": False,
         "rids": [],
         "ecs": [],
         "status": "ok",  # ok | plan_parse_failed | no_ids_emitted
@@ -244,6 +257,10 @@ async def _run_one(prompt_spec: dict, max_iterations: int) -> dict[str, Any]:
     row["phase2_tokens_out"] = phase2["tokens_out"]
     row["phase2_duration_ms"] = phase2["duration_ms"]
     row["phase2_iterations"] = phase2["iterations"]
+    row["phase2_nudge_count"] = phase2.get("nudge_count", 0)
+    row["step_convention_ok"] = bool(
+        STEP_LINE_RE.search(phase2["final_answer"] or "")
+    )
 
     rids, ecs = _extract_ids(phase2["final_answer"])
     log.info("[%s]   phase2 extracted: %d R-IDs, %d ECs", pid, len(rids), len(ecs))
@@ -306,6 +323,16 @@ def _aggregate(per_prompt: list[dict]) -> dict[str, Any]:
     total_e = sum(len(r["ecs"]) for r in per_prompt)
     total_e_bad = sum(1 for r in per_prompt for x in r["ecs"] if not x["verified"])
 
+    total_nudges = sum(
+        r.get("phase1_nudge_count", 0) + r.get("phase2_nudge_count", 0)
+        for r in per_prompt
+    )
+    prompts_with_nudge = sum(
+        1 for r in per_prompt
+        if (r.get("phase1_nudge_count", 0) + r.get("phase2_nudge_count", 0)) > 0
+    )
+    step_convention_ok = sum(1 for r in per_prompt if r.get("step_convention_ok"))
+
     return {
         "phase1_stats": {
             "total_tokens_in": p1_tokens_in,
@@ -320,6 +347,7 @@ def _aggregate(per_prompt: list[dict]) -> dict[str, Any]:
             "avg_duration_ms": p2_avg_ms,
             "phase2_runs": len(p2_eligible),
             "no_ids_emitted": no_ids_emitted,
+            "step_convention_ok": step_convention_ok,
         },
         "pathway_accuracy": {
             "total_rids_extracted": total_r,
@@ -328,6 +356,10 @@ def _aggregate(per_prompt: list[dict]) -> dict[str, Any]:
             "total_ecs_extracted": total_e,
             "total_ecs_hallucinated": total_e_bad,
             "ec_hallucination_rate_pct": round(100.0 * total_e_bad / total_e, 1) if total_e else 0.0,
+        },
+        "nudge_stats": {
+            "total_nudges_fired": total_nudges,
+            "prompts_with_nudge": prompts_with_nudge,
         },
     }
 
@@ -376,15 +408,26 @@ def _print_summary(agg: dict, per_prompt: list[dict]) -> None:
             1,
         )
     print(f"Overall: {overall_rate}%   →  band: {_threshold_band(overall_rate)}")
+    ns = agg.get("nudge_stats", {})
+    print(
+        f"Nudges fired: {ns.get('total_nudges_fired', 0)}"
+        f"  (across {ns.get('prompts_with_nudge', 0)} prompt(s))"
+    )
+    print(
+        f"Step convention adherence: {agg['phase2_stats'].get('step_convention_ok', 0)}"
+        f" / {agg['phase2_stats'].get('phase2_runs', 0)} phase-2 runs"
+    )
     print()
     print("Per prompt:")
     for row in per_prompt:
         r_bad = sum(1 for r in row["rids"] if not r["verified"])
         e_bad = sum(1 for e in row["ecs"] if not e["verified"])
+        nudge_tot = row.get("phase1_nudge_count", 0) + row.get("phase2_nudge_count", 0)
+        step_ok = "Y" if row.get("step_convention_ok") else "N"
         print(
             f"  {row['id']:<22} status={row['status']:<20}"
-            f" plan_ids={row['phase1_plan_ids']!s:<30}"
-            f" followup={row['followup_sent']!r:<8}"
+            f" step={step_ok}"
+            f" nudges={nudge_tot}"
             f" rids={r_bad}/{len(row['rids'])}"
             f" ecs={e_bad}/{len(row['ecs'])}"
         )
