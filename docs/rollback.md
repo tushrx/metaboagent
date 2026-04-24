@@ -107,6 +107,9 @@ After the Phase 1 commits (including `phase1: lazy-validate PRIMARY_LLM_API_KEY`
 
 - Firewall `:8000` / `:8001` / `:8002` to 127.0.0.1 + LAN CIDR only. Not done yet.
 - vLLM streaming doesn't surface usage_metadata through LangChain at v0.19.0. `tokens_in` / `tokens_out` report as 0 in `Event{type=done}`. Affects eval harness (Phase 8) metrics. Workaround: non-streaming usage probe after stream, or local tokenization. Not blocking Phase 3.
+- npm audit: 4 high-severity advisories in Next 14 transitive deps. Address before public deploy via Next 15 upgrade or `npm audit fix --force` with regression testing.
+- `ui/web/public/favicon.ico` is a 32×32 PNG renamed. Replace with a true ICO via `png-to-ico` before public deploy if perfectionism matters.
+- `ui/static/branding/` and `ui/web/public/branding/` hold duplicate source files. Add a sync script in 5.5 polish if drift becomes a concern.
 
 ---
 

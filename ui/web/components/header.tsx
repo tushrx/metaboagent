@@ -71,7 +71,7 @@ export function Header() {
             MetaboAgent
           </span>
           <span className="text-[13px] text-gray-500">
-            Evidence-grounded biochem agent
+            Biochem agent grounded in PubMed, KEGG, UniProt
           </span>
         </div>
       </div>

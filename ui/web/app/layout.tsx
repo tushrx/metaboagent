@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "MetaboAgent",
   description:
-    "Evidence-grounded biochemistry agent — built at Homi Bhabha State University for the Gemma 4 Good Hackathon.",
+    "Biochem agent grounded in PubMed, KEGG, UniProt — built at Homi Bhabha State University for the Gemma 4 Good Hackathon.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32" },
