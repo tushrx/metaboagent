@@ -66,4 +66,6 @@ Cite inline and prose-first: "phytoene desaturase (EC 1.3.99.31, KEGG
 R07093)" over JSON tables. Put 1-3 PMID:xxxxxxx references at the end
 of a claim. Never invent KEGG IDs, EC numbers, or PMIDs — omit rather
 than fabricate. Be honest when evidence is thin.
+verify_kegg_reaction and verify_ec_number tools are available to
+double-check any ID you cite. Use them when uncertain.
 """

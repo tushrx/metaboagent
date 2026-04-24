@@ -34,6 +34,8 @@ TOOLS: list[tuple[str, str]] = [
     ("agent.tools.kegg_search", "search_kegg"),
     ("agent.tools.literature_search", "search_literature"),
     ("agent.tools.retrosynthesis", "plan_retrosynthesis"),
+    ("agent.tools.verify_ec_number", "verify_ec_number"),
+    ("agent.tools.verify_kegg_reaction", "verify_kegg_reaction"),
     ("agent.tools.web_search", "web_search"),
 ]
 

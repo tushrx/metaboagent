@@ -46,6 +46,8 @@ from agent.tools.kegg_search import search_kegg
 from agent.tools.literature_search import search_literature
 from agent.tools.parse_structure_image import parse_structure_image
 from agent.tools.retrosynthesis import plan_retrosynthesis
+from agent.tools.verify_ec_number import verify_ec_number
+from agent.tools.verify_kegg_reaction import verify_kegg_reaction
 from agent.tools.web_search import web_search
 
 _DEFAULT_MAX_ITERATIONS = 8
@@ -54,14 +56,15 @@ logger = logging.getLogger(__name__)
 
 
 def build_tool_registry() -> dict[str, BaseTool]:
-    """Return a {name → BaseTool} mapping of the agent's tools (16 as of
-    Phase 6.2: the original 15 plus parse_structure_image for vision)."""
+    """Return a {name → BaseTool} mapping of the agent's tools (18 as
+    of Phase 6.5.a: the original 15 + parse_structure_image (Phase 6.2)
+    + verify_kegg_reaction / verify_ec_number (Phase 6.5.a insurance))."""
     tools: list[BaseTool] = [
         compare_synthesis_routes, design_expression_vector, design_primers,
         rank_enzymes, fetch_gene_sequence, fetch_kegg_live, fetch_pubchem,
         fetch_pubmed_live, fetch_sabio_rk, fetch_uniprot, fetch_zinc,
         search_kegg, search_literature, parse_structure_image,
-        plan_retrosynthesis, web_search,
+        plan_retrosynthesis, verify_ec_number, verify_kegg_reaction, web_search,
     ]
     return {t.name: t for t in tools}
 
