@@ -62,6 +62,16 @@ def _fetch_synonyms(cid: int, max_syn: int = 6) -> list[str]:
 def fetch_pubchem(compound_name_or_cid: str) -> str:
     """Fetch compound data from PubChem (PUG REST) in real time.
 
+    Call this tool when the user references a PubChem CID ("CID 2244"),
+    a ChEBI identifier ("CHEBI:15365"), an InChIKey, or explicitly asks
+    to "look up", "fetch", or "pull" a compound from PubChem/ChEBI.
+    PubChem entries carry ChEBI and KEGG cross-references, so this is
+    also the right entry point for ChEBI:\\d+ queries until a dedicated
+    ChEBI tool lands. Do NOT call this for plain factual questions
+    about a well-known compound ("what is the formula of aspirin?") —
+    answer those from knowledge. Only ground in PubChem when the user
+    signals they want the database record.
+
     Args:
         compound_name_or_cid: Compound name (e.g., "lycopene") or numeric
             PubChem CID (e.g., "446925").

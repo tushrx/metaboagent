@@ -7,6 +7,11 @@ CIDs, ChEBI IDs, InChI/InChIKey, molecular formulas) into **canonical**
 every identifier + synonym we found across sources", not "a blessed ID from
 a single database".
 
+Call paths into this module should be triggered whenever the user
+references a CHEBI:\\d+ identifier or asks to "look up" a molecule by
+any structured ID — the resolver stitches KEGG + PubChem + (eventual)
+ChEBI into one canonical record rather than answering from memory.
+
 Design goals (anchored in ``codex_rag_design.md`` §3, §11):
 
 1. **Layered tiers, explicit strategies** — Tier 1 exact-ID lookups run
