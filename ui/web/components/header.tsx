@@ -88,7 +88,7 @@ export function Header({
   };
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-5">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-3 sm:px-5">
       <div className="flex min-w-0 items-center gap-3">
         <Image
           src="/branding/hbsu.png"
@@ -99,23 +99,26 @@ export function Header({
           title="Team from Homi Bhabha State University, Mumbai"
           className="shrink-0 rounded"
         />
-        <div className="flex flex-col leading-tight">
+        <div className="hidden min-w-0 flex-col leading-tight sm:flex">
           <span className="text-[17px] font-semibold tracking-tight text-gray-900">
             MetaboAgent
           </span>
-          <span className="text-[13px] text-gray-500">
+          <span className="truncate text-[13px] text-gray-500">
             Biochem agent grounded in PubMed, KEGG, UniProt
           </span>
         </div>
+        <span className="truncate text-[15px] font-semibold text-gray-900 sm:hidden">
+          MetaboAgent
+        </span>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-4">
         <div
           className="flex items-center gap-2"
           title={statusLabel(status, health)}
         >
           <StatusDot status={status} label={statusLabel(status, health)} />
-          <span className="text-sm text-gray-600">Backend</span>
+          <span className="hidden text-sm text-gray-600 sm:inline">Backend</span>
         </div>
 
         <div className="relative flex items-center">
@@ -132,7 +135,7 @@ export function Header({
             }
             className="flex items-center gap-2 focus:outline-none"
           >
-            <span className="text-sm text-gray-600">Deep mode</span>
+            <span className="hidden text-sm text-gray-600 sm:inline">Deep mode</span>
             <span
               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
                 deepMode ? "bg-blue-600" : "bg-gray-200"
