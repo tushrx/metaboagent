@@ -11,6 +11,7 @@ final_answer. See CLAUDE.md §4 for the full event schema.
 from __future__ import annotations
 
 import json
+import logging
 import time
 from typing import Any, AsyncIterator
 
@@ -47,6 +48,8 @@ from agent.tools.retrosynthesis import plan_retrosynthesis
 from agent.tools.web_search import web_search
 
 _DEFAULT_MAX_ITERATIONS = 8
+
+logger = logging.getLogger(__name__)
 
 
 def build_tool_registry() -> dict[str, BaseTool]:
@@ -178,7 +181,7 @@ async def run_agent(
 def _history_from_messages(messages: list[BaseMessage]) -> History:
     """Drop any incoming SystemMessage (we inject our own) and replay into History."""
     h = History()
-    for m in messages:
+    for i, m in enumerate(messages):
         if isinstance(m, HumanMessage):
             h.add_user_turn(m.content)
         elif isinstance(m, AIMessage):
@@ -192,6 +195,11 @@ def _history_from_messages(messages: list[BaseMessage]) -> History:
                 is_error=getattr(m, "status", "success") == "error",
             )
         elif isinstance(m, SystemMessage):
+            logger.warning(
+                "run_agent received SystemMessage at position %d; "
+                "dropped in favor of PRIMARY_SYSTEM_PROMPT",
+                i,
+            )
             continue
     return h
 
