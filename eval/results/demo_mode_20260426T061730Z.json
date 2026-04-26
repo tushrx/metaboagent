@@ -1,0 +1,99 @@
+{
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "by_category": {
+      "live_with_fallback": {
+        "total": 3,
+        "passed": 3
+      },
+      "live_no_fallback": {
+        "total": 1,
+        "passed": 1
+      },
+      "no_tool": {
+        "total": 1,
+        "passed": 1
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "Q1_pubmed_lycopene",
+      "prompt": "Search PubMed for recent papers on lycopene biosynthesis in E. coli.",
+      "category": "live_with_fallback",
+      "passed": true,
+      "tool_calls": [
+        "fetch_pubmed_live",
+        "search_literature"
+      ],
+      "iterations": 3,
+      "duration_ms": 8416,
+      "final_answer": "Based on a search of the literature, while I found several papers on metabolic engineering in *E. coli* and other hosts (like *Yarrowia lipolytica*), the specific, recent literature directly detailing **lycopene biosynthesis in *E. coli*** is not immediately prominent in the top results. The search returned papers on carotenoid synthesis in other yeasts and general metabolic engineering in *E. coli*.\n\nTo give you the most accurate and actionable information, I recommend we pivot to a design-focused approach. Since you are interested in lycopene, we can look at the established biosynthetic pathway and propose a synthetic biology plan.\n\nWould you like me to:\n\n1.  **Search for the established lycopene biosynthetic pathway** (using KEGG/literature) to see what enzymes are required?\n2.  **Propose a synthetic route** to produce lycopene in *E. coli* (Phase 1 of the synthesis protocol)?\n3.  **Look up specific enzymes** related to carotenoid synthesis?",
+      "notes": [
+        "indexed fallback invoked: ['search_literature']"
+      ]
+    },
+    {
+      "id": "Q2_kegg_compound",
+      "prompt": "Look up KEGG compound C00022.",
+      "category": "live_with_fallback",
+      "passed": true,
+      "tool_calls": [
+        "fetch_kegg_live",
+        "search_kegg"
+      ],
+      "iterations": 3,
+      "duration_ms": 3440,
+      "final_answer": "Pyruvate (C00022) is a central metabolic intermediate with the chemical formula $\\text{C}_3\\text{H}_4\\text{O}_3$. It is involved in a vast number of biochemical pathways, including glycolysis, the TCA cycle, and various anabolic processes.\n\nIt is featured in over 50 different KEGG pathways, such as map00010 (Glycolysis/Gluconeogenesis) and map00100 (TCA cycle).\n\nWould you like to know more about its role in a specific pathway, or perhaps look up a reaction involving it?",
+      "notes": [
+        "indexed fallback invoked: ['search_kegg']"
+      ]
+    },
+    {
+      "id": "Q3_uniprot_p05067",
+      "prompt": "Get the UniProt entry for P05067.",
+      "category": "live_with_fallback",
+      "passed": true,
+      "tool_calls": [
+        "fetch_uniprot",
+        "search_literature"
+      ],
+      "iterations": 3,
+      "duration_ms": 2467,
+      "final_answer": "The UniProt entry for P05067 is not directly available in the live database due to demo mode limitations. However, a search of the indexed literature associated with this identifier points to **KEGG Pathway map07041: Antineoplastics - antimetabolic agents**.\n\nWould you like me to search for more specific literature on this pathway, or perhaps look up the function of the protein associated with this accession in a different context?",
+      "notes": [
+        "indexed fallback invoked: ['search_literature']"
+      ]
+    },
+    {
+      "id": "Q4_zinc_aspirin",
+      "prompt": "Search ZINC15 for aspirin analogs.",
+      "category": "live_no_fallback",
+      "passed": true,
+      "tool_calls": [
+        "fetch_zinc"
+      ],
+      "iterations": 2,
+      "duration_ms": 1643,
+      "final_answer": "I apologize, but the live lookup in ZINC15 is currently unavailable in this demo mode environment. I cannot pull real-time commercial availability or vendor information for aspirin analogs.\n\nIf you'd like, I can search the literature for studies on aspirin analogs, or I can look up the chemical structure of aspirin itself if you have a specific identifier!",
+      "notes": [
+        "honest demo-mode admission present"
+      ]
+    },
+    {
+      "id": "Q5_glucose_formula",
+      "prompt": "What is the molecular formula of glucose?",
+      "category": "no_tool",
+      "passed": true,
+      "tool_calls": [],
+      "iterations": 1,
+      "duration_ms": 1288,
+      "final_answer": "Glucose has the molecular formula $\\text{C}_6\\text{H}_{12}\\text{O}_6$.\n\nSince this is a very fundamental chemical property, I can provide it directly without needing to query a database.\n\nWould you like to know more about glucose's metabolism, such as its role in glycolysis or how it's synthesized in a specific organism?",
+      "notes": [
+        "zero tool calls as expected"
+      ]
+    }
+  ]
+}
