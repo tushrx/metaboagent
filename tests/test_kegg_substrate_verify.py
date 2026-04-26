@@ -235,3 +235,21 @@ def test_verify_reaction_substrate_reverse_direction(monkeypatch):
     out = verify_reaction_substrate("R00000", "acetyl-CoA", "citrate")
     # Direction-lenient — both compounds present, verdict fully_matches.
     assert out["verdict"] == "fully_matches"
+
+
+def test_verify_reaction_substrate_accepts_name_lists(monkeypatch):
+    """Step lines can have multi-substrate sides ('A + B -> C').
+    The resolver runs over each name and the matcher unions the C-IDs.
+    """
+    # R00351 stored direction: citrate <=> acetyl-CoA + oxaloacetate + CoA
+    _patch_lookup(monkeypatch, "C00158 + C00010 <=> C00024 + C00001 + C00036")
+    out = verify_reaction_substrate(
+        "R00351",
+        ["acetyl-CoA", "oxaloacetate"],   # multi-substrate step
+        ["citrate"],
+    )
+    assert out["verdict"] == "fully_matches"
+    # Both substrate names should resolve into claimed_substrate_ids
+    assert "C00024" in out["claimed_substrate_ids"]
+    assert "C00036" in out["claimed_substrate_ids"]
+    assert out["claimed_product_ids"] == ["C00158"]

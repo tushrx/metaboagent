@@ -313,8 +313,8 @@ def _classify_substrate_match(
 
 def verify_reaction_substrate(
     reaction_id: str,
-    claimed_substrate: str,
-    claimed_product: str,
+    claimed_substrate: str | list[str],
+    claimed_product: str | list[str],
     *,
     client: httpx.Client | None = None,
     sleep_after: bool = True,
@@ -323,25 +323,31 @@ def verify_reaction_substrate(
     """Verify whether the agent's claimed (substrate, product) pair is
     consistent with the KEGG reaction's chemistry.
 
+    Both ``claimed_substrate`` and ``claimed_product`` accept either a
+    single name or a list of names — step lines like
+    ``acetyl-CoA + oxaloacetate -> citrate`` have multiple substrates,
+    and resolving each individually lets the matcher work against the
+    union of their KEGG IDs.
+
     Returns a dict with:
       - ``rid_exists``        — did the R-ID resolve in KEGG?
-      - ``substrate_matches`` — claimed substrate appears in equation?
-      - ``product_matches``   — claimed product appears in equation?
-      - ``substrate_resolved``— did the resolver find any C-ID for the
-                                claimed substrate name?
-      - ``product_resolved``  — same for the claimed product
+      - ``substrate_matches`` — any claimed substrate appears in equation?
+      - ``product_matches``   — any claimed product appears in equation?
+      - ``substrate_resolved``— did the resolver find any C-ID for at
+                                least one claimed substrate name?
+      - ``product_resolved``  — same for the claimed product side
       - ``kegg_substrates``   — LHS compounds (raw KEGG storage order)
       - ``kegg_products``     — RHS compounds
       - ``claimed_substrate_ids`` / ``claimed_product_ids`` — resolved
-                                C-IDs the matcher used
+                                C-IDs the matcher used (deduped, ordered)
       - ``verdict`` — one of {"rid_invalid", "fully_matches",
                               "substrate_only", "product_only",
                               "neither"}
 
     A ``"neither"`` verdict can mean either (a) the reaction's chemistry
     is unrelated to the claimed pair (the real-but-wrong-enzyme failure
-    mode this verifier targets) or (b) one or both names didn't
-    resolve. Callers distinguish via the ``substrate_resolved`` /
+    mode this verifier targets) or (b) the names didn't resolve.
+    Callers distinguish via the ``substrate_resolved`` /
     ``product_resolved`` fields.
 
     Direction-lenient by design — see ``_classify_substrate_match``.
@@ -368,18 +374,26 @@ def verify_reaction_substrate(
             "verdict": "rid_invalid",
         }
 
-    substrate_ids = resolve_compound_name(
-        claimed_substrate,
-        client=client,
-        sleep_after=sleep_after,
-        use_remote_fallback=use_remote_resolver,
-    )
-    product_ids = resolve_compound_name(
-        claimed_product,
-        client=client,
-        sleep_after=sleep_after,
-        use_remote_fallback=use_remote_resolver,
-    )
+    sub_names = [claimed_substrate] if isinstance(claimed_substrate, str) else list(claimed_substrate)
+    prod_names = [claimed_product] if isinstance(claimed_product, str) else list(claimed_product)
+
+    def _resolve_each(names: list[str]) -> list[str]:
+        out: list[str] = []
+        seen: set[str] = set()
+        for name in names:
+            for cid in resolve_compound_name(
+                name,
+                client=client,
+                sleep_after=sleep_after,
+                use_remote_fallback=use_remote_resolver,
+            ):
+                if cid not in seen:
+                    seen.add(cid)
+                    out.append(cid)
+        return out
+
+    substrate_ids = _resolve_each(sub_names)
+    product_ids = _resolve_each(prod_names)
 
     classification = _classify_substrate_match(
         substrate_ids, product_ids,

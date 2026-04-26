@@ -45,6 +45,7 @@ from eval._kegg_verify import (
     KEGG_SLEEP_S,
     verify_ec_number as _kv_verify_ec,
     verify_kegg_reaction_id as _kv_verify_rid,
+    verify_reaction_substrate,
 )
 from eval._runner import drain_agent_turn, timestamp_utc, write_result
 
@@ -85,6 +86,109 @@ _INSUFFICIENT_EVIDENCE_MARKERS = (
 # Silent-giveup threshold: any meaningful design explanation will be
 # well above this in non-whitespace characters.
 _SILENT_GIVEUP_MAX_CHARS = 50
+
+
+# Phase 8.3.B — step-block parsing for substrate-relevance checks.
+# A "step block" is a Step N: line plus everything until the next Step
+# line. The head of the step ("Step N: A + B → C") gives us the
+# substrate names (lhs of arrow) and product names (rhs); the body
+# carries any cited R-IDs / EC numbers we want to substrate-check.
+_STEP_HEAD_RE = re.compile(
+    r"^\s*(?:\*\*)?\s*(?:Step\s+)?(\d+)[.):]\s*(.*?)\s*(?:\*\*)?\s*$",
+    re.IGNORECASE,
+)
+_ARROW_RE = re.compile(r"\s*(?:->|→|=>)\s*")
+_PLUS_SPLIT_RE = re.compile(r"\s+\+\s+")
+
+
+def _clean_compound_token(s: str) -> str:
+    s = s.strip()
+    s = re.sub(r"\([^)]*\)$", "", s).strip()
+    s = s.rstrip(":,;.")
+    s = s.strip().strip("*").strip("`").strip("_").strip()
+    return s
+
+
+def _parse_arrow_chemistry(head: str) -> tuple[list[str], list[str]]:
+    """From 'A + B → C' return (['A', 'B'], ['C']).
+
+    Empty lists when no arrow is present — caller should treat the step
+    as ineligible for substrate-relevance checking and fall back to
+    existence-only verification.
+    """
+    m = _ARROW_RE.search(head)
+    if not m:
+        return [], []
+    lhs = head[: m.start()]
+    rhs = head[m.end():]
+    lhs = re.sub(r"\([^)]*\)$", "", lhs).strip()
+    rhs = re.sub(r"\([^)]*\)$", "", rhs).strip()
+    sub_names = [_clean_compound_token(p) for p in _PLUS_SPLIT_RE.split(lhs) if p.strip()]
+    prod_names = [_clean_compound_token(p) for p in _PLUS_SPLIT_RE.split(rhs) if p.strip()]
+    return [s for s in sub_names if s], [p for p in prod_names if p]
+
+
+def _parse_step_blocks(text: str) -> list[dict[str, Any]]:
+    """Split a phase-2 answer into step blocks.
+
+    Each block is::
+
+        {
+          step_num: int,
+          step_head: str,            # text after the "Step N:" marker
+          substrate_names: list[str],
+          product_names: list[str],
+          rids: list[str],           # R-IDs found in the block body
+          ecs: list[str],            # EC numbers found in the block body
+          body: str,                 # the block as raw text
+        }
+
+    Blocks are returned in source order. A non-arrow step head yields
+    empty substrate / product lists; downstream verification handles
+    the missing-context case explicitly.
+    """
+    if not text:
+        return []
+    lines = text.splitlines()
+    starts: list[tuple[int, int, str]] = []
+    for i, line in enumerate(lines):
+        m = _STEP_HEAD_RE.match(line)
+        if not m:
+            continue
+        # Reuse STEP_LINE_RE-style guard: anchor must be a digit at line
+        # start. _STEP_HEAD_RE already enforces this.
+        starts.append((i, int(m.group(1)), m.group(2).strip()))
+    blocks: list[dict[str, Any]] = []
+    for k, (start_i, step_num, head) in enumerate(starts):
+        end_i = starts[k + 1][0] if k + 1 < len(starts) else len(lines)
+        body = "\n".join(lines[start_i:end_i])
+        sub_names, prod_names = _parse_arrow_chemistry(head)
+        rids: list[str] = []
+        for r in RID_RE.findall(body):
+            if r not in rids:
+                rids.append(r)
+        ecs: list[str] = []
+        for e in EC_RE.findall(body):
+            if e not in ecs:
+                ecs.append(e)
+        blocks.append({
+            "step_num": step_num,
+            "step_head": head,
+            "substrate_names": sub_names,
+            "product_names": prod_names,
+            "rids": rids,
+            "ecs": ecs,
+            "body": body,
+        })
+    return blocks
+
+
+def _block_for_rid(rid: str, blocks: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Return the first step block whose body contains the given R-ID."""
+    for b in blocks:
+        if rid in b["body"]:
+            return b
+    return None
 
 
 def _classify_no_ids_reason(text: str) -> str:
@@ -296,16 +400,55 @@ async def _run_one(prompt_spec: dict, max_iterations: int) -> dict[str, Any]:
         return row
 
     final = phase2["final_answer"]
+    step_blocks = _parse_step_blocks(final)
     rid_rows: list[dict] = []
     ec_rows: list[dict] = []
     with httpx.Client(headers={"User-Agent": "MetaboAgent-eval/1.0"}) as client:
         for rid in rids:
-            exists = _verify_kegg_id(client, "rid", rid)
-            rid_rows.append({
-                "id": rid,
-                "verified": exists,
-                "context": _context_snippet(final, rid),
-            })
+            block = _block_for_rid(rid, step_blocks)
+            if block and block["substrate_names"] and block["product_names"]:
+                result = verify_reaction_substrate(
+                    rid,
+                    block["substrate_names"],
+                    block["product_names"],
+                    client=client,
+                    sleep_after=False,
+                )
+                rid_rows.append({
+                    "id": rid,
+                    "verified": result["rid_exists"],
+                    "step_num": block["step_num"],
+                    "claimed_substrates": block["substrate_names"],
+                    "claimed_products": block["product_names"],
+                    "substrate_matches": result["substrate_matches"],
+                    "product_matches": result["product_matches"],
+                    "substrate_resolved": result["substrate_resolved"],
+                    "product_resolved": result["product_resolved"],
+                    "kegg_substrates": result["kegg_substrates"],
+                    "kegg_products": result["kegg_products"],
+                    "verdict": result["verdict"],
+                    "context": _context_snippet(final, rid),
+                })
+            else:
+                # No usable step context — keep existence-only check
+                # and tag verdict so aggregates can exclude this row
+                # from substrate-relevance rates.
+                exists = _verify_kegg_id(client, "rid", rid)
+                rid_rows.append({
+                    "id": rid,
+                    "verified": exists,
+                    "step_num": block["step_num"] if block else None,
+                    "claimed_substrates": [],
+                    "claimed_products": [],
+                    "substrate_matches": False,
+                    "product_matches": False,
+                    "substrate_resolved": False,
+                    "product_resolved": False,
+                    "kegg_substrates": [],
+                    "kegg_products": [],
+                    "verdict": "no_step_context",
+                    "context": _context_snippet(final, rid),
+                })
             time.sleep(KEGG_SLEEP_S)
         for ec in ecs:
             exists = _verify_kegg_id(client, "ec", ec)
@@ -321,9 +464,18 @@ async def _run_one(prompt_spec: dict, max_iterations: int) -> dict[str, Any]:
     row["ecs"] = ec_rows
     r_bad = sum(1 for r in rid_rows if not r["verified"])
     e_bad = sum(1 for e in ec_rows if not e["verified"])
+    fully = sum(1 for r in rid_rows if r.get("verdict") == "fully_matches")
+    sub_only = sum(1 for r in rid_rows if r.get("verdict") == "substrate_only")
+    prod_only = sum(1 for r in rid_rows if r.get("verdict") == "product_only")
+    neither_v = sum(1 for r in rid_rows if r.get("verdict") == "neither")
+    no_ctx = sum(1 for r in rid_rows if r.get("verdict") == "no_step_context")
     log.info(
         "[%s]   verified: rids %d hallucinated of %d; ecs %d hallucinated of %d",
         pid, r_bad, len(rid_rows), e_bad, len(ec_rows),
+    )
+    log.info(
+        "[%s]   substrate-relevance: full=%d sub_only=%d prod_only=%d neither=%d no_ctx=%d",
+        pid, fully, sub_only, prod_only, neither_v, no_ctx,
     )
     return row
 
@@ -356,6 +508,49 @@ def _aggregate(per_prompt: list[dict]) -> dict[str, Any]:
     total_r_bad = sum(1 for r in per_prompt for x in r["rids"] if not x["verified"])
     total_e = sum(len(r["ecs"]) for r in per_prompt)
     total_e_bad = sum(1 for r in per_prompt for x in r["ecs"] if not x["verified"])
+
+    # Substrate-relevance rollup (Phase 8.3.B). Only RIDs with a parsed
+    # step block (verdict in the {fully, substrate_only, product_only,
+    # neither} set) count toward the rates — RIDs cited outside any
+    # step block are tagged "no_step_context" and excluded.
+    eligible_rids = [
+        x for r in per_prompt for x in r["rids"]
+        if x.get("verdict") in {
+            "fully_matches", "substrate_only", "product_only", "neither", "rid_invalid",
+        }
+    ]
+    no_step_ctx = sum(
+        1 for r in per_prompt for x in r["rids"]
+        if x.get("verdict") == "no_step_context"
+    )
+    fully_matching = sum(1 for x in eligible_rids if x["verdict"] == "fully_matches")
+    substrate_only = sum(1 for x in eligible_rids if x["verdict"] == "substrate_only")
+    product_only = sum(1 for x in eligible_rids if x["verdict"] == "product_only")
+    neither_v = sum(1 for x in eligible_rids if x["verdict"] == "neither")
+    rid_invalid = sum(1 for x in eligible_rids if x["verdict"] == "rid_invalid")
+    substrate_relevant = fully_matching + substrate_only
+    existence_verified_eligible = sum(1 for x in eligible_rids if x["verified"])
+    real_but_wrong = existence_verified_eligible - fully_matching
+
+    def _pct(n, d):
+        return round(100.0 * n / d, 1) if d else 0.0
+
+    rid_substrate_relevance = {
+        "rids_extracted_total": total_r,
+        "rids_eligible_for_substrate_check": len(eligible_rids),
+        "rids_no_step_context": no_step_ctx,
+        "rids_existence_verified_eligible": existence_verified_eligible,
+        "rids_fully_matching": fully_matching,
+        "rids_substrate_only": substrate_only,
+        "rids_product_only": product_only,
+        "rids_neither": neither_v,
+        "rids_rid_invalid": rid_invalid,
+        "rids_substrate_relevant": substrate_relevant,
+        "rids_real_but_wrong": real_but_wrong,
+        "rids_fully_matching_pct": _pct(fully_matching, len(eligible_rids)),
+        "rids_substrate_relevant_pct": _pct(substrate_relevant, len(eligible_rids)),
+        "rids_real_but_wrong_pct": _pct(real_but_wrong, existence_verified_eligible),
+    }
 
     total_nudges = sum(
         r.get("phase1_nudge_count", 0) + r.get("phase2_nudge_count", 0)
@@ -396,6 +591,7 @@ def _aggregate(per_prompt: list[dict]) -> dict[str, Any]:
             "total_ecs_hallucinated": total_e_bad,
             "ec_hallucination_rate_pct": round(100.0 * total_e_bad / total_e, 1) if total_e else 0.0,
         },
+        "rid_substrate_relevance": rid_substrate_relevance,
         "nudge_stats": {
             "total_nudges_fired": total_nudges,
             "prompts_with_nudge": prompts_with_nudge,
@@ -451,6 +647,28 @@ def _print_summary(agg: dict, per_prompt: list[dict]) -> None:
             1,
         )
     print(f"Overall: {overall_rate}%   →  band: {_threshold_band(overall_rate)}")
+    sr = agg.get("rid_substrate_relevance", {})
+    if sr:
+        print()
+        print("Substrate-relevance (Phase 8.3.B):")
+        print(
+            f"  RIDs extracted: {sr['rids_extracted_total']}  "
+            f"eligible (had step context): {sr['rids_eligible_for_substrate_check']}  "
+            f"no-step-context: {sr['rids_no_step_context']}"
+        )
+        print(
+            f"  Verdicts: full={sr['rids_fully_matching']}  "
+            f"sub_only={sr['rids_substrate_only']}  "
+            f"prod_only={sr['rids_product_only']}  "
+            f"neither={sr['rids_neither']}  "
+            f"rid_invalid={sr['rids_rid_invalid']}"
+        )
+        print(
+            f"  Fully matching: {sr['rids_fully_matching_pct']}%  "
+            f"Substrate-relevant: {sr['rids_substrate_relevant_pct']}%  "
+            f"Real-but-wrong: {sr['rids_real_but_wrong_pct']}% "
+            f"({sr['rids_real_but_wrong']}/{sr['rids_existence_verified_eligible']} verified eligible)"
+        )
     ns = agg.get("nudge_stats", {})
     print(
         f"Nudges fired: {ns.get('total_nudges_fired', 0)}"
@@ -546,6 +764,7 @@ def main() -> int:
         "phase1_stats": agg["phase1_stats"],
         "phase2_stats": agg["phase2_stats"],
         "pathway_accuracy": agg["pathway_accuracy"],
+        "rid_substrate_relevance": agg.get("rid_substrate_relevance", {}),
         "per_prompt": per_prompt,
     }
     out_path = write_result(
