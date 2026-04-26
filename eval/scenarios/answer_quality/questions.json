@@ -1,0 +1,88 @@
+[
+  {
+    "id": "Q1_acetyl_coa_tca",
+    "question_type": "mechanism",
+    "question": "Explain the role of acetyl-CoA in the TCA cycle. What is the first reaction it participates in?",
+    "tier": "default",
+    "rubric": [
+      {"point": "States the first reaction is condensation with oxaloacetate", "weight": 1},
+      {"point": "Names citrate (or citric acid) as the product of that condensation", "weight": 1},
+      {"point": "Identifies citrate synthase as the catalyzing enzyme", "weight": 1},
+      {"point": "Mentions the cycle generates reduced cofactors (NADH and/or FADH2) and CO2", "weight": 1},
+      {"point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)", "weight": 1}
+    ],
+    "max_score": 5
+  },
+  {
+    "id": "Q2_nadh_etc",
+    "question_type": "mechanism",
+    "question": "How does NADH get re-oxidized in the electron transport chain?",
+    "tier": "default",
+    "rubric": [
+      {"point": "States NADH donates electrons to Complex I (NADH dehydrogenase / NADH:ubiquinone oxidoreductase)", "weight": 1},
+      {"point": "Mentions O2 as the terminal electron acceptor (water as the product)", "weight": 1},
+      {"point": "Mentions proton pumping across the inner mitochondrial membrane to establish a gradient", "weight": 1},
+      {"point": "Mentions ATP synthase coupling the proton gradient to ATP production", "weight": 1},
+      {"point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)", "weight": 1}
+    ],
+    "max_score": 5
+  },
+  {
+    "id": "Q3_resveratrol_ecoli",
+    "question_type": "pathway_design",
+    "question": "What enzymes would you express in E. coli to produce resveratrol from tyrosine?",
+    "tier": "deep",
+    "rubric": [
+      {"point": "Names tyrosine ammonia-lyase (TAL) as the first enzyme", "weight": 1},
+      {"point": "Names 4-coumaric acid (or p-coumarate) as the TAL product", "weight": 1},
+      {"point": "Names 4-coumarate-CoA ligase (4CL) as the second enzyme", "weight": 1},
+      {"point": "Names stilbene synthase (STS) as producing resveratrol", "weight": 1},
+      {"point": "Mentions malonyl-CoA as a co-substrate for STS (3 units required)", "weight": 1},
+      {"point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)", "weight": 1}
+    ],
+    "max_score": 6
+  },
+  {
+    "id": "Q4_lycopene_bottleneck",
+    "question_type": "pathway_design",
+    "question": "What's the main bottleneck in heterologous lycopene biosynthesis in microbes?",
+    "tier": "deep",
+    "rubric": [
+      {"point": "Identifies precursor supply (IPP/DMAPP from MEP or MVA pathway, or FPP/GGPP) as a key bottleneck", "weight": 1},
+      {"point": "Names at least one carotenogenic enzyme (CrtE/GGPP synthase, CrtB/phytoene synthase, or CrtI/phytoene desaturase)", "weight": 1},
+      {"point": "Mentions a downstream constraint such as redox/cofactor balance (NADPH), membrane storage capacity, or competing flux", "weight": 1},
+      {"point": "Connects the bottleneck to an engineering strategy (overexpression, fusion, push-pull, or knockout of competing pathways)", "weight": 1},
+      {"point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)", "weight": 1}
+    ],
+    "max_score": 5
+  },
+  {
+    "id": "Q5_mep_vs_mva",
+    "question_type": "comparison",
+    "question": "Compare the MEP and MVA pathways for isoprenoid precursor production. Which microbes use which?",
+    "tier": "deep",
+    "rubric": [
+      {"point": "Names MEP starting materials (glyceraldehyde-3-phosphate + pyruvate) or identifies it as the non-mevalonate / DXP pathway", "weight": 1},
+      {"point": "Names MVA starting material (acetyl-CoA) or identifies it as the mevalonate pathway", "weight": 1},
+      {"point": "Identifies bacteria (or specifically E. coli, plant plastids) as MEP users", "weight": 1},
+      {"point": "Identifies yeast (or animals, archaea, plant cytosol) as MVA users", "weight": 1},
+      {"point": "States both pathways converge on IPP/DMAPP as the universal isoprenoid precursor", "weight": 1},
+      {"point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)", "weight": 1}
+    ],
+    "max_score": 6
+  },
+  {
+    "id": "Q6_kegg_c00022",
+    "question_type": "lookup",
+    "question": "What does KEGG compound C00022 refer to and what pathways is it central to?",
+    "tier": "default",
+    "rubric": [
+      {"point": "Names the compound as pyruvate (or pyruvic acid)", "weight": 1},
+      {"point": "Mentions glycolysis as a central pathway", "weight": 1},
+      {"point": "Mentions the TCA cycle, acetyl-CoA bridge (pyruvate dehydrogenase), or citric acid cycle linkage", "weight": 1},
+      {"point": "Mentions at least one of: gluconeogenesis, amino acid metabolism (alanine), fermentation, or anaplerotic reactions", "weight": 1},
+      {"point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)", "weight": 1}
+    ],
+    "max_score": 5
+  }
+]
