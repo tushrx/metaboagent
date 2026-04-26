@@ -25,6 +25,7 @@ import re
 
 from langchain_core.tools import tool
 
+from agent.tools._demo import is_demo_mode, stub as demo_stub
 from agent.tools._http import get_json, get_text, make_session
 from config import PUBMED_BASE_URL  # same E-utilities host
 from vectorstore.live_indexer import VectorDocument, index_documents, pick_collection
@@ -91,6 +92,9 @@ def fetch_gene_sequence(gene_or_accession: str, organism: str = "") -> str:
     q = (gene_or_accession or "").strip()
     if not q:
         return json.dumps({"error": "empty query"})
+    if is_demo_mode():
+        return demo_stub("fetch_gene_sequence",
+                         gene_or_accession=q, organism=organism)
 
     # Step 1 — resolve to an accession if the caller gave a gene symbol.
     if _looks_like_accession(q):

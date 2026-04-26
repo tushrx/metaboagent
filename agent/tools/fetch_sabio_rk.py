@@ -21,6 +21,7 @@ from typing import Optional
 
 from langchain_core.tools import tool
 
+from agent.tools._demo import is_demo_mode, stub as demo_stub
 from agent.tools._http import get_text, make_session
 from vectorstore.live_indexer import VectorDocument, index_documents, pick_collection
 
@@ -61,6 +62,9 @@ def fetch_sabio_rk(ec_number: str, organism: str = "", max_results: int = 15) ->
     ec = (ec_number or "").strip()
     if not ec:
         return json.dumps({"error": "ec_number required"})
+    if is_demo_mode():
+        return demo_stub("fetch_sabio_rk", fallback="search_literature",
+                         ec_number=ec, organism=organism, max_results=int(max_results))
 
     params = {
         "q": _build_query(ec, organism or None),

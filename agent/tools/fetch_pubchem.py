@@ -16,6 +16,7 @@ from typing import Optional
 
 from langchain_core.tools import tool
 
+from agent.tools._demo import is_demo_mode, stub as demo_stub
 from agent.tools._http import get_json, make_session
 from vectorstore.live_indexer import VectorDocument, index_documents, pick_collection
 
@@ -85,6 +86,8 @@ def fetch_pubchem(compound_name_or_cid: str) -> str:
     q = (compound_name_or_cid or "").strip()
     if not q:
         return json.dumps({"error": "empty query"})
+    if is_demo_mode():
+        return demo_stub("fetch_pubchem", compound_name_or_cid=q)
 
     cid = _resolve_cid(q)
     if cid is None:

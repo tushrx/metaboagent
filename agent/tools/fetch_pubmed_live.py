@@ -17,6 +17,7 @@ import xml.etree.ElementTree as ET
 
 from langchain_core.tools import tool
 
+from agent.tools._demo import is_demo_mode, stub as demo_stub
 from agent.tools._http import get_json, get_text, make_session
 from config import PUBMED_BASE_URL
 from vectorstore.live_indexer import VectorDocument, index_documents, pick_collection
@@ -95,6 +96,9 @@ def fetch_pubmed_live(query: str, max_results: int = 10) -> str:
     q = (query or "").strip()
     if not q:
         return json.dumps({"error": "empty query"})
+    if is_demo_mode():
+        return demo_stub("fetch_pubmed_live", fallback="search_literature",
+                         query=q, max_results=int(max_results))
     cap = min(50, max(1, int(max_results)))
 
     # esearch → PMIDs
