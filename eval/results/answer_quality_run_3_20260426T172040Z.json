@@ -1,0 +1,119 @@
+{
+  "timestamp_utc": "20260426T172040Z",
+  "judge_model": "google/gemma-4-26B-A4B-it",
+  "n_questions": 6,
+  "per_question": [
+    {
+      "id": "Q1_acetyl_coa_tca",
+      "score": 4,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "judge_notes": "The answer uses 'R00001' as a placeholder for a reaction ID and 'PMID:N/A' as a placeholder for a PubMed ID."
+    },
+    {
+      "id": "Q2_nadh_etc",
+      "score": 5,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer covers all required biochemical steps and does not contain any fabricated IDs."
+    },
+    {
+      "id": "Q3_resveratrol_ecoli",
+      "score": 6,
+      "max": 6,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies all enzymes, intermediates, and co-substrates required for the pathway."
+    },
+    {
+      "id": "Q4_lycopene_bottleneck",
+      "score": 4,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies precursor supply (GGPP) and the enzyme PSY as bottlenecks, mentions engineering strategies (push-pull, overexpression), and does not mention redox/cofactor balance or membrane storage. No fake IDs were used."
+    },
+    {
+      "id": "Q5_mep_vs_mva",
+      "score": 6,
+      "max": 6,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies the substrates, the microbial distribution, the convergence on IPP/DMAPP, and contains no fabricated IDs."
+    },
+    {
+      "id": "Q6_kegg_c00022",
+      "score": 5,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies pyruvate, lists glycolysis, the TCA cycle, and gluconeogenesis/amino acid metabolism, and uses real KEGG map IDs."
+    }
+  ],
+  "aggregate": {
+    "total_score": 30,
+    "max_score": 32,
+    "pct": 93.8,
+    "parse_failures": 0
+  },
+  "by_question_type": {
+    "mechanism": {
+      "score": 9,
+      "max": 10,
+      "n": 2,
+      "pct": 90.0
+    },
+    "pathway_design": {
+      "score": 10,
+      "max": 11,
+      "n": 2,
+      "pct": 90.9
+    },
+    "comparison": {
+      "score": 6,
+      "max": 6,
+      "n": 1,
+      "pct": 100.0
+    },
+    "lookup": {
+      "score": 5,
+      "max": 5,
+      "n": 1,
+      "pct": 100.0
+    }
+  }
+}

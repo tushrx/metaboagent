@@ -1,0 +1,119 @@
+{
+  "timestamp_utc": "20260426T171906Z",
+  "judge_model": "google/gemma-4-26B-A4B-it",
+  "n_questions": 6,
+  "per_question": [
+    {
+      "id": "Q1_acetyl_coa_tca",
+      "score": 5,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer covers all points, including the generation of NADH and FADH2. No IDs were fabricated."
+    },
+    {
+      "id": "Q2_nadh_etc",
+      "score": 5,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer covers all required biochemical steps and does not contain any fabricated IDs."
+    },
+    {
+      "id": "Q3_resveratrol_ecoli",
+      "score": 5,
+      "max": 6,
+      "rubric_breakdown": [
+        true,
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies TAL, 4CL, and STS, and mentions malonyl-CoA. However, it identifies the product of TAL as trans-cinnamic acid, whereas the rubric specifically asks for 4-coumaric acid (p-coumarate). Note: In the actual biological pathway, TAL produces cinnamic acid, which is then hydroxylated to p-coumaric acid before 4CL acts on it; the agent's pathway skips the hydroxylase step, but the rubric specifically asks if it names p-coumarate as the TAL product."
+    },
+    {
+      "id": "Q4_lycopene_bottleneck",
+      "score": 4,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "judge_notes": "The answer identifies precursor supply (GGPP), names the key enzyme (PSY), mentions membrane/toxicity constraints, but does not propose an engineering strategy (it asks if the user wants one). No fake IDs were used."
+    },
+    {
+      "id": "Q5_mep_vs_mva",
+      "score": 6,
+      "max": 6,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer covers all rubric points accurately and contains no fabricated IDs."
+    },
+    {
+      "id": "Q6_kegg_c00022",
+      "score": 5,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies pyruvate, lists glycolysis, the TCA cycle, and both gluconeogenesis and alanine metabolism. All KEGG map IDs provided are real."
+    }
+  ],
+  "aggregate": {
+    "total_score": 30,
+    "max_score": 32,
+    "pct": 93.8,
+    "parse_failures": 0
+  },
+  "by_question_type": {
+    "mechanism": {
+      "score": 10,
+      "max": 10,
+      "n": 2,
+      "pct": 100.0
+    },
+    "pathway_design": {
+      "score": 9,
+      "max": 11,
+      "n": 2,
+      "pct": 81.8
+    },
+    "comparison": {
+      "score": 6,
+      "max": 6,
+      "n": 1,
+      "pct": 100.0
+    },
+    "lookup": {
+      "score": 5,
+      "max": 5,
+      "n": 1,
+      "pct": 100.0
+    }
+  }
+}

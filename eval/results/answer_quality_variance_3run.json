@@ -1,0 +1,234 @@
+{
+  "kind": "answer_quality_variance_3run",
+  "judge_model": "google/gemma-4-26B-A4B-it",
+  "n_questions": 6,
+  "max_score": 32,
+  "runs": [
+    {
+      "path": "answer_quality_run_1_20260426T171906Z.json",
+      "timestamp_utc": "20260426T171906Z",
+      "total_score": 30,
+      "pct": 93.8
+    },
+    {
+      "path": "answer_quality_run_2_20260426T171952Z.json",
+      "timestamp_utc": "20260426T171952Z",
+      "total_score": 31,
+      "pct": 96.9
+    },
+    {
+      "path": "answer_quality_run_3_20260426T172040Z.json",
+      "timestamp_utc": "20260426T172040Z",
+      "total_score": 30,
+      "pct": 93.8
+    }
+  ],
+  "aggregate": {
+    "totals_per_run": [
+      30,
+      31,
+      30
+    ],
+    "pcts_per_run": [
+      93.8,
+      96.9,
+      93.8
+    ],
+    "min": 30,
+    "median": 30,
+    "max": 31,
+    "min_pct": 93.8,
+    "median_pct": 93.8,
+    "max_pct": 96.9
+  },
+  "by_question_type": {
+    "mechanism": {
+      "per_run_scores": [
+        10,
+        9,
+        9
+      ],
+      "max": 10,
+      "stable": false
+    },
+    "pathway_design": {
+      "per_run_scores": [
+        9,
+        11,
+        10
+      ],
+      "max": 11,
+      "stable": false
+    },
+    "comparison": {
+      "per_run_scores": [
+        6,
+        6,
+        6
+      ],
+      "max": 6,
+      "stable": true
+    },
+    "lookup": {
+      "per_run_scores": [
+        5,
+        5,
+        5
+      ],
+      "max": 5,
+      "stable": true
+    }
+  },
+  "per_question": [
+    {
+      "id": "Q1_acetyl_coa_tca",
+      "type": "mechanism",
+      "scores_per_run": [
+        5,
+        4,
+        4
+      ],
+      "max": 5,
+      "flips": [
+        {
+          "point_idx": 4,
+          "point": "Mentions the cycle generates reduced cofactors (NADH and/or FADH2) and CO2",
+          "values_per_run": [
+            true,
+            false,
+            true
+          ]
+        },
+        {
+          "point_idx": 5,
+          "point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)",
+          "values_per_run": [
+            true,
+            true,
+            false
+          ]
+        }
+      ],
+      "fabrication_check_per_run": [
+        true,
+        true,
+        false
+      ],
+      "fabrication_failed_in_any_run": true
+    },
+    {
+      "id": "Q2_nadh_etc",
+      "type": "mechanism",
+      "scores_per_run": [
+        5,
+        5,
+        5
+      ],
+      "max": 5,
+      "flips": [],
+      "fabrication_check_per_run": [
+        true,
+        true,
+        true
+      ],
+      "fabrication_failed_in_any_run": false
+    },
+    {
+      "id": "Q3_resveratrol_ecoli",
+      "type": "pathway_design",
+      "scores_per_run": [
+        5,
+        6,
+        6
+      ],
+      "max": 6,
+      "flips": [
+        {
+          "point_idx": 2,
+          "point": "Names 4-coumaric acid (or p-coumarate) as the TAL product",
+          "values_per_run": [
+            false,
+            true,
+            true
+          ]
+        }
+      ],
+      "fabrication_check_per_run": [
+        true,
+        true,
+        true
+      ],
+      "fabrication_failed_in_any_run": false
+    },
+    {
+      "id": "Q4_lycopene_bottleneck",
+      "type": "pathway_design",
+      "scores_per_run": [
+        4,
+        5,
+        4
+      ],
+      "max": 5,
+      "flips": [
+        {
+          "point_idx": 3,
+          "point": "Mentions a downstream constraint such as redox/cofactor balance (NADPH), membrane storage capacity, or competing flux",
+          "values_per_run": [
+            true,
+            true,
+            false
+          ]
+        },
+        {
+          "point_idx": 4,
+          "point": "Connects the bottleneck to an engineering strategy (overexpression, fusion, push-pull, or knockout of competing pathways)",
+          "values_per_run": [
+            false,
+            true,
+            true
+          ]
+        }
+      ],
+      "fabrication_check_per_run": [
+        true,
+        true,
+        true
+      ],
+      "fabrication_failed_in_any_run": false
+    },
+    {
+      "id": "Q5_mep_vs_mva",
+      "type": "comparison",
+      "scores_per_run": [
+        6,
+        6,
+        6
+      ],
+      "max": 6,
+      "flips": [],
+      "fabrication_check_per_run": [
+        true,
+        true,
+        true
+      ],
+      "fabrication_failed_in_any_run": false
+    },
+    {
+      "id": "Q6_kegg_c00022",
+      "type": "lookup",
+      "scores_per_run": [
+        5,
+        5,
+        5
+      ],
+      "max": 5,
+      "flips": [],
+      "fabrication_check_per_run": [
+        true,
+        true,
+        true
+      ],
+      "fabrication_failed_in_any_run": false
+    }
+  ]
+}
