@@ -8,6 +8,11 @@ The "duplication" findings in §4 were resolved by 8.2; the table in §1
 still describes the eval semantics, which are unchanged. See §7 for the
 8.2 outcomes summary.
 
+For per-eval scoring methodology (judge model, rubric design, variance,
+known limitations), see `docs/eval-methodology.md`. The inventory says
+*what* each eval measures; the methodology doc says *how* and what the
+measurements can and cannot tell us.
+
 ---
 
 ## 1. Eval entrypoints
