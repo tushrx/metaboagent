@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import logging
 import os
 import sys
@@ -106,6 +107,31 @@ def _tool_call_names(events: list[dict[str, Any]]) -> list[str]:
     return [ev["name"] for ev in events if ev.get("type") == "tool_call"]
 
 
+def _first_tool_result_content(events: list[dict[str, Any]]) -> dict | None:
+    """Return the parsed content of the first tool_result event, or None.
+
+    Tools return JSON strings; this parses them so the caller can inspect
+    the payload (e.g. to distinguish a real cached result from a demo
+    stub via the absence of a ``demo_mode`` marker).
+    """
+    first_call = next((ev for ev in events if ev.get("type") == "tool_call"), None)
+    if first_call is None:
+        return None
+    call_id = first_call.get("id")
+    for ev in events:
+        if ev.get("type") == "tool_result" and ev.get("id") == call_id:
+            content = ev.get("content")
+            if isinstance(content, dict):
+                return content
+            if isinstance(content, str):
+                try:
+                    return json.loads(content)
+                except json.JSONDecodeError:
+                    return None
+            return None
+    return None
+
+
 def _classify(query: dict[str, Any], drained: dict[str, Any]) -> dict[str, Any]:
     """Apply per-category assertions and return a result row."""
     tool_names = _tool_call_names(drained["events"])
@@ -115,8 +141,12 @@ def _classify(query: dict[str, Any], drained: dict[str, Any]) -> dict[str, Any]:
     passed = False
 
     if cat == "live_with_fallback":
-        # First call must be the live-fetch tool, then at least one
-        # indexed-corpus search tool AFTER it.
+        # Two valid paths to PASS:
+        #   (a) cache-hit: live-fetch tool returned a real cached payload
+        #       (no "demo_mode": true marker). Phase 7.3 wired this in.
+        #   (b) cache-miss + fallback: live-fetch returned a demo stub,
+        #       and at least one indexed-corpus search tool was called
+        #       after it.
         if not tool_names:
             notes.append("no tool calls at all")
         else:
@@ -126,18 +156,29 @@ def _classify(query: dict[str, Any], drained: dict[str, Any]) -> dict[str, Any]:
                     f"first tool was {first!r}, expected "
                     f"{query['expected_initial_tool']!r}"
                 )
-            indexed_after_first = [
-                n for n in tool_names[1:] if n in INDEXED_FALLBACK_TOOLS
-            ]
-            if indexed_after_first:
+
+            first_content = _first_tool_result_content(drained["events"])
+            cache_hit = (
+                isinstance(first_content, dict)
+                and not first_content.get("demo_mode")
+            )
+
+            if cache_hit:
                 passed = True
-                notes.append(
-                    f"indexed fallback invoked: {indexed_after_first}"
-                )
+                notes.append("live-fetch returned a real cached result (cache-hit path)")
             else:
-                notes.append(
-                    "no indexed-corpus tool invoked after live-fetch stub"
-                )
+                indexed_after_first = [
+                    n for n in tool_names[1:] if n in INDEXED_FALLBACK_TOOLS
+                ]
+                if indexed_after_first:
+                    passed = True
+                    notes.append(
+                        f"indexed fallback invoked: {indexed_after_first}"
+                    )
+                else:
+                    notes.append(
+                        "neither cache-hit nor indexed-corpus fallback after live-fetch stub"
+                    )
 
     elif cat == "live_no_fallback":
         # Must not falsely claim corpus sourcing. Final answer must
