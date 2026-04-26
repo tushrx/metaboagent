@@ -1,8 +1,12 @@
-# Eval Inventory & Gap Analysis (Phase 8.1)
+# Eval Inventory & Gap Analysis (Phase 8.1, updated for 8.2)
 
 Snapshot of every eval entrypoint, scenario set, and result file in the
-repo as of 2026-04-26 (commits up to `bdbfa4c` on `v2-rebuild`). Used to
+repo as of 2026-04-26 (commits up to `7663127` on `v2-rebuild`). Used to
 plan the 8.2 unification and 8.3 answer-quality rubric.
+
+The "duplication" findings in §4 were resolved by 8.2; the table in §1
+still describes the eval semantics, which are unchanged. See §7 for the
+8.2 outcomes summary.
 
 ---
 
@@ -117,3 +121,37 @@ eval/
 - The pathway eval's two-turn driver. Demo-mode and answer-quality are single-turn; pathway is two-turn by nature; squashing them into one shape would make every consumer pay for the rare case.
 
 **Validation plan for 8.2:** after refactor, re-run `eval_demo_mode` and `eval_pathway_hallucination`; results must be byte-identical (modulo the timestamp field) to the most recent baseline JSONs already in `eval/results/`. That confirms the consolidation is purely structural.
+
+---
+
+## 7. 8.2 outcomes (post-refactor)
+
+Five commits landed (`8d17995 → 4cefe89` on `v2-rebuild`). Net delta:
+- Eval scripts: 1099 → 1033 lines (−66, deduplicated)
+- New shared modules: 124 + 219 = 343 lines (`_runner.py`, `_kegg_verify.py`)
+- The +277 net lines buy reusable infrastructure for 8.3's rubric eval and substrate-relevance work.
+
+### Duplication entries — status
+
+| Item from §4 | Status |
+|---|---|
+| `_drain_turn` (pathway) and `_drain` (demo_mode) — 90% identical | Resolved. Both now thin wrappers around `eval._runner.drain_agent_turn`. The pathway version retains the Phase-6.5.c nudge counter as a local addition (8 lines). |
+| Three different inline result-file writers | Resolved. All three call `eval._runner.write_result(eval_name, payload, output_path?, ts?)`. The `ts` parameter keeps the filename suffix and the embedded `timestamp_utc` field in lockstep. |
+| `_print_sequence` in `tests/test_agent_e2e.py` | Untouched — low-priority, only used for unittest stdout. |
+| `diagnose_phase1_failures.py` | Untouched per spec — one-shot diagnostic, complete. |
+
+### New shared modules
+
+- **`eval/_runner.py`** — `drain_agent_turn`, `write_result`, `timestamp_utc`. Deliberately not a base class; each eval keeps its own scoring shape.
+- **`eval/_kegg_verify.py`** — `verify_kegg_reaction_id` and `verify_ec_number` returning `{exists, equation, name, ec_numbers}` and `{exists, name, sysname, reactions}`. Mirrors the production `verify_*` tools' regex/parser/cache shape but ignores `DEMO_MODE` (an eval that stubs verification cannot detect fabrication). Designed to be extended in 8.3 for substrate-relevance checks.
+
+### Validation evidence
+
+`eval/results/baseline_8.2_before/` and `eval/results/baseline_8.2_after/` hold paired before/after runs of all three runtime evals:
+- `demo_mode.json` — byte-identical (modulo timestamps and LLM-text fields) before vs after.
+- `pathway_hallucination.json` — structural diff PASS (top-level keys, per_prompt schema, prompt IDs). LLM-driven counts varied across runs (the documented Phase-1 reliability noise).
+- `structure_extraction.json` — same 20 rows, same row schema, same CIDs. Verdict counts moved by one cell (LLM extraction noise).
+
+### Eval-logic followup, found during validation (cleanup landed 7663127)
+
+Re-running `eval_demo_mode` post-7.3 dropped from 5/5 to 3/5: cache integration in 7.3 means `fetch_kegg_live` / `fetch_pubmed_live` now return real cached payloads on hits, so the agent never invokes the indexed-corpus fallback. The original assertion ("indexed-corpus tool was called after the live-fetch stub") was correct for cache-miss but mis-scored cache-hits. Cleanup commit `7663127` adds a second pass condition (the live-fetch returned a real cached result, detected by absence of the `demo_mode` marker in the parsed `tool_result` content). 5/5 restored, all three categories green; both pass paths exercised across Q1–Q3.
