@@ -17,7 +17,7 @@ from typing import Optional
 
 from langchain_core.tools import tool
 
-from agent.tools._demo import is_demo_mode, stub as demo_stub
+from agent.tools._demo import cached_or_stub, is_demo_mode
 from agent.tools._http import get_json, make_session
 from vectorstore.live_indexer import VectorDocument, index_documents, pick_collection
 
@@ -135,8 +135,9 @@ def fetch_uniprot(protein_name_or_ec: str, organism: str = "") -> str:
     if not query:
         return json.dumps({"error": "empty query"})
     if is_demo_mode():
-        return demo_stub("fetch_uniprot", fallback="search_literature",
-                         protein_name_or_ec=protein_name_or_ec, organism=organism)
+        return cached_or_stub("fetch_uniprot", fallback="search_literature",
+                              protein_name_or_ec=protein_name_or_ec,
+                              organism=organism)
 
     params = {"query": query, "format": "json", "size": 5,
               "fields": "accession,protein_name,gene_names,organism_name,ec,length,cc_function,ft_act_site,ft_binding,ft_signal,ft_transmem,xref_kegg,xref_pdb,xref_brenda,sequence"}

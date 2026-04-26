@@ -11,7 +11,7 @@ import logging
 
 from langchain_core.tools import tool
 
-from agent.tools._demo import is_demo_mode, stub as demo_stub
+from agent.tools._demo import cached_or_stub, is_demo_mode
 
 log = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ def web_search(query: str, max_results: int = 5) -> str:
     """
     max_results = max(1, min(int(max_results or 5), 10))
     if is_demo_mode():
-        return demo_stub("web_search", query=query, max_results=max_results)
+        return cached_or_stub("web_search", query=query, max_results=max_results)
     try:
         hits = _run_ddg(query, max_results)
     except Exception as e:  # noqa: BLE001

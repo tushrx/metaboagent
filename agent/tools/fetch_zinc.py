@@ -23,7 +23,7 @@ import re
 
 from langchain_core.tools import tool
 
-from agent.tools._demo import is_demo_mode, stub as demo_stub
+from agent.tools._demo import cached_or_stub, is_demo_mode
 from agent.tools._http import get_json, make_session
 from vectorstore.live_indexer import VectorDocument, index_documents, pick_collection
 
@@ -98,7 +98,7 @@ def fetch_zinc(compound_name_or_zinc_id: str) -> str:
     if not q:
         return json.dumps({"error": "empty query"})
     if is_demo_mode():
-        return demo_stub("fetch_zinc", compound_name_or_zinc_id=q)
+        return cached_or_stub("fetch_zinc", compound_name_or_zinc_id=q)
 
     canonical = _normalize_zinc_id(q)
     if canonical:

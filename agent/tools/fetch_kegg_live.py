@@ -20,7 +20,7 @@ import re
 
 from langchain_core.tools import tool
 
-from agent.tools._demo import is_demo_mode, stub as demo_stub
+from agent.tools._demo import cached_or_stub, is_demo_mode
 from agent.tools._http import get_text, make_session
 from config import COLLECTION_COMPOUNDS, COLLECTION_LITERATURE, COLLECTION_REACTIONS
 from data.ingestion.kegg_parser import parse_entry
@@ -80,7 +80,7 @@ def fetch_kegg_live(entity_id: str) -> str:
     if not q:
         return json.dumps({"error": "empty id"})
     if is_demo_mode():
-        return demo_stub("fetch_kegg_live", fallback="search_kegg", entity_id=q)
+        return cached_or_stub("fetch_kegg_live", fallback="search_kegg", entity_id=q)
     kind, canonical, collection = _classify(q)
 
     text = get_text(_session, f"{_BASE}/{canonical}")
