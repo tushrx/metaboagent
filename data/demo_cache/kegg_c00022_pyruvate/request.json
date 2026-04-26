@@ -1,0 +1,8 @@
+{
+  "id": "kegg_c00022_pyruvate",
+  "category": "lookup",
+  "prompt": "Look up KEGG compound C00022 (pyruvate).",
+  "phase2_followup": null,
+  "expected_tier": "default",
+  "warmed_seconds": 7.12
+}

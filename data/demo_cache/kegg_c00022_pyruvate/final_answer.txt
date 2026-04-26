@@ -1,0 +1,8 @@
+Pyruvate (KEGG ID: C00022) is a central metabolic intermediate with the chemical formula $\text{C}_3\text{H}_4\text{O}_3$ and an exact mass of $88.0160$.
+
+It is a key node in several major metabolic pathways, including:
+*   Glycolysis / Gluconeogenesis (map00010)
+*   Citrate cycle (TCA cycle) (map00020)
+*   Pentose phosphate pathway (map00030)
+
+Would you like to know more about its role in a specific pathway, or perhaps look up a reaction involving pyruvate?

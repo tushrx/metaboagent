@@ -1,0 +1,18 @@
+[
+  {
+    "tool_name": "search_kegg",
+    "args": {
+      "query": "artemisinic acid biosynthesis",
+      "top_k": 1
+    },
+    "result": "{\"query\": \"artemisinic acid biosynthesis\", \"filter\": null, \"hits\": [{\"collection\": \"kegg_reactions\", \"id\": \"R10585\", \"score\": 0.944, \"name\": \"(+)-copaly-diphosphate diphosphate-lyase (cyclizing, miltiradiene-forming)\", \"equation\": \"C11901 <=> C20711 + C00013\", \"ec_numbers\": \"4.2.3.131\", \"pathway_ids\": \"map00904,rn00904,map01110,rn01110\"}, {\"collection\": \"kegg_compounds\", \"id\": \"C10314\", \"score\": 0.946, \"name\": \"Chrysophanic acid 9-anthrone\", \"formula\": \"C15H12O3\", \"pathway_ids\": \"\"}]}"
+  },
+  {
+    "tool_name": "search_literature",
+    "args": {
+      "query": "artemisinic acid biosynthesis in S. cerevisiae",
+      "max_results": 3
+    },
+    "result": "{\"query\": \"artemisinic acid biosynthesis in S. cerevisiae\", \"hits\": [{\"pmid\": \"41805943\", \"title\": \"Sporobolomyces pararoseus: a versatile chassis for circular bioproduction of β-carotene, torulene, and torularhodin.\", \"journal\": \"Archives of microbiology\", \"year\": \"2026\", \"source\": \"pubmed\", \"score\": 0.965, \"snippet\": \"Sporobolomyces pararoseus: a versatile chassis for circular bioproduction of β-carotene, torulene, and torularhodin.\"}, {\"pmid\": \"41692660\", \"title\": \"Growth-coupled evolution accelerates efficient biosynthesis of natural products.\", \"journal\": \"Trends in biotechnology\", \"year\": \"2026\", \"source\": \"pubmed\", \"score\": 0.963, \"snippet\": \"Growth-coupled evolution accelerates efficient biosynthesis of natural products.  Microbial natural product biosynthesis often suffers from metabolic burden and genetic instability. Bushin et al. introduce a synthetic C1 feedback loop that couples xanthommatin production to cell survival, enabling adaptive laboratory evolution to achieve gram-scale production. This strategy offers a generalizable …\"}, {\"pmid\": \"32720145\", \"title\": \"Methods for Metabolic Engineering of a Filamentous Trichoderma reesei.\", \"journal\": \"Methods in molecular biology (Clifton, N.J.)\", \"year\": \"2020\", \"source\": \"pubmed\", \"score\": 0.963, \"snippet\": \"Methods for Metabolic Engineering of a Filamentous Trichoderma reesei.  In this work, we describe genetic tools and techniques for engineering Trichoderma reesei for the production of farnesene. Enhanced production of farnesene was used as an example of this methodology; as were the overexpression of a key enzyme, HMGS, in the MVA pathway.\"}]}"
+  }
+]

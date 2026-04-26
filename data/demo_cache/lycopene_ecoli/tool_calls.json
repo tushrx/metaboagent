@@ -1,0 +1,18 @@
+[
+  {
+    "tool_name": "search_kegg",
+    "args": {
+      "query": "lycopene biosynthesis pathway",
+      "top_k": 1
+    },
+    "result": "{\"query\": \"lycopene biosynthesis pathway\", \"filter\": null, \"hits\": [{\"collection\": \"kegg_reactions\", \"id\": \"R10584\", \"score\": 0.942, \"name\": \"(2E,6E)-farnesyl-diphosphate diphosphate-lyase (cyclizing, alpha-copaene-forming)\", \"equation\": \"C00448 <=> C09639 + C00013\", \"ec_numbers\": \"4.2.3.133\", \"pathway_ids\": \"\"}, {\"collection\": \"kegg_compounds\", \"id\": \"C17627\", \"score\": 0.941, \"name\": \"Prenyl diphosphate\", \"formula\": \"\", \"pathway_ids\": \"\"}]}"
+  },
+  {
+    "tool_name": "search_kegg",
+    "args": {
+      "query": "lycopene synthesis from precursors",
+      "top_k": 1
+    },
+    "result": "{\"query\": \"lycopene synthesis from precursors\", \"filter\": null, \"hits\": [{\"collection\": \"kegg_reactions\", \"id\": \"R09896\", \"score\": 0.945, \"name\": \"(2E,6E)-farnesyl-diphosphate diphosphate-lyase (cyclizing, avermitilol-forming)\", \"equation\": \"C00448 + C00001 <=> C20181 + C00013\", \"ec_numbers\": \"4.2.3.96\", \"pathway_ids\": \"map00909,rn00909\"}, {\"collection\": \"kegg_compounds\", \"id\": \"C20121\", \"score\": 0.942, \"name\": \"trans,trans-Farnesyl phosphate\", \"formula\": \"C15H27O4P\", \"pathway_ids\": \"map00900,map01110\"}]}"
+  }
+]

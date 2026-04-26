@@ -1,0 +1,8 @@
+{
+  "id": "mevalonate_ecoli",
+  "category": "pathway_design",
+  "prompt": "Design a microbial synthesis route for mevalonate in E. coli. Show the pathway with KEGG reaction IDs and EC numbers.",
+  "phase2_followup": "A",
+  "expected_tier": "default",
+  "warmed_seconds": 23.99
+}

@@ -1,0 +1,13 @@
+The KEGG entry for reaction **R02082** is for **(R)-mevalonate:NADP+ oxidoreductase (CoA acylating)**.
+
+This reaction is part of several key metabolic pathways, including:
+*   **rn00900** Terpenoid backbone biosynthesis
+*   **rn01100** Metabolic pathways
+*   **rn01110** Biosynthesis of secondary metabolites
+
+The chemical equation for this reaction is:
+`C00418 + C00010 + 2 C00006 <=> C00356 + 2 C00005 + 2 C00080`
+
+The enzyme associated with this reaction is **1.1.1.34**.
+
+Would you like to know more about the substrates/products (e.g., what C00418 is), or perhaps explore the pathway it belongs to, like Terpenoid backbone biosynthesis?

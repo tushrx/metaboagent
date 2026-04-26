@@ -1,0 +1,35 @@
+<plan>
+[
+  {
+    "id": "A",
+    "title": "Microbial pathway reconstruction",
+    "route": "microbial",
+    "host": "ecoli",
+    "summary": "Identify and integrate genes from known resveratrol producers into E. coli.",
+    "est_difficulty": "high",
+    "est_confidence": 0.85
+  },
+  {
+    "id": "B",
+    "title": "Enzymatic cascade optimization",
+    "route": "enzymatic",
+    "host": null,
+    "summary": "Focus on optimizing the expression and activity of key heterologous enzymes.",
+    "est_difficulty": "medium",
+    "est_confidence": 0.75
+  },
+  {
+    "id": "C",
+    "title": "Chemical synthesis route",
+    "route": "chemical",
+    "host": null,
+    "summary": "Propose a total chemical synthesis route for resveratrol as an alternative.",
+    "est_difficulty": "high",
+    "est_confidence": 0.60
+  }
+]
+</plan>
+Pick an approach and I'll produce the full design.
+
+--- phase 2 (followup='A') ---
+

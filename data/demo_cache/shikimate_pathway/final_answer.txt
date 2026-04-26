@@ -1,0 +1,8 @@
+The shikimate pathway is a central metabolic route in plants, microorganisms, and some fungi. Its primary function is to synthesize aromatic amino acids—phenylalanine, tyrosine, and tryptophan—from simpler precursors, specifically phosphoenolpyruvate (PEP) and erythrose-4-phosphate (E4P).
+
+In essence, it takes two common glycolytic/pentose phosphate pathway intermediates and funnels them through a series of enzymatic steps to build the core aromatic ring structure.
+
+Would you like me to go deeper into:
+1.  The specific enzymatic steps and reactions?
+2.  How this pathway is engineered in microbes for producing valuable aromatic compounds?
+3.  The regulatory mechanisms controlling the pathway?

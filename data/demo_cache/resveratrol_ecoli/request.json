@@ -1,0 +1,8 @@
+{
+  "id": "resveratrol_ecoli",
+  "category": "pathway_design",
+  "prompt": "Design a heterologous pathway for resveratrol production in E. coli starting from tyrosine. Include KEGG reaction IDs and EC numbers.",
+  "phase2_followup": "A",
+  "expected_tier": "default",
+  "warmed_seconds": 12.44
+}

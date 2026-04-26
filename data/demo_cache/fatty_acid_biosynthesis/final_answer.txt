@@ -1,0 +1,10 @@
+Fatty acid biosynthesis is a complex, multi-step metabolic pathway. The key enzymes involved are primarily responsible for the sequential addition of two-carbon units (malonyl-CoA) to a growing acyl chain, a process that is highly conserved across many organisms.
+
+To give you the most precise information, I can look up the specific enzymes involved in the pathway in different organisms, or I can search for the general pathway map in KEGG.
+
+Would you like me to:
+1. **Search for the general KEGG pathway** for fatty acid biosynthesis?
+2. **Rank specific enzyme candidates** for a particular host (e.g., *E. coli* or *S. cerevisiae*)?
+3. **Search the literature** for recent reviews on the enzymes involved?
+
+Let me know what direction you'd like to go!

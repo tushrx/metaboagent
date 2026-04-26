@@ -1,0 +1,8 @@
+{
+  "id": "uniprot_p05067",
+  "category": "lookup",
+  "prompt": "Get UniProt entry P05067.",
+  "phase2_followup": null,
+  "expected_tier": "default",
+  "warmed_seconds": 3.96
+}

@@ -1,0 +1,5 @@
+Based on the UniProt results for various species, the EC number associated with HMG-CoA reductase is **1.1.1.34**.
+
+This enzyme catalyzes the conversion of (3S)-hydroxy-3-methylglutaryl-CoA (HMG-CoA) to mevalonic acid, which is the rate-limiting step in the synthesis of cholesterol and other isoprenoids in many organisms, such as *Homo sapiens* (P04035) and *Mus musculus* (Q01237) [PubMed:21357570, PubMed:2991281].
+
+Would you like to explore the metabolic pathway this enzyme belongs to, or perhaps look into how this enzyme is expressed in a specific host organism?

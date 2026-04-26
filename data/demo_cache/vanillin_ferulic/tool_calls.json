@@ -1,0 +1,18 @@
+[
+  {
+    "tool_name": "search_kegg",
+    "args": {
+      "query": "ferulic acid to vanillin biosynthesis",
+      "top_k": 3
+    },
+    "result": "{\"query\": \"ferulic acid to vanillin biosynthesis\", \"filter\": null, \"hits\": [{\"collection\": \"kegg_reactions\", \"id\": \"R12566\", \"score\": 0.964, \"name\": \"feruloyl-CoA hydro-lyase/vanillin-lyase (acetyl-CoA-forming)\", \"equation\": \"C00406 + C00001 <=> C00755 + C00024\", \"ec_numbers\": \"4.1.2.61\", \"pathway_ids\": \"\"}, {\"collection\": \"kegg_reactions\", \"id\": \"R09278\", \"score\": 0.964, \"name\": \"5-carboxyvanillate 5-carboxy-lyase (vanillate-forming)\", \"equation\": \"C18338 <=> C06672 + C00011\", \"ec_numbers\": \"\", \"pathway_ids\": \"map00627,rn00627,map01120,rn01120\"}, {\"collection\": \"kegg_reactions\", \"id\": \"R07989\", \"score\": 0.964, \"name\": \"malonyl-CoA:feruloyl-CoA malonyltransferase (cyclizing)\", \"equation\": \"C00406 + 3 C00083 <=> C16405 + 4 C00010 + 3 C00011\", \"ec_numbers\": \"2.3.1.74\", \"pathway_ids\": \"map00941,rn00941\"}, {\"collection\": \"kegg_compounds\", \"id\": \"C03057\", \"score\": 0.967, \"name\": \"2-Carboxybenzaldehyde\", \"formula\": \"C8H6O3\", \"pathway_ids\": \"map00624,map01120\"}, {\"collection\": \"kegg_compounds\", \"id\": \"C02666\", \"score\": 0.966, \"name\": \"Coniferyl aldehyde\", \"formula\": \"C10H10O3\", \"pathway_ids\": \"map00940,map01061,map01100,map01110\"}, {\"collection\": \"kegg_compounds\", \"id\": \"C00803\", \"score\": 0.966, \"name\": \"Pentanoate\", \"formula\": \"C5H10O2\", \"pathway_ids\": \"\"}]}"
+  },
+  {
+    "tool_name": "search_literature",
+    "args": {
+      "query": "ferulic acid to vanillin biosynthesis pathway",
+      "max_results": 3
+    },
+    "result": "{\"query\": \"ferulic acid to vanillin biosynthesis pathway\", \"hits\": [{\"pmid\": \"22615135\", \"title\": \"Enhancement of the promiscuous aldolase and dehydration activities of 4-oxalocrotonate tautomerase by protein engineering.\", \"journal\": \"Chembiochem : a European journal of chemical biology\", \"year\": \"2012\", \"source\": \"pubmed\", \"score\": 0.963, \"snippet\": \"Enhancement of the promiscuous aldolase and dehydration activities of 4-oxalocrotonate tautomerase by protein engineering.  Double play: The enzyme 4-oxalocrotonate tautomerase (4-OT) catalyzes not only the initial cross-coupling of acetaldehyde and benzaldehyde to yield 3-hydroxy-3-phenylpropanal, but also the subsequent dehydration of this aldol compound to yield cinnamaldehyde as the final prod…\"}, {\"pmid\": \"30335232\", \"title\": \"Corrigendum: Improvement in the Thermostability of a β-Amino Acid Converting ω-Transaminase by Using FoldX.\", \"journal\": \"Chembiochem : a European journal of chemical biology\", \"year\": \"2018\", \"source\": \"pubmed\", \"score\": 0.962, \"snippet\": \"Corrigendum: Improvement in the Thermostability of a β-Amino Acid Converting ω-Transaminase by Using FoldX.\"}, {\"pmid\": \"25080238\", \"title\": \"Metabolic engineering for higher alcohol production.\", \"journal\": \"Metabolic engineering\", \"year\": \"2014\", \"source\": \"pubmed\", \"score\": 0.962, \"snippet\": \"Metabolic engineering for higher alcohol production.  Engineering microbial hosts for the production of higher alcohols looks to combine the benefits of renewable biological production with the useful chemical properties of larger alcohols. In this review we outline the array of metabolic engineering strategies employed for the efficient diversion of carbon flux from native biosynthetic pathways t…\"}]}"
+  }
+]

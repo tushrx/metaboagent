@@ -1,0 +1,8 @@
+{
+  "id": "lycopene_ecoli",
+  "category": "pathway_design",
+  "prompt": "Show me a heterologous pathway for lycopene production in E. coli, with KEGG R-IDs and ECs.",
+  "phase2_followup": "A",
+  "expected_tier": "default",
+  "warmed_seconds": 24.02
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "tool_name": "fetch_kegg_live",
+    "args": {
+      "entity_id": "C00022"
+    },
+    "result": "{\"query\": \"C00022\", \"kind\": \"compound\", \"kegg_id\": \"cpd:C00022\", \"name\": \"Pyruvate; ; Pyruvic acid; ; 2-Oxopropanoate; ; 2-Oxopropanoic acid; ; Pyroracemic acid\", \"url\": \"https://www.kegg.jp/entry/cpd:C00022\", \"formula\": \"C3H4O3\", \"exact_mass\": \"88.0160\", \"pathways\": \"map00010  Glycolysis / Gluconeogenesis map00020  Citrate cycle (TCA cycle) map00030  Pentose phosphate pathway map00040  Pentose and glucuronate interconversions map00053  Ascorbate and aldarate metabolism map00250  Alanine, aspartate and glutamate metabolism map00260  Glycine, serine and threonine metabolism map00261  Monobactam biosynthesis map00270  Cysteine and methionine metabolism map00290  Valine, leucine and isoleucine biosynthesis map00330  Arginine and proline metabolism map00350  Tyrosine metabolism map00360  Phenylalanine metabolism map00362  Benzoate degradation map00430  Taurine \", \"section_count\": 14}"
+  }
+]

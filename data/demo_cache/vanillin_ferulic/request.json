@@ -1,0 +1,8 @@
+{
+  "id": "vanillin_ferulic",
+  "category": "pathway_design",
+  "prompt": "Design a biosynthesis route for vanillin from ferulic acid. Include KEGG reaction IDs and EC numbers for each step.",
+  "phase2_followup": "A",
+  "expected_tier": "default",
+  "warmed_seconds": 18.51
+}

@@ -1,0 +1,7 @@
+The UniProt entry P05067 corresponds to the **Amyloid-beta precursor protein (APP)** from *Homo sapiens*.
+
+This protein functions as a cell surface receptor, playing roles in neurite growth, neuronal adhesion, and axonogenesis. It is involved in promoting synaptogenesis through interactions with neighboring cells and can regulate transcription by binding to APBB1-KAT5, while also inhibiting Notch signaling via interaction with Numb (PubMed:25122912).
+
+The entry also lists several associated PDB structures, including 1AAP, 1AMB, 1AMC, and others.
+
+Would you like to know more about the function of APP, or perhaps look up a related pathway or enzyme?

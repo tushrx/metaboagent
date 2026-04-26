@@ -1,0 +1,13 @@
+The literature shows significant progress in engineering yeast for the production of artemisinin and its precursor, artemisinic acid.
+
+Here are some key takeaways from recent and relevant papers:
+
+*   **Industrial-Level Production:** A 2023 study highlighted the use of metabolic engineering and synthetic biology to achieve industrial-level production of artemisinic acid from engineered yeast (PMID: 36528397).
+*   **Precursor Synthesis:** Research has focused on producing the precursor, amorphadiene, in yeast, which is then converted to dihydroartemisinic acid, a direct precursor to artemisinin (PMID: 22247290).
+*   **Genetic Enhancement:** Studies have explored enhancing production by introducing transcription factors from the source plant, *Artemisia annua*, into yeast cells to boost the biosynthetic pathway (PMID: 40107365).
+
+Since you are interested in production, are you looking to:
+
+1.  **Design a synthetic biology pathway** to produce artemisinic acid in yeast?
+2.  **Compare** the microbial vs. chemical synthesis routes for artemisinin?
+3.  **Dive deeper** into the biochemical steps of the pathway?

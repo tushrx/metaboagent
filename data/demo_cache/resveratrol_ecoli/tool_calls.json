@@ -1,0 +1,40 @@
+[
+  {
+    "tool_name": "search_kegg",
+    "args": {
+      "query": "tyrosine to resveratrol biosynthesis",
+      "top_k": 3
+    },
+    "result": "{\"query\": \"tyrosine to resveratrol biosynthesis\", \"filter\": null, \"hits\": [{\"collection\": \"kegg_reactions\", \"id\": \"R13231\", \"score\": 0.945, \"name\": \"geranylfarnesyl-diphosphate diphosphate-lyase (cyclizing, somaliensene A-forming)\", \"equation\": \"C04217 <=> C22841 + C00013\", \"ec_numbers\": \"4.2.3.216\", \"pathway_ids\": \"\"}, {\"collection\": \"kegg_reactions\", \"id\": \"R09896\", \"score\": 0.945, \"name\": \"(2E,6E)-farnesyl-diphosphate diphosphate-lyase (cyclizing, avermitilol-forming)\", \"equation\": \"C00448 + C00001 <=> C20181 + C00013\", \"ec_numbers\": \"4.2.3.96\", \"pathway_ids\": \"map00909,rn00909\"}, {\"collection\": \"kegg_reactions\", \"id\": \"R13292\", \"score\": 0.945, \"name\": \"pentaprenyl-diphosphate diphosphate-lyase [cyclizing, talaropentaene-forming]\", \"equation\": \"C01230 <=> C22894 + C00013\", \"ec_numbers\": \"4.2.3.220\", \"pathway_ids\": \"\"}, {\"collection\": \"kegg_compounds\", \"id\": \"C05309\", \"score\": 0.949, \"name\": \"Semiquinone\", \"formula\": \"\", \"pathway_ids\": \"map05208\"}, {\"collection\": \"kegg_compounds\", \"id\": \"C04816\", \"score\": 0.948, \"name\": \"Dephospho-[[hydroxymethylglutaryl-CoA reductase (NADPH)]kinase]\", \"formula\": \"\", \"pathway_ids\": \"\"}, {\"collection\": \"kegg_compounds\", \"id\": \"C03597\", \"score\": 0.948, \"name\": \"Actinomycinic monolactone\", \"formula\": \"\", \"pathway_ids\": \"\"}]}"
+  },
+  {
+    "tool_name": "search_literature",
+    "args": {
+      "query": "resveratrol biosynthesis pathway E. coli",
+      "max_results": 3
+    },
+    "result": "{\"query\": \"resveratrol biosynthesis pathway E. coli\", \"hits\": [{\"pmid\": \"32498036\", \"title\": \"Engineering of natural product biosynthesis in Pseudomonas putida.\", \"journal\": \"Current opinion in biotechnology\", \"year\": \"2020\", \"source\": \"pubmed\", \"score\": 0.968, \"snippet\": \"Engineering of natural product biosynthesis in Pseudomonas putida.\"}, {\"pmid\": \"24603359\", \"title\": \"Production of bioactive ginsenoside compound K in metabolically engineered yeast.\", \"journal\": \"Cell research\", \"year\": \"2014\", \"source\": \"pubmed\", \"score\": 0.964, \"snippet\": \"Production of bioactive ginsenoside compound K in metabolically engineered yeast.\"}, {\"pmid\": \"38486059\", \"title\": \"Metabolic engineering of the paclitaxel anticancer drug.\", \"journal\": \"Cell research\", \"year\": \"2024\", \"source\": \"pubmed\", \"score\": 0.964, \"snippet\": \"Metabolic engineering of the paclitaxel anticancer drug.\"}]}"
+  },
+  {
+    "tool_name": "search_kegg",
+    "args": {
+      "query": "phenylpropanoid biosynthesis",
+      "top_k": 1
+    },
+    "result": "{\"query\": \"phenylpropanoid biosynthesis\", \"filter\": null, \"hits\": [{\"collection\": \"kegg_reactions\", \"id\": \"R09970\", \"score\": 0.941, \"name\": \"geranyl-diphosphate diphosphate-lyase (cyclizing, alpha-terpinene-forming)\", \"equation\": \"C00341 <=> C09898 + C00013\", \"ec_numbers\": \"4.2.3.115\", \"pathway_ids\": \"\"}, {\"collection\": \"kegg_compounds\", \"id\": \"C05629\", \"score\": 0.943, \"name\": \"Phenylpropanoate\", \"formula\": \"C9H10O2\", \"pathway_ids\": \"map00360,map01100,map01120,map01220\"}]}"
+  },
+  {
+    "tool_name": "search_literature",
+    "args": {
+      "query": "tyrosine to resveratrol biosynthesis pathway"
+    },
+    "result": "{\"query\": \"tyrosine to resveratrol biosynthesis pathway\", \"hits\": [{\"pmid\": \"kegg_pathway:map00670\", \"title\": \"\", \"journal\": \"\", \"year\": \"\", \"source\": \"kegg_pathway\", \"score\": 0.953, \"snippet\": \"KEGG Pathway map00670. Name: One carbon pool by folate. Class: Metabolism; Metabolism of cofactors and vitamins. Description: .\"}, {\"pmid\": \"kegg_pathway:map00541\", \"title\": \"\", \"journal\": \"\", \"year\": \"\", \"source\": \"kegg_pathway\", \"score\": 0.952, \"snippet\": \"KEGG Pathway map00541. Name: Biosynthesis of various nucleotide sugars. Class: Metabolism; Glycan biosynthesis and metabolism. Description: .\"}, {\"pmid\": \"kegg_pathway:map01065\", \"title\": \"\", \"journal\": \"\", \"year\": \"\", \"source\": \"kegg_pathway\", \"score\": 0.951, \"snippet\": \"KEGG Pathway map01065. Name: Biosynthesis of alkaloids derived from histidine and purine. Class: . Description: .\"}, {\"pmid\": \"kegg_pathway:map00770\", \"title\": \"\", \"journal\": \"\", \"year\": \"\", \"source\": \"kegg_pathway\", \"score\": 0.951, \"snippet\": \"KEGG Pathway map00770. Name: Pantothenate and CoA biosynthesis. Class: Metabolism; Metabolism of cofactors and vitamins. Description: .\"}, {\"pmid\": \"kegg_pathway:map00401\", \"title\": \"\", \"journal\": \"\", \"year\": \"\", \"source\": \"kegg_pathway\", \"score\": 0.951, \"snippet\": \"KEGG Pathway map00401. Name: Novobiocin biosynthesis. Class: Metabolism; Biosynthesis of other secondary metabolites. Description: .\"}]}"
+  },
+  {
+    "tool_name": "search_literature",
+    "args": {
+      "query": "phenylpropanoid pathway tyrosine to resveratrol enzymes"
+    },
+    "result": "{\"query\": \"phenylpropanoid pathway tyrosine to resveratrol enzymes\", \"hits\": [{\"pmid\": \"kegg_pathway:map01063\", \"title\": \"\", \"journal\": \"\", \"year\": \"\", \"source\": \"kegg_pathway\", \"score\": 0.968, \"snippet\": \"KEGG Pathway map01063. Name: Biosynthesis of alkaloids derived from shikimate pathway. Class: . Description: .\"}, {\"pmid\": \"kegg_pathway:map00904\", \"title\": \"\", \"journal\": \"\", \"year\": \"\", \"source\": \"kegg_pathway\", \"score\": 0.968, \"snippet\": \"KEGG Pathway map00904. Name: Diterpenoid biosynthesis INCLUDING Gibberellin biosynthesis. Class: Metabolism; Metabolism of terpenoids and polyketides. Description: .\"}, {\"pmid\": \"kegg_pathway:map00944\", \"title\": \"\", \"journal\": \"\", \"year\": \"\", \"source\": \"kegg_pathway\", \"score\": 0.968, \"snippet\": \"KEGG Pathway map00944. Name: Flavone and flavonol biosynthesis. Class: Metabolism; Biosynthesis of other secondary metabolites. Description: Flavones and flavonols (3-hydroxyflavones) are common flavonoids in the plant kingdom. They are synthesized as part of the flavonoid modification pathways in aglycone and glucoside forms..\"}, {\"pmid\": \"kegg_pathway:map00907\", \"title\": \"\", \"journal\": \"\", \"year\": \"\", \"source\": \"kegg_pathway\", \"score\": 0.967, \"snippet\": \"KEGG Pathway map00907. Name: Pinene, camphor and geraniol degradation. Class: Metabolism; Metabolism of terpenoids and polyketides. Description: .\"}, {\"pmid\": \"kegg_pathway:map00523\", \"title\": \"\", \"journal\": \"\", \"year\": \"\", \"source\": \"kegg_pathway\", \"score\": 0.967, \"snippet\": \"KEGG Pathway map00523. Name: Polyketide sugar unit biosynthesis. Class: Metabolism; Metabolism of terpenoids and polyketides. Description: .\"}]}"
+  }
+]

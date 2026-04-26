@@ -1,0 +1,8 @@
+{
+  "id": "mep_vs_mva",
+  "category": "freeform",
+  "prompt": "What's the difference between MEP and MVA pathways for isoprenoid biosynthesis?",
+  "phase2_followup": null,
+  "expected_tier": "default",
+  "warmed_seconds": 4.38
+}

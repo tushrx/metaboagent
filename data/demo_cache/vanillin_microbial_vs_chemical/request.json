@@ -1,0 +1,8 @@
+{
+  "id": "vanillin_microbial_vs_chemical",
+  "category": "freeform",
+  "prompt": "Compare microbial vs chemical synthesis of vanillin.",
+  "phase2_followup": null,
+  "expected_tier": "default",
+  "warmed_seconds": 8.99
+}

@@ -1,0 +1,8 @@
+{
+  "id": "fatty_acid_biosynthesis",
+  "category": "freeform",
+  "prompt": "What enzymes are involved in fatty acid biosynthesis?",
+  "phase2_followup": null,
+  "expected_tier": "default",
+  "warmed_seconds": 2.8
+}

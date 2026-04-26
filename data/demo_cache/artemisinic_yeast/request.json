@@ -1,0 +1,8 @@
+{
+  "id": "artemisinic_yeast",
+  "category": "pathway_design",
+  "prompt": "How would you engineer S. cerevisiae to produce artemisinic acid? Show the pathway with KEGG R-IDs and EC numbers.",
+  "phase2_followup": "A",
+  "expected_tier": "default",
+  "warmed_seconds": 24.57
+}
