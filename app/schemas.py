@@ -56,12 +56,18 @@ class ChatRequest(BaseModel):
 
 
 class HealthResponse(BaseModel):
-    """Per-tier reachability probe result."""
+    """Per-tier reachability probe result.
+
+    ``demo_mode`` is a system-wide flag — true when the server is running
+    with ``DEMO_MODE=1`` set, telling the UI to surface the offline-mode
+    banner and the operator that live-fetch tools are gated.
+    """
 
     default: Literal["ok", "down"]
     deep: Literal["ok", "down"]
     max_rigor: Literal["ok", "down"]
     overall: Literal["ok", "degraded", "down"]
+    demo_mode: bool
 
 
 class ToolDescriptor(BaseModel):

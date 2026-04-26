@@ -114,8 +114,13 @@ def create_app() -> FastAPI:
             overall, status_code = "down", 503
         else:
             overall, status_code = "degraded", 200
+        # DEMO_MODE is read at request time so a hot-flip (env change in a
+        # running container) is reflected in the next /health probe rather
+        # than requiring a restart.
+        demo_mode = os.environ.get("DEMO_MODE") == "1"
         return JSONResponse(
-            {**statuses, "overall": overall}, status_code=status_code,
+            {**statuses, "overall": overall, "demo_mode": demo_mode},
+            status_code=status_code,
         )
 
     @app.get("/tools", response_model=list[ToolDescriptor])
