@@ -17,6 +17,8 @@ sys.path.insert(0, str(REPO_ROOT / "eval"))
 
 from eval_pathway_hallucination import (  # noqa: E402
     _block_for_rid,
+    _clean_compound_token,
+    _extract_chemistry,
     _parse_arrow_chemistry,
     _parse_step_blocks,
 )
@@ -151,3 +153,114 @@ def test_block_for_rid_returns_none_when_outside_any_block():
 def test_empty_text_returns_no_blocks():
     assert _parse_step_blocks("") == []
     assert _parse_step_blocks(None) == []
+
+
+# ---- LaTeX arrow + body fallback (real-world phase-2 styling) -------------
+
+
+def test_arrow_latex_dollar_rightarrow():
+    sub, prod = _parse_arrow_chemistry(
+        r"Ferulic Acid + CoA $\rightarrow$ Feruloyl-CoA"
+    )
+    assert sub == ["Ferulic Acid", "CoA"]
+    assert prod == ["Feruloyl-CoA"]
+
+
+def test_arrow_bare_latex():
+    sub, prod = _parse_arrow_chemistry(r"acetyl-CoA \to citrate")
+    assert sub == ["acetyl-CoA"]
+    assert prod == ["citrate"]
+
+
+def test_clean_token_strips_latex_math_wrappers():
+    # $\text{H}_2\text{O}$ should reduce to "H_2O" (subscript markers
+    # stay; resolver handles further normalization)
+    cleaned = _clean_compound_token(r"$\text{H}_2\text{O}$")
+    assert "H" in cleaned and "O" in cleaned
+    assert "$" not in cleaned and "\\text" not in cleaned
+
+
+def test_extract_chemistry_falls_back_to_reaction_line():
+    """Step head has no arrow — chemistry lives on a Reaction: bullet."""
+    head = "Ferulic Acid Activation (Precursor Generation)"
+    body = (
+        "**Step 1: Ferulic Acid Activation (Precursor Generation)**\n"
+        "*   **Reaction:** Ferulic Acid + CoA $\\rightarrow$ Feruloyl-CoA\n"
+        "*   **Enzyme:** Feruloyl-CoA Synthetase\n"
+    )
+    sub, prod = _extract_chemistry(head, body)
+    assert sub == ["Ferulic Acid", "CoA"]
+    assert prod == ["Feruloyl-CoA"]
+
+
+def test_extract_chemistry_prefers_step_head_when_present():
+    head = "acetyl-CoA → citrate"
+    body = (
+        "Step 1: acetyl-CoA → citrate\n"
+        "*   **Reaction:** something completely different\n"
+    )
+    sub, prod = _extract_chemistry(head, body)
+    assert sub == ["acetyl-CoA"]
+    assert prod == ["citrate"]
+
+
+def test_block_for_rid_prefers_block_with_chemistry():
+    """An R-ID that appears in two blocks goes to the chemistry-bearing one."""
+    text = (
+        "**Step 1: Ferulic Acid Activation**\n"
+        "*   **Enzyme:** Feruloyl-CoA Synthetase\n"
+        "*   **KEGG Reaction:** R12566\n"
+        "\n"
+        "Step 2: Feruloyl-CoA $\\rightarrow$ Vanillin\n"
+        "    Reaction: R12566 EC 4.1.2.61\n"
+    )
+    blocks = _parse_step_blocks(text)
+    b = _block_for_rid("R12566", blocks)
+    assert b is not None
+    # Step 2 has chemistry from the LaTeX arrow on its head.
+    assert b["step_num"] == 2
+    assert b["substrate_names"] == ["Feruloyl-CoA"]
+    assert b["product_names"] == ["Vanillin"]
+
+
+def test_bullet_prefixed_step_head_is_recognized():
+    """Bullet-list step style: '*   **Step 1: ...**'."""
+    text = (
+        "**Pathway Steps:**\n"
+        "*   **Step 1: Feruloyl-CoA Hydro-lyase Activity**\n"
+        "    *   **Reaction:** Feruloyl-CoA $\\rightarrow$ Vanillin + Acetyl-CoA\n"
+        "    *   **Reaction ID:** R12566\n"
+    )
+    blocks = _parse_step_blocks(text)
+    assert len(blocks) == 1
+    assert blocks[0]["step_num"] == 1
+    assert "Feruloyl-CoA" in blocks[0]["substrate_names"]
+    assert "Vanillin" in blocks[0]["product_names"]
+    assert blocks[0]["rids"] == ["R12566"]
+
+
+def test_real_world_vanillin_phase2_excerpt():
+    """End-to-end: a phase-2 fragment from an actual eval run.
+
+    The agent emits a prose-only step header AND a diagram-rendering
+    section with explicit LaTeX arrow chemistry. Either path should
+    surface a step block whose chemistry resolves to ferulic acid →
+    feruloyl-CoA (or the symmetric Step 2: feruloyl-CoA → vanillin).
+    """
+    text = (
+        "**Step 1: Ferulic Acid Activation (Precursor Generation)**\n"
+        "*   **Reaction:** Ferulic Acid + CoA $\\rightarrow$ Feruloyl-CoA\n"
+        "*   **KEGG Reaction:** R12566\n"
+        "\n"
+        "**Step 2: Vanillin Formation (Core Conversion)**\n"
+        "*   **Reaction:** Feruloyl-CoA $\\rightarrow$ Vanillin\n"
+        "*   **EC Number:** $\\text{4.1.2.61}$\n"
+    )
+    blocks = _parse_step_blocks(text)
+    assert len(blocks) == 2
+    # Step 1 picks up chemistry from the Reaction: bullet
+    assert blocks[0]["substrate_names"] == ["Ferulic Acid", "CoA"]
+    assert blocks[0]["product_names"] == ["Feruloyl-CoA"]
+    # Step 2 picks up chemistry from the Reaction: bullet
+    assert blocks[1]["substrate_names"] == ["Feruloyl-CoA"]
+    assert blocks[1]["product_names"] == ["Vanillin"]

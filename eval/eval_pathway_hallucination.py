@@ -94,15 +94,37 @@ _SILENT_GIVEUP_MAX_CHARS = 50
 # substrate names (lhs of arrow) and product names (rhs); the body
 # carries any cited R-IDs / EC numbers we want to substrate-check.
 _STEP_HEAD_RE = re.compile(
-    r"^\s*(?:\*\*)?\s*(?:Step\s+)?(\d+)[.):]\s*(.*?)\s*(?:\*\*)?\s*$",
+    # Optional leading bullet-list marker (* / - / •) so we catch
+    # "*   **Step 1: ...**" along with the bare and bolded forms.
+    r"^\s*[\*\-•]?\s*(?:\*\*)?\s*(?:Step\s+)?(\d+)[.):]\s*(.*?)\s*(?:\*\*)?\s*$",
     re.IGNORECASE,
 )
-_ARROW_RE = re.compile(r"\s*(?:->|→|=>)\s*")
+# Arrow forms we accept on a step line or Reaction: bullet:
+#   ASCII / Unicode:  ->, =>, →, ⇒, ⟶
+#   LaTeX (delimited or bare):  $\rightarrow$, $\to$, \rightarrow, \to
+# Word-boundary on the bare LaTeX forms keeps "rightarrow" inside a
+# longer identifier from accidentally triggering.
+_ARROW_RE = re.compile(
+    r"\s*(?:->|=>|→|⇒|⟶|\$\\(?:rightarrow|to)\$|\\(?:rightarrow|to)\b)\s*"
+)
 _PLUS_SPLIT_RE = re.compile(r"\s+\+\s+")
+# A "Reaction:" sub-bullet inside a step block. The agent often puts
+# the actual A → B chemistry on this line rather than on the step head
+# (which is typically a prose label like "**Step 1: Activation**").
+_REACTION_LINE_RE = re.compile(
+    r"^\s*[\*\-•]?\s*\**\s*(?:Reaction|Conversion)\s*:?\s*\**\s*(.+?)\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
 
 
 def _clean_compound_token(s: str) -> str:
     s = s.strip()
+    # Strip LaTeX math delimiters: $...$  →  inner content.
+    s = re.sub(r"\$([^$]*?)\$", r"\1", s)
+    # Strip \text{...}  →  inner content.
+    s = re.sub(r"\\text\{([^}]*?)\}", r"\1", s)
+    # Strip generic \something{...} wrappers (e.g. \mathrm{...}).
+    s = re.sub(r"\\[a-zA-Z]+\{([^}]*?)\}", r"\1", s)
     s = re.sub(r"\([^)]*\)$", "", s).strip()
     s = s.rstrip(":,;.")
     s = s.strip().strip("*").strip("`").strip("_").strip()
@@ -114,7 +136,8 @@ def _parse_arrow_chemistry(head: str) -> tuple[list[str], list[str]]:
 
     Empty lists when no arrow is present — caller should treat the step
     as ineligible for substrate-relevance checking and fall back to
-    existence-only verification.
+    existence-only verification (or to the body-Reaction-line fallback
+    in ``_extract_chemistry``).
     """
     m = _ARROW_RE.search(head)
     if not m:
@@ -126,6 +149,24 @@ def _parse_arrow_chemistry(head: str) -> tuple[list[str], list[str]]:
     sub_names = [_clean_compound_token(p) for p in _PLUS_SPLIT_RE.split(lhs) if p.strip()]
     prod_names = [_clean_compound_token(p) for p in _PLUS_SPLIT_RE.split(rhs) if p.strip()]
     return [s for s in sub_names if s], [p for p in prod_names if p]
+
+
+def _extract_chemistry(step_head: str, body: str) -> tuple[list[str], list[str]]:
+    """Step-head chemistry first, then body-Reaction-line fallback.
+
+    The agent often writes a prose-only step head ("**Step 1:
+    Activation**") with the A → B chemistry on a sub-bullet
+    ``*   **Reaction:** A + B → C``. Without this fallback the parser
+    misses every R-ID emitted in that style.
+    """
+    sub, prod = _parse_arrow_chemistry(step_head)
+    if sub or prod:
+        return sub, prod
+    for m in _REACTION_LINE_RE.finditer(body):
+        sub, prod = _parse_arrow_chemistry(m.group(1))
+        if sub or prod:
+            return sub, prod
+    return [], []
 
 
 def _parse_step_blocks(text: str) -> list[dict[str, Any]]:
@@ -162,7 +203,7 @@ def _parse_step_blocks(text: str) -> list[dict[str, Any]]:
     for k, (start_i, step_num, head) in enumerate(starts):
         end_i = starts[k + 1][0] if k + 1 < len(starts) else len(lines)
         body = "\n".join(lines[start_i:end_i])
-        sub_names, prod_names = _parse_arrow_chemistry(head)
+        sub_names, prod_names = _extract_chemistry(head, body)
         rids: list[str] = []
         for r in RID_RE.findall(body):
             if r not in rids:
@@ -184,11 +225,22 @@ def _parse_step_blocks(text: str) -> list[dict[str, Any]]:
 
 
 def _block_for_rid(rid: str, blocks: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """Return the first step block whose body contains the given R-ID."""
-    for b in blocks:
-        if rid in b["body"]:
+    """Return the best step block whose body contains the given R-ID.
+
+    Prefers blocks that have parsed substrate/product chemistry — when
+    an R-ID appears in two blocks (e.g. once in a prose-only step
+    header section, once in a diagram-rendering section with explicit
+    arrow chemistry), the chemistry-bearing block is the right anchor
+    for substrate-relevance. Falls back to any matching block when no
+    candidate has parsed chemistry.
+    """
+    candidates = [b for b in blocks if rid in b["body"]]
+    if not candidates:
+        return None
+    for b in candidates:
+        if b["substrate_names"] and b["product_names"]:
             return b
-    return None
+    return candidates[0]
 
 
 def _classify_no_ids_reason(text: str) -> str:
