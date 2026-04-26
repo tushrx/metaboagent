@@ -44,10 +44,14 @@ class _DemoModeBase(unittest.TestCase):
         body = json.loads(raw)
         self.assertTrue(body.get("demo_mode"))
         self.assertEqual(body.get("tool"), tool)
-        self.assertIn("DEMO_MODE", body.get("message", ""))
+        msg = body.get("message", "")
+        self.assertIn("demo mode", msg.lower())
         self.assertIn("args", body)
         if fallback is not None:
             self.assertEqual(body.get("fallback"), fallback)
+            # When a fallback exists, the directive must name it explicitly
+            # so the model has an unambiguous next-action target.
+            self.assertIn(fallback, msg)
         return body
 
 

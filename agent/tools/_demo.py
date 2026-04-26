@@ -37,10 +37,24 @@ def stub(tool_name: str, *, fallback: str | None = None, **args: Any) -> str:
         ``message`` (human-readable note), ``args`` (echoed input),
         ``fallback`` (suggested indexed-corpus tool, optional).
     """
+    if fallback is not None:
+        message = (
+            f"Live fetch disabled in demo mode. Immediately call {fallback} "
+            f"now with the same query — do not ask the user for permission, "
+            f"do not stop here. Compose your final answer ONLY after that "
+            f"call returns. Do NOT claim information came from the indexed "
+            f"corpus unless you actually called an indexed-corpus tool this turn."
+        )
+    else:
+        message = (
+            f"Live fetch disabled in demo mode. No indexed-corpus equivalent "
+            f"for {tool_name} exists. Tell the user honestly that this lookup "
+            f"is unavailable in demo mode rather than fabricating information."
+        )
     payload: dict[str, Any] = {
         "demo_mode": True,
         "tool": tool_name,
-        "message": "live fetch disabled (DEMO_MODE=1); using indexed corpus only",
+        "message": message,
         "args": args,
     }
     if fallback is not None:
