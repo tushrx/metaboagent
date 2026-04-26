@@ -31,7 +31,6 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import datetime as dt
 import json
 import logging
 import re
@@ -42,13 +41,15 @@ from typing import Any
 
 import httpx
 
+from eval._kegg_verify import (
+    KEGG_SLEEP_S,
+    verify_ec_number as _kv_verify_ec,
+    verify_kegg_reaction_id as _kv_verify_rid,
+)
+from eval._runner import drain_agent_turn, timestamp_utc, write_result
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PROMPTS_PATH = REPO_ROOT / "eval/scenarios/pathway_design/prompts.json"
-RESULTS_DIR = REPO_ROOT / "eval/results"
-
-KEGG_BASE = "https://rest.kegg.jp"
-KEGG_SLEEP_S = 0.4   # ~2.5 rps, under KEGG's 3 rps anonymous ceiling
-KEGG_TIMEOUT_S = 10.0
 
 RID_RE = re.compile(r"\bR\d{5}\b")
 EC_RE = re.compile(r"\bEC\s?(\d+\.\d+\.\d+\.\d+)\b")
@@ -172,57 +173,29 @@ def _context_snippet(text: str, needle: str, window: int = 80) -> str:
 
 
 def _verify_kegg_id(client: httpx.Client, kind: str, raw: str) -> bool:
+    """Thin adapter — eval rows want a bool, the shared module returns a dict.
+
+    The dict carries equation/name/ec_numbers we don't store today; 8.3's
+    substrate-relevance work will read those fields directly via the
+    shared module rather than going through this adapter.
+    """
     if kind == "rid":
-        path = f"{KEGG_BASE}/get/{raw}"
-    elif kind == "ec":
-        path = f"{KEGG_BASE}/get/ec:{raw}"
-    else:
-        raise ValueError(f"unknown kind: {kind}")
-    try:
-        r = client.get(path, timeout=KEGG_TIMEOUT_S)
-    except httpx.HTTPError as e:
-        log.warning("  KEGG request failed for %s %s: %s", kind, raw, e)
-        return False
-    if r.status_code == 200 and r.text.strip():
-        return True
-    if r.status_code == 404:
-        return False
-    log.warning("  unexpected KEGG status %d for %s %s", r.status_code, kind, raw)
-    return False
+        return bool(_kv_verify_rid(raw, client=client, sleep_after=False)["exists"])
+    if kind == "ec":
+        return bool(_kv_verify_ec(raw, client=client, sleep_after=False)["exists"])
+    raise ValueError(f"unknown kind: {kind}")
 
 
 async def _drain_turn(messages_payload: list[Any], max_iterations: int) -> dict[str, Any]:
-    """Run one agent turn and collect the stream. messages_payload is a
-    list of langchain BaseMessage objects."""
-    from agent.core import run_agent
+    """Run one agent turn and add the Phase-6.5.c nudge counter.
 
-    events: list[dict] = []
-    final_answer = ""
-    tokens_in = 0
-    tokens_out = 0
-    duration_ms = 0
-    iterations = 0
-    t0 = time.perf_counter()
-    async for ev in run_agent(
+    The shared ``drain_agent_turn`` does the heavy lifting; we only
+    need the additional nudge tally for instrumentation here.
+    """
+    events, final_answer, usage = await drain_agent_turn(
         messages_payload,
-        tier="default",
         max_iterations=max_iterations,
-    ):
-        if ev.get("type") == "token":
-            continue  # keep JSON compact; we already get final_answer
-        events.append(ev)
-        if ev.get("type") == "final_answer":
-            final_answer = ev.get("content") or ""
-        if ev.get("type") == "done":
-            usage = ev.get("usage") or {}
-            tokens_in = usage.get("tokens_in", 0) or 0
-            tokens_out = usage.get("tokens_out", 0) or 0
-            duration_ms = usage.get("ms", 0) or 0
-            iterations = usage.get("iterations", 0) or 0
-    elapsed_ms = int(round((time.perf_counter() - t0) * 1000))
-    # run_agent reports its own ms; fall back to wallclock if zero.
-    if not duration_ms:
-        duration_ms = elapsed_ms
+    )
     nudge_count = sum(
         1 for ev in events
         if ev.get("type") == "thinking"
@@ -231,10 +204,10 @@ async def _drain_turn(messages_payload: list[Any], max_iterations: int) -> dict[
     return {
         "events": events,
         "final_answer": final_answer,
-        "tokens_in": tokens_in,
-        "tokens_out": tokens_out,
-        "duration_ms": duration_ms,
-        "iterations": iterations,
+        "tokens_in": usage["tokens_in"],
+        "tokens_out": usage["tokens_out"],
+        "duration_ms": usage["duration_ms"],
+        "iterations": usage["iterations"],
         "nudge_count": nudge_count,
     }
 
@@ -564,25 +537,22 @@ def main() -> int:
     per_prompt = asyncio.run(_run_all(prompts, args.max_iterations))
     agg = _aggregate(per_prompt)
 
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    ts = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    out_path = Path(args.output) if args.output else RESULTS_DIR / f"pathway_hallucination_baseline_{ts}.json"
-    out_path.write_text(
-        json.dumps(
-            {
-                "timestamp_utc": ts,
-                "kind": "pathway_hallucination_baseline",
-                "flow": "two_turn",
-                "tier": "default",
-                "phase1_stats": agg["phase1_stats"],
-                "phase2_stats": agg["phase2_stats"],
-                "pathway_accuracy": agg["pathway_accuracy"],
-                "per_prompt": per_prompt,
-            },
-            indent=2,
-            ensure_ascii=False,
-        ) + "\n",
-        encoding="utf-8",
+    ts = timestamp_utc()
+    payload = {
+        "timestamp_utc": ts,
+        "kind": "pathway_hallucination_baseline",
+        "flow": "two_turn",
+        "tier": "default",
+        "phase1_stats": agg["phase1_stats"],
+        "phase2_stats": agg["phase2_stats"],
+        "pathway_accuracy": agg["pathway_accuracy"],
+        "per_prompt": per_prompt,
+    }
+    out_path = write_result(
+        "pathway_hallucination_baseline",
+        payload,
+        output_path=Path(args.output) if args.output else None,
+        ts=ts,
     )
 
     log.info("wrote %s", out_path)
