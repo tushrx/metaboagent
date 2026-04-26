@@ -1,9 +1,9 @@
-"""Eval-side KEGG ID verification (Phase 8.2 extraction).
+"""Eval-side KEGG ID verification (Phase 8.2 extraction; 8.3.B substrate check).
 
 The current pathway-hallucination eval calls ``rest.kegg.jp`` directly
 with a hand-rolled httpx client and returns just a bool — fine for
 "did this R-id resolve at all?" but useless for the substrate-relevance
-work coming in Phase 8.3 / G4. This module:
+work in Phase 8.3 / G4. This module:
 
   - Returns the parsed canonical fields (equation, name, ec_numbers /
     name, reactions) so callers can do downstream consistency checks.
@@ -13,10 +13,13 @@ work coming in Phase 8.3 / G4. This module:
   - DOES NOT respect ``DEMO_MODE``. The production tools stub when
     DEMO_MODE=1; an eval that stubs verification cannot detect
     fabrication, which is the whole point.
-
-Designed to be extended in 8.3 with a substrate-relevance check that
-takes the parsed equation and a "claimed substrate" and decides whether
-the ID is being cited in the right context.
+  - Phase 8.3.B layers a substrate-relevance check on top of the
+    existing equation extraction: ``get_reaction_compounds`` parses the
+    LHS / RHS of the equation into KEGG compound IDs, and
+    ``verify_reaction_substrate`` decides whether a claimed
+    (substrate, product) pair is consistent with the reaction's
+    chemistry. Direction-lenient because KEGG ``<=>`` notation is
+    reversible — the agent can describe either direction.
 
 Rate limit: 400 ms after each network call (KEGG anonymous ceiling is
 ~3 rps).
@@ -217,3 +220,181 @@ def verify_ec_number(
 
     _ec_cache[norm] = result
     return result
+
+
+# ---- substrate-relevance (Phase 8.3.B) ------------------------------------
+
+# KEGG equations use a single ``<=>`` separator between substrates (LHS)
+# and products (RHS). Compound IDs are ``Cnnnnn``; coefficients and
+# parenthetical terms ride alongside but never collide with the C-ID
+# regex.
+_EQUATION_SEP = re.compile(r"\s*<=>\s*")
+_CID_RE = re.compile(r"\bC\d{5}\b")
+
+
+def get_reaction_compounds(
+    reaction_id: str,
+    *,
+    client: httpx.Client | None = None,
+    sleep_after: bool = True,
+) -> dict[str, Any]:
+    """Return ``{exists, substrates, products}`` for a KEGG reaction.
+
+    ``substrates`` and ``products`` are lists of KEGG compound IDs
+    parsed from the LHS / RHS of the equation. Empty lists when the
+    reaction has no equation field or doesn't resolve.
+    """
+    info = verify_kegg_reaction_id(
+        reaction_id, client=client, sleep_after=sleep_after,
+    )
+    if not info.get("exists"):
+        return {
+            "exists": False,
+            "reaction_id": info.get("reaction_id"),
+            "substrates": [],
+            "products": [],
+        }
+    eq = info.get("equation") or ""
+    parts = _EQUATION_SEP.split(eq, maxsplit=1)
+    if len(parts) != 2:
+        return {
+            "exists": True,
+            "reaction_id": info["reaction_id"],
+            "substrates": [],
+            "products": [],
+            "equation": eq or None,
+        }
+    lhs, rhs = parts
+    substrates = _CID_RE.findall(lhs)
+    products = _CID_RE.findall(rhs)
+    return {
+        "exists": True,
+        "reaction_id": info["reaction_id"],
+        "substrates": substrates,
+        "products": products,
+        "equation": eq,
+    }
+
+
+def _classify_substrate_match(
+    claimed_substrate_ids: list[str],
+    claimed_product_ids: list[str],
+    kegg_substrates: list[str],
+    kegg_products: list[str],
+) -> dict[str, Any]:
+    """Pure classifier — separated for unit testing without network.
+
+    Direction-lenient: a claimed compound matches if it appears on
+    either side of the ``<=>`` separator. KEGG records reactions in
+    one canonical direction, but most are reversible in vivo and the
+    agent may describe either direction in a step line.
+    """
+    all_kegg = set(kegg_substrates) | set(kegg_products)
+    sub_set = set(claimed_substrate_ids)
+    prod_set = set(claimed_product_ids)
+    substrate_matches = bool(sub_set & all_kegg)
+    product_matches = bool(prod_set & all_kegg)
+
+    if substrate_matches and product_matches:
+        verdict = "fully_matches"
+    elif substrate_matches:
+        verdict = "substrate_only"
+    elif product_matches:
+        verdict = "product_only"
+    else:
+        verdict = "neither"
+
+    return {
+        "substrate_matches": substrate_matches,
+        "product_matches": product_matches,
+        "verdict": verdict,
+    }
+
+
+def verify_reaction_substrate(
+    reaction_id: str,
+    claimed_substrate: str,
+    claimed_product: str,
+    *,
+    client: httpx.Client | None = None,
+    sleep_after: bool = True,
+    use_remote_resolver: bool = True,
+) -> dict[str, Any]:
+    """Verify whether the agent's claimed (substrate, product) pair is
+    consistent with the KEGG reaction's chemistry.
+
+    Returns a dict with:
+      - ``rid_exists``        — did the R-ID resolve in KEGG?
+      - ``substrate_matches`` — claimed substrate appears in equation?
+      - ``product_matches``   — claimed product appears in equation?
+      - ``substrate_resolved``— did the resolver find any C-ID for the
+                                claimed substrate name?
+      - ``product_resolved``  — same for the claimed product
+      - ``kegg_substrates``   — LHS compounds (raw KEGG storage order)
+      - ``kegg_products``     — RHS compounds
+      - ``claimed_substrate_ids`` / ``claimed_product_ids`` — resolved
+                                C-IDs the matcher used
+      - ``verdict`` — one of {"rid_invalid", "fully_matches",
+                              "substrate_only", "product_only",
+                              "neither"}
+
+    A ``"neither"`` verdict can mean either (a) the reaction's chemistry
+    is unrelated to the claimed pair (the real-but-wrong-enzyme failure
+    mode this verifier targets) or (b) one or both names didn't
+    resolve. Callers distinguish via the ``substrate_resolved`` /
+    ``product_resolved`` fields.
+
+    Direction-lenient by design — see ``_classify_substrate_match``.
+    """
+    # Local import to keep the resolver optional for callers that only
+    # want existence/equation lookup (and to keep the import graph
+    # one-directional: the resolver does not import this module).
+    from eval._kegg_name_resolver import resolve_compound_name
+
+    compounds = get_reaction_compounds(
+        reaction_id, client=client, sleep_after=sleep_after,
+    )
+    if not compounds["exists"]:
+        return {
+            "rid_exists": False,
+            "substrate_matches": False,
+            "product_matches": False,
+            "substrate_resolved": False,
+            "product_resolved": False,
+            "kegg_substrates": [],
+            "kegg_products": [],
+            "claimed_substrate_ids": [],
+            "claimed_product_ids": [],
+            "verdict": "rid_invalid",
+        }
+
+    substrate_ids = resolve_compound_name(
+        claimed_substrate,
+        client=client,
+        sleep_after=sleep_after,
+        use_remote_fallback=use_remote_resolver,
+    )
+    product_ids = resolve_compound_name(
+        claimed_product,
+        client=client,
+        sleep_after=sleep_after,
+        use_remote_fallback=use_remote_resolver,
+    )
+
+    classification = _classify_substrate_match(
+        substrate_ids, product_ids,
+        compounds["substrates"], compounds["products"],
+    )
+
+    return {
+        "rid_exists": True,
+        "substrate_matches": classification["substrate_matches"],
+        "product_matches": classification["product_matches"],
+        "substrate_resolved": bool(substrate_ids),
+        "product_resolved": bool(product_ids),
+        "kegg_substrates": compounds["substrates"],
+        "kegg_products": compounds["products"],
+        "claimed_substrate_ids": substrate_ids,
+        "claimed_product_ids": product_ids,
+        "verdict": classification["verdict"],
+    }
