@@ -24,17 +24,12 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import datetime as dt
-import json
 import logging
 import os
 import sys
-import time
-from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-RESULTS_DIR = REPO_ROOT / "eval/results"
+from eval._runner import drain_agent_turn, write_result
 
 INDEXED_FALLBACK_TOOLS = {"search_literature", "search_kegg"}
 LIVE_FETCH_TOOLS_WITH_FALLBACK = {
@@ -94,33 +89,16 @@ log = logging.getLogger("eval_demo_mode")
 async def _drain(prompt: str, max_iterations: int = 6) -> dict[str, Any]:
     """Run a single user turn through run_agent and collect events."""
     from langchain_core.messages import HumanMessage
-    from agent.core import run_agent
 
-    events: list[dict[str, Any]] = []
-    final_answer = ""
-    iterations = 0
-    duration_ms = 0
-    t0 = time.perf_counter()
-    async for ev in run_agent(
+    events, final_answer, usage = await drain_agent_turn(
         [HumanMessage(content=prompt)],
-        tier="default",
         max_iterations=max_iterations,
-    ):
-        if ev.get("type") == "token":
-            continue
-        events.append(ev)
-        if ev.get("type") == "final_answer":
-            final_answer = ev.get("content") or ""
-        if ev.get("type") == "done":
-            usage = ev.get("usage") or {}
-            iterations = usage.get("iterations", 0) or 0
-            duration_ms = usage.get("ms", 0) or 0
-    elapsed_ms = int(round((time.perf_counter() - t0) * 1000))
+    )
     return {
         "events": events,
         "final_answer": final_answer,
-        "iterations": iterations,
-        "duration_ms": duration_ms or elapsed_ms,
+        "iterations": usage["iterations"],
+        "duration_ms": usage["duration_ms"],
     }
 
 
@@ -233,15 +211,6 @@ def _category_summary(rows: list[dict[str, Any]], cat: str) -> dict[str, int]:
     }
 
 
-def _write_results(out: dict[str, Any]) -> Path:
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    ts = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    path = RESULTS_DIR / f"demo_mode_{ts}.json"
-    with path.open("w") as f:
-        json.dump(out, f, indent=2, ensure_ascii=False)
-    return path
-
-
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -260,7 +229,7 @@ def main() -> int:
         return 2
 
     out = asyncio.run(_run_all(args.max_iterations))
-    path = _write_results(out)
+    path = write_result("demo_mode", out)
 
     log.info("---")
     s = out["summary"]

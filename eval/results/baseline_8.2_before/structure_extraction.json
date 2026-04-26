@@ -1,0 +1,415 @@
+{
+  "timestamp_utc": "20260426T084150Z",
+  "model": "PRIMARY_LLM (E4B via parse_structure_image)",
+  "summary": {
+    "overall": {
+      "PASS_STRICT": 1,
+      "PASS_INCHI": 0,
+      "PARTIAL": 12,
+      "FAIL": 7
+    },
+    "overall_n": 20,
+    "by_difficulty": {
+      "simple": {
+        "PASS_STRICT": 1,
+        "PASS_INCHI": 0,
+        "PARTIAL": 3,
+        "FAIL": 1
+      },
+      "medium": {
+        "PASS_STRICT": 0,
+        "PASS_INCHI": 0,
+        "PARTIAL": 5,
+        "FAIL": 3
+      },
+      "hard": {
+        "PASS_STRICT": 0,
+        "PASS_INCHI": 0,
+        "PARTIAL": 3,
+        "FAIL": 2
+      },
+      "very_hard": {
+        "PASS_STRICT": 0,
+        "PASS_INCHI": 0,
+        "PARTIAL": 1,
+        "FAIL": 1
+      }
+    }
+  },
+  "rows": [
+    {
+      "cid": "702",
+      "name": "ethanol",
+      "difficulty": "simple",
+      "image": "702_ethanol.png",
+      "ground_truth_smiles": "CCO",
+      "ground_truth_inchi_key": "LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CCO",
+        "confidence": "high",
+        "alternative_smiles": [],
+        "notes": "The structure appears to be ethanol, although the drawing is highly schematic. The 'H' next to 'O' suggests an alcohol group (-OH).",
+        "rdkit_canonical": "CCO",
+        "inchi_key": "LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+        "formula": "C2H6O"
+      },
+      "verdict": "PASS_STRICT"
+    },
+    {
+      "cid": "750",
+      "name": "glycine",
+      "difficulty": "simple",
+      "image": "750_glycine.png",
+      "ground_truth_smiles": "C(C(=O)O)N",
+      "ground_truth_inchi_key": "DHMQDGOQFOQNFH-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "O=C(O)N",
+        "confidence": "high",
+        "alternative_smiles": [],
+        "notes": "The structure shown is the carboxylate anion of ammonia, or more accurately, the ammonium carbamate anion if the structure implies a resonance form, but based on the drawing, it is likely the carbamic acid anion or a related species. The SMILES O=C(O)N represents the structure $\\text{H}_2\\text{N-COOH}$ (Carbamic acid) or its deprotonated form depending on context. Given the explicit $\\text{O}^-$ shown, it is the carboxylate form of carbamic acid.",
+        "rdkit_canonical": "NC(=O)O",
+        "inchi_key": "KXDHJXZQYSOELW-UHFFFAOYSA-N",
+        "formula": "CH3NO2"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "2244",
+      "name": "aspirin",
+      "difficulty": "simple",
+      "image": "2244_aspirin.png",
+      "ground_truth_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+      "ground_truth_inchi_key": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CC(=O)OC1=CC=CC=C1",
+        "confidence": "high",
+        "alternative_smiles": [],
+        "notes": "The structure is methyl benzoate.",
+        "rdkit_canonical": "CC(=O)Oc1ccccc1",
+        "inchi_key": "IPBVNPXQWQGGJP-UHFFFAOYSA-N",
+        "formula": "C8H8O2"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "2519",
+      "name": "caffeine",
+      "difficulty": "simple",
+      "image": "2519_caffeine.png",
+      "ground_truth_smiles": "CN1C=NC2=C1C(=O)N(C(=O)N2C)C",
+      "ground_truth_inchi_key": "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CN1CCN(C)C1C2=C(C)C=C2C(=O)N",
+        "confidence": "high",
+        "alternative_smiles": [],
+        "notes": "The structure appears to be a derivative of imidazo[1,2-a]pyridine or a related fused heterocycle, specifically a substituted imidazo[1,2-a]pyridine-2-one derivative. The SMILES provided assumes the standard representation of the depicted structure.",
+        "rdkit_canonical": "CC1=C(C2N(C)CCN2C)C(C(N)=O)=C1",
+        "inchi_key": "NMXLYGYQJSFJEQ-UHFFFAOYSA-N",
+        "formula": "C11H17N3O"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "5793",
+      "name": "glucose",
+      "difficulty": "simple",
+      "image": "5793_glucose.png",
+      "ground_truth_smiles": "C(C1C(C(C(C(O1)O)O)O)O)O",
+      "ground_truth_inchi_key": "WQZGKKKJIJFFOK-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "C1CO(O)C(O)C(O)C1O",
+        "confidence": "high",
+        "alternative_smiles": [],
+        "notes": "This structure appears to be a pyranose sugar, likely D-glucose or a similar isomer, drawn in a chair or Haworth projection style. The SMILES provided represents the open-chain form or a generic cyclic form without explicit stereochemistry defined for all chiral centers, which is common for simple representations.",
+        "rdkit_canonical": null,
+        "inchi_key": null,
+        "formula": null
+      },
+      "verdict": "FAIL"
+    },
+    {
+      "cid": "925",
+      "name": "nad_plus",
+      "difficulty": "medium",
+      "image": "925_nad_plus.png",
+      "ground_truth_smiles": "C1=CC(=C[N+](=C1)C2C(C(C(O2)COP(=O)([O-])OP(=O)(O)OCC3C(C(C(O3)N4C=NC5=C(N=CN=C54)N)O)O)O)O)C(=O)N",
+      "ground_truth_inchi_key": "BAWFJGJZGIEFAR-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "C1=CN=C(C=C1)C(=O)N#N;",
+        "confidence": "low",
+        "alternative_smiles": [
+          "C1=CN=C(C=C1)C(=O)N(C)C"
+        ],
+        "notes": "The image provided is a complex molecule, likely a phosphorylated sugar derivative (like a nucleotide or phosphorylated sugar), but the structure shown in the image is highly complex and appears to be a disaccharide or a phosphorylated sugar linked to a nicotinamide derivative. The SMILES provided above is a simplification based on the visible nicotinamide moiety (the part with the pyridine ring and amide group) and ignores the large sugar/phosphate structure, as accurately representing the entire structure is beyond simple extraction without more context or a clearer drawing. The structure in the image is likely a phosphorylated sugar linked to nicotinamide, which is a much larger molecule than the simplified SMILES.",
+        "rdkit_canonical": null,
+        "inchi_key": null,
+        "formula": null
+      },
+      "verdict": "FAIL"
+    },
+    {
+      "cid": "1060",
+      "name": "pyruvate",
+      "difficulty": "medium",
+      "image": "1060_pyruvate.png",
+      "ground_truth_smiles": "CC(=O)C(=O)O",
+      "ground_truth_inchi_key": "LCTONWCANYUPML-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CC(=O)O",
+        "confidence": "high",
+        "alternative_smiles": [],
+        "notes": "",
+        "rdkit_canonical": "CC(=O)O",
+        "inchi_key": "QTBSBXVTEAMEQO-UHFFFAOYSA-N",
+        "formula": "C2H4O2"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "1183",
+      "name": "vanillin",
+      "difficulty": "medium",
+      "image": "1183_vanillin.png",
+      "ground_truth_smiles": "COC1=C(C=CC(=C1)C=O)O",
+      "ground_truth_inchi_key": "MWOOGOJBHIARFG-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "COc1ccc(C=O)cc1",
+        "confidence": "high",
+        "alternative_smiles": [],
+        "notes": "",
+        "rdkit_canonical": "COc1ccc(C=O)cc1",
+        "inchi_key": "ZRSNZINYAWTAHE-UHFFFAOYSA-N",
+        "formula": "C8H8O2"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "3672",
+      "name": "ibuprofen",
+      "difficulty": "medium",
+      "image": "3672_ibuprofen.png",
+      "ground_truth_smiles": "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",
+      "ground_truth_inchi_key": "HEFNNWSXXWATRW-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "Cc1ccc(CC(C)C)cc1C(=O)O",
+        "confidence": "high",
+        "alternative_smiles": [],
+        "notes": "",
+        "rdkit_canonical": "Cc1ccc(CC(C)C)cc1C(=O)O",
+        "inchi_key": "JKQMUNPDTCJLNF-UHFFFAOYSA-N",
+        "formula": "C12H16O2"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "5957",
+      "name": "atp",
+      "difficulty": "medium",
+      "image": "5957_atp.png",
+      "ground_truth_smiles": "C1=NC(=C2C(=N1)N(C=N2)C3C(C(C(O3)COP(=O)(O)OP(=O)(O)OP(=O)(O)O)O)O)N",
+      "ground_truth_inchi_key": "ZKHQWZAMYRWXGA-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "C1=CN=C(C=C1)N2CCN(CC2)C3=CN=C(C=C3)N",
+        "confidence": "low",
+        "alternative_smiles": [
+          "C1=CN=C(C=C1)N2CCN(CC2)C3=CN=C(C=C3)N"
+        ],
+        "notes": "The image provided shows a molecule with a phosphate group attached to a heterocyclic base structure, likely a derivative of purine or a related fused ring system. However, the structure drawn in the image is highly ambiguous or incomplete for a standard chemical structure representation, especially regarding the connection point of the phosphate group to the base. The SMILES provided above is a placeholder based on a common heterocyclic structure, but it does not accurately represent the phosphate group shown in the image. A definitive SMILES cannot be generated from the provided image due to ambiguity.",
+        "rdkit_canonical": "Nc1ccc(N2CCN(c3ccccn3)CC2)cn1",
+        "inchi_key": "QDBOYIZCXUSXHT-UHFFFAOYSA-N",
+        "formula": "C14H17N5"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "5997",
+      "name": "cholesterol",
+      "difficulty": "medium",
+      "image": "5997_cholesterol.png",
+      "ground_truth_smiles": "CC(C)CCCC(C)C1CCC2C1(CCC3C2CC=C4C3(CCC(C4)O)C)C",
+      "ground_truth_inchi_key": "HVYWMOMLDIMFJA-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CC(C)CC1CCC2CCC1CCC2C1=CC(O)C",
+        "confidence": "medium",
+        "alternative_smiles": [
+          "CC(C)CC1CCC2CCC1CCC2C1=CC(O)C"
+        ],
+        "notes": "The structure appears to be a derivative of a terpenoid or steroid-like skeleton. The stereochemistry shown (wedges and dashes) is complex and has been simplified in the SMILES representation, which might not fully capture all relative stereochemical information without explicit stereodescriptors.",
+        "rdkit_canonical": null,
+        "inchi_key": null,
+        "formula": null
+      },
+      "verdict": "FAIL"
+    },
+    {
+      "cid": "68827",
+      "name": "artemisinin",
+      "difficulty": "medium",
+      "image": "68827_artemisinin.png",
+      "ground_truth_smiles": "CC1CCC2C(C(=O)OC3C24C1CCC(O3)(OO4)C)C",
+      "ground_truth_inchi_key": "BLUAFEHZUWYNDE-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CC1COCCC1O[C@H](C)C(=O)OC1C",
+        "confidence": "medium",
+        "alternative_smiles": [
+          "CC1COCCC1O[C@H](C)C(=O)OC1C"
+        ],
+        "notes": "The stereochemistry at the ring junctions and the chiral center attached to the methyl group is not explicitly defined (wedges/dashes are present but their specific configuration is not clear from the image alone, assuming a common representation for the drawing style).",
+        "rdkit_canonical": null,
+        "inchi_key": null,
+        "formula": null
+      },
+      "verdict": "FAIL"
+    },
+    {
+      "cid": "444493",
+      "name": "acetyl_coa",
+      "difficulty": "medium",
+      "image": "444493_acetyl_coa.png",
+      "ground_truth_smiles": "CC(=O)SCCNC(=O)CCNC(=O)C(C(C)(C)COP(=O)(O)OP(=O)(O)OCC1C(C(C(O1)N2C=NC3=C(N=CN=C32)N)O)OP(=O)(O)O)O",
+      "ground_truth_inchi_key": "ZSLZBFCDCINBPY-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CC(=O)S(C)C(=O)N(CC(C)C)C(=O)N(CC(C)C)P(=O)(O)P(=O)(O)P(=O)(O)O",
+        "confidence": "medium",
+        "alternative_smiles": [
+          "CC(=O)S(C)C(=O)N(CC(C)C)C(=O)N(CC(C)C)P(=O)(O)P(=O)(O)P(=O)(O)O"
+        ],
+        "notes": "The structure appears to be a complex molecule, possibly a modified peptide or a phosphonate derivative. The phosphonate group is drawn in a way that suggests a linear chain of phosphate/phosphonate groups, but the final part of the structure shows a nucleoside-like base attached to a phosphate group, which is not fully represented in the simplified SMILES above. The SMILES provided represents the acyl-amino acid chain attached to a simplified phosphate group, ignoring the heterocyclic base structure for simplicity due to ambiguity in the drawing's representation of the final linkage.",
+        "rdkit_canonical": "CC(=O)[SH](C)C(=O)N(CC(C)C)C(=O)N(CC(C)C)P(=O)(O)P(=O)(O)P(=O)(O)O",
+        "inchi_key": "VLWUQULEAIRAHI-UHFFFAOYSA-N",
+        "formula": "C13H29N2O10P3S"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "36314",
+      "name": "taxol",
+      "difficulty": "hard",
+      "image": "36314_taxol.png",
+      "ground_truth_smiles": "CC1=C2C(C(=O)C3(C(CC4C(C3C(C(C2(C)C)(CC1OC(=O)C(C(C5=CC=CC=C5)NC(=O)C6=CC=CC=C6)O)O)OC(=O)C7=CC=CC=C7)(CO4)OC(=O)C)O)C)OC(=O)C",
+      "ground_truth_inchi_key": "RCINICONZNJXQF-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CC(=O)OC1=CC=CC=C1C2C(C3=CC=CC=C3)C(C(=O)O)C2C1=CC=CC=C1C(=O)N(C)C1=CC=CC=C1",
+        "confidence": "medium",
+        "alternative_smiles": [
+          "CC(=O)OC1=CC=CC=C1C2C(C3=CC=CC=C3)C(C(=O)O)C2C1=CC=CC=C1C(=O)N(C)C1=CC=CC=C1"
+        ],
+        "notes": "The structure is complex and contains multiple stereocenters. The SMILES provided is a simplified representation and may not capture all stereochemical information accurately without explicit stereochemical notation in the input image.",
+        "rdkit_canonical": "CC(=O)Oc1ccccc1C1C(c2ccccc2)C(C(=O)O)C1c1ccccc1C(=O)N(C)c1ccccc1",
+        "inchi_key": "WVBMBJKCKRUDDY-UHFFFAOYSA-N",
+        "formula": "C33H29NO5"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "439230",
+      "name": "mevalonate",
+      "difficulty": "hard",
+      "image": "439230_mevalonate.png",
+      "ground_truth_smiles": "CC(CCO)(CC(=O)O)O",
+      "ground_truth_inchi_key": "KJTLQQUUPVSXIM-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CC(C)C(O)C(=O)O",
+        "confidence": "high",
+        "alternative_smiles": [],
+        "notes": "The structure appears to be 2-methyl-3-hydroxybutanoic acid, though the drawing is simplified. The stereocenter at C3 is not explicitly defined.",
+        "rdkit_canonical": "CC(C)C(O)C(=O)O",
+        "inchi_key": "NGEWQZIDQIYUNV-UHFFFAOYSA-N",
+        "formula": "C5H10O3"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "446925",
+      "name": "lycopene",
+      "difficulty": "hard",
+      "image": "446925_lycopene.png",
+      "ground_truth_smiles": "CC(=CCCC(=CC=CC(=CC=CC(=CC=CC=C(C)C=CC=C(C)C=CC=C(C)CCC=C(C)C)C)C)C)C",
+      "ground_truth_inchi_key": "OAIJSZIZWZSQBC-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CC(C)CC=CC=CC=CC=C(C)CC=CC=CC=CC=C(C)C",
+        "confidence": "medium",
+        "alternative_smiles": [
+          "CC(C)CC=CC=CC=CC=C(C)CC=CC=CC=CC=C(C)C"
+        ],
+        "notes": "The structure appears to be a polyene with two isobutyl groups attached to the ends of the conjugated system. The exact connectivity of the double bonds is assumed to be fully conjugated as drawn.",
+        "rdkit_canonical": "CC(C)=CC=CC=CC=CCC(C)=CC=CC=CC=CCC(C)C",
+        "inchi_key": "BJSLEBIWELIWMY-UHFFFAOYSA-N",
+        "formula": "C24H34"
+      },
+      "verdict": "PARTIAL"
+    },
+    {
+      "cid": "643975",
+      "name": "fad",
+      "difficulty": "hard",
+      "image": "643975_fad.png",
+      "ground_truth_smiles": "CC1=CC2=C(C=C1C)N(C3=NC(=O)NC(=O)C3=N2)CC(C(C(COP(=O)(O)OP(=O)(O)OCC4C(C(C(O4)N5C=NC6=C(N=CN=C65)N)O)O)O)O)O",
+      "ground_truth_inchi_key": "VWWQXMAJTJZDQX-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CN1C=C(C(=O)N)C2=C(C=C2)C3=C(C=C3)C4=C(C=C4)C5=C(C=C5)C6=C(C=C6)C7=C(C=C7)C8=C(C=C8)C9=C(C=C9)C10=C(C=C10)C11=C(C=C11)C12=C(C=C12)C13=C(C=C13)C14=C(C=C14)C15=C(C=C15)C16=C(C=C16)C17=C(C=C17)C18=C(C=C18)C19=C(C=C19)C20=C(C=C20)C21=C(C=C21)C22=C(C=C22)C23=C(C=C23)C24=C(C=C24)C25=C(C=C25)C26=C(C=C26)C27=C(C=C27)C28=C(C=C28)C29=C(C=C29)C30=C(C=C30)C31=C(C=C31)C32=C(C=C32)C33=C(C=C33)C34=C(C=C34)C35=C(C=C35)C36=C(C=C36)C37=C(C=C37)C38=C(C=C38)C39=C(C=C39)C40=C(C=C40)C41=C(C=C41)C42=C(C=C42)C43=C(C=C43)C44=C(C=C44)C45=C(C=C45)C46=C(C=C46)C47=C(C=C47)C48=C(C=C48)C49=C(C=C49)C50=C(C=C50)C51=C(C=C51)C52=C(C=C52)C53=C(C=C53)C54=C(C=C54)C55=C(C=C55)C56=C(C=C56)C57=C(C=C57)C58=C(C=C58)C59=C(C=C59)C60=C(C=C60)C61=C(C=C61)C62=C(C=C62)C63=C(C=C63)C64=C(C=C64)C65=C(C=C65)C66=C(C=C66)C67=C(C=C67)C68=C(C=C68)C69=C(C=C69)C70=C(C=C70)C71=C(C=C71)C72=C(C=C72)C73=C(C=C73)C74=C(C=C74)C75=C(C=C75)C76=C(C=C76)C77=C(C=C77)C78=C(C=C78)C79=C(C=C79)C80=C(C=C80)C81=C(C=C81)C82=C(C=C82)C83=C(C=C83)C84=C(C=C84)C85=C(C=C85)C86=C(C=C86)C87=C(C=C87)C88=C(C=C88)C89=C(C=C89)C90=C(C=C90)",
+        "confidence": "medium",
+        "alternative_smiles": [],
+        "notes": "The structure contains a phosphate group linked to a sugar moiety, which is then linked to a nucleoside analog (likely a modified purine base). The stereochemistry of the sugar ring is implied but not explicitly defined in the drawing, leading to a medium confidence score. The phosphate group is drawn with explicit charges.",
+        "rdkit_canonical": null,
+        "inchi_key": null,
+        "formula": null
+      },
+      "verdict": "FAIL"
+    },
+    {
+      "cid": "5311498",
+      "name": "coenzyme_b12",
+      "difficulty": "hard",
+      "image": "5311498_coenzyme_b12.png",
+      "ground_truth_smiles": "CC1=CC2=C(C=C1C)N(C=N2)C3C(C(C(O3)CO)OP(=O)([O-])OC(C)CNC(=O)CCC4(C(C5C6(C(C(C(=C(C7=NC(=CC8=NC(=C(C4=N5)C)C(C8(C)C)CCC(=O)N)C(C7(C)CC(=O)N)CCC(=O)N)C)[N-]6)CCC(=O)N)(C)CC(=O)N)C)CC(=O)N)C)O.[C-]#N.[Co+3]",
+      "ground_truth_inchi_key": "FDJOLVPMNUYSCM-UHFFFAOYSA-L",
+      "extracted": {
+        "smiles": null,
+        "confidence": "low",
+        "alternative_smiles": [],
+        "notes": "tool exception: APITimeoutError: Request timed out.",
+        "rdkit_canonical": null,
+        "inchi_key": null,
+        "formula": null
+      },
+      "verdict": "FAIL"
+    },
+    {
+      "cid": "12560",
+      "name": "erythromycin",
+      "difficulty": "very_hard",
+      "image": "12560_erythromycin.png",
+      "ground_truth_smiles": "CCC1C(C(C(C(=O)C(CC(C(C(C(C(C(=O)O1)C)OC2CC(C(C(O2)C)O)(C)OC)C)OC3C(C(CC(O3)C)N(C)C)O)(C)O)C)C)O)(C)O",
+      "ground_truth_inchi_key": "ULGZDMOVFRHVEP-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": null,
+        "confidence": "low",
+        "alternative_smiles": [],
+        "notes": "tool exception: APITimeoutError: Request timed out.",
+        "rdkit_canonical": null,
+        "inchi_key": null,
+        "formula": null
+      },
+      "verdict": "FAIL"
+    },
+    {
+      "cid": "5284616",
+      "name": "rapamycin",
+      "difficulty": "very_hard",
+      "image": "5284616_rapamycin.png",
+      "ground_truth_smiles": "CC1CCC2CC(C(=CC=CC=CC(CC(C(=O)C(C(C(=CC(C(=O)CC(OC(=O)C3CCCCN3C(=O)C(=O)C1(O2)O)C(C)CC4CCC(C(C4)OC)O)C)C)O)OC)C)C)C)OC",
+      "ground_truth_inchi_key": "QFJCIRLUMZQUOT-UHFFFAOYSA-N",
+      "extracted": {
+        "smiles": "CC(C)C1CCC(C)C2C1CCC(C)C2C(C)C(C)C(=O)O[C@H](O)C(=O)C1CCC(C)C2C1CCC(C)C2C(C)C(C)C(=O)O",
+        "confidence": "medium",
+        "alternative_smiles": [],
+        "notes": "The structure is complex and contains multiple stereocenters. The SMILES provided is a simplified representation and may not capture all stereochemical information perfectly without explicit stereochemical notation in the input image.",
+        "rdkit_canonical": "CC(C)C1CCC(C)C2C1CCC(C)C2C(C)C(C)C(=O)O[C@H](O)C(=O)C1CCC(C)C2C1CCC(C)C2C(C)C(C)C(=O)O",
+        "inchi_key": "UPBQNRXJKHEPKV-JATKWTLYSA-N",
+        "formula": "C39H66O6"
+      },
+      "verdict": "PARTIAL"
+    }
+  ]
+}

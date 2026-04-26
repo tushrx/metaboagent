@@ -1,0 +1,97 @@
+{
+  "summary": {
+    "total": 5,
+    "passed": 3,
+    "failed": 2,
+    "by_category": {
+      "live_with_fallback": {
+        "total": 3,
+        "passed": 1
+      },
+      "live_no_fallback": {
+        "total": 1,
+        "passed": 1
+      },
+      "no_tool": {
+        "total": 1,
+        "passed": 1
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "Q1_pubmed_lycopene",
+      "prompt": "Search PubMed for recent papers on lycopene biosynthesis in E. coli.",
+      "category": "live_with_fallback",
+      "passed": true,
+      "tool_calls": [
+        "fetch_pubmed_live",
+        "search_literature"
+      ],
+      "iterations": 3,
+      "duration_ms": 11890,
+      "final_answer": "Based on a search of the literature, I found several papers related to metabolic engineering in microbes, though the search results were heavily skewed toward *Yarrowia lipolytica* and general metabolic engineering in *E. coli*, rather than specific, recent papers on lycopene biosynthesis in *E. coli*.\n\nThe search results provided general context on:\n*   **Metabolic Engineering:** Several papers discuss engineering pathways in yeasts (*Y. lipolytica*) for carotenoids or fatty alcohols, which is a common theme in this field (PMID: 33847991, 33847989).\n*   **General *E. coli* Engineering:** Other results focus on chlorophyll biosynthesis or vanillin production in *E. coli* (PMID: 29387799, 31461264).\n\nSince the direct search for \"lycopene biosynthesis in E. coli\" did not yield a highly specific, recent paper, I recommend we pivot to a more targeted approach.\n\nTo help me provide a detailed design, could you clarify what you'd like to do next? For example, are you interested in:\n\n1.  **Designing a pathway** to produce lycopene in *E. coli* (a synthesis/engineering request)?\n2.  **Finding the specific enzymes** involved in lycopene synthesis (a literature/database lookup)?\n3.  **Comparing** the microbial vs. chemical routes for lycopene?\n\nLet me know how you'd like to proceed!",
+      "notes": [
+        "indexed fallback invoked: ['search_literature']"
+      ]
+    },
+    {
+      "id": "Q2_kegg_compound",
+      "prompt": "Look up KEGG compound C00022.",
+      "category": "live_with_fallback",
+      "passed": false,
+      "tool_calls": [
+        "fetch_kegg_live"
+      ],
+      "iterations": 2,
+      "duration_ms": 3015,
+      "final_answer": "Pyruvate (C00022) is a central metabolic intermediate in many biological pathways. It is chemically known as Pyruvic acid, with the formula $\\text{C}_3\\text{H}_4\\text{O}_3$ and an exact mass of $88.0160$.\n\nIt plays a critical role in several major pathways, including:\n*   Glycolysis / Gluconeogenesis ($\\text{map00010}$)\n*   Citrate cycle (TCA cycle) ($\\text{map00020}$)\n*   Pentose phosphate pathway ($\\text{map00030}$)\n\nWould you like to know more about its role in a specific pathway, or perhaps look up a related enzyme?",
+      "notes": [
+        "no indexed-corpus tool invoked after live-fetch stub"
+      ]
+    },
+    {
+      "id": "Q3_uniprot_p05067",
+      "prompt": "Get the UniProt entry for P05067.",
+      "category": "live_with_fallback",
+      "passed": false,
+      "tool_calls": [
+        "fetch_uniprot"
+      ],
+      "iterations": 2,
+      "duration_ms": 2098,
+      "final_answer": "The UniProt entry for P05067 is for **Amyloid-beta precursor protein (APP)** from *Homo sapiens*.\n\nThis protein functions as a cell surface receptor, playing roles in neurite growth, neuronal adhesion, and axonogenesis. It is involved in promoting synaptogenesis and regulating transcription through protein-protein interactions.\n\nWould you like me to go deeper into any of these aspects, such as its known interactions, or perhaps look up a related pathway?",
+      "notes": [
+        "no indexed-corpus tool invoked after live-fetch stub"
+      ]
+    },
+    {
+      "id": "Q4_zinc_aspirin",
+      "prompt": "Search ZINC15 for aspirin analogs.",
+      "category": "live_no_fallback",
+      "passed": true,
+      "tool_calls": [
+        "fetch_zinc"
+      ],
+      "iterations": 2,
+      "duration_ms": 2090,
+      "final_answer": "I apologize, but the live lookup for ZINC15 is currently unavailable in this demo mode environment. I cannot pull real-time commercial availability or vendor information for aspirin analogs.\n\nIf you can provide a specific chemical name, a PubChem CID, or a ZINC ID for a particular analog, I can try to look up its general chemical properties using other available tools.\n\nWould you like me to search the literature for studies on aspirin analogs, or perhaps look up the structure of aspirin itself?",
+      "notes": [
+        "honest demo-mode admission present"
+      ]
+    },
+    {
+      "id": "Q5_glucose_formula",
+      "prompt": "What is the molecular formula of glucose?",
+      "category": "no_tool",
+      "passed": true,
+      "tool_calls": [],
+      "iterations": 1,
+      "duration_ms": 1041,
+      "final_answer": "The molecular formula of glucose is $\\text{C}_6\\text{H}_{12}\\text{O}_6$.\n\nIf you're interested in how glucose is metabolized, or perhaps how to engineer a pathway to produce a related sugar or carbohydrate, I can dive deeper into the biochemistry!",
+      "notes": [
+        "zero tool calls as expected"
+      ]
+    }
+  ]
+}
