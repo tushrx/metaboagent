@@ -140,6 +140,29 @@ class HealthEndpointTests(unittest.TestCase):
         body = r.json()
         self.assertEqual(body["overall"], "down")
 
+    def test_demo_mode_field_true_when_env_set(self):
+        with patch.dict(os.environ, {"DEMO_MODE": "1"}, clear=False):
+            with patch("app.server._probe", _scripted_probe({
+                "8001": "ok", "8002": "ok", "8000": "ok",
+            })):
+                with TestClient(create_app()) as client:
+                    r = client.get("/health")
+        self.assertEqual(r.status_code, 200)
+        body = r.json()
+        self.assertIs(body["demo_mode"], True)
+
+    def test_demo_mode_field_false_when_env_unset(self):
+        env = {k: v for k, v in os.environ.items() if k != "DEMO_MODE"}
+        with patch.dict(os.environ, env, clear=True):
+            with patch("app.server._probe", _scripted_probe({
+                "8001": "ok", "8002": "ok", "8000": "ok",
+            })):
+                with TestClient(create_app()) as client:
+                    r = client.get("/health")
+        self.assertEqual(r.status_code, 200)
+        body = r.json()
+        self.assertIs(body["demo_mode"], False)
+
 
 # ---- g: /tools endpoint ---------------------------------------------------
 
