@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import argparse
 import base64
-import datetime as dt
 import json
 import logging
 import sys
@@ -32,11 +31,12 @@ from typing import Any
 from rdkit import Chem
 from rdkit import RDLogger
 
+from eval._runner import timestamp_utc, write_result
+
 RDLogger.DisableLog("rdApp.*")
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STRUCTURES_DIR = REPO_ROOT / "eval/scenarios/structures"
-RESULTS_DIR = REPO_ROOT / "eval/results"
 
 Verdict = str  # "PASS_STRICT" | "PASS_INCHI" | "PARTIAL" | "FAIL"
 BUCKET_ORDER = ("PASS_STRICT", "PASS_INCHI", "PARTIAL", "FAIL")
@@ -175,22 +175,17 @@ def main() -> int:
 
     summary = _rollup(rows)
 
-    # Build output path.
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    ts = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    out_path = Path(args.output) if args.output else RESULTS_DIR / f"structure_extraction_{ts}.json"
-    out_path.write_text(
-        json.dumps(
-            {
-                "timestamp_utc": ts,
-                "model": "PRIMARY_LLM (E4B via parse_structure_image)",
-                "summary": summary,
-                "rows": rows,
-            },
-            indent=2,
-            ensure_ascii=False,
-        ) + "\n",
-        encoding="utf-8",
+    ts = timestamp_utc()
+    out_path = write_result(
+        "structure_extraction",
+        {
+            "timestamp_utc": ts,
+            "model": "PRIMARY_LLM (E4B via parse_structure_image)",
+            "summary": summary,
+            "rows": rows,
+        },
+        output_path=Path(args.output) if args.output else None,
+        ts=ts,
     )
 
     log.info("wrote %s", out_path)
