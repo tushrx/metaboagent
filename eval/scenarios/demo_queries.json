@@ -1,0 +1,107 @@
+[
+  {
+    "id": "mevalonate_ecoli",
+    "category": "pathway_design",
+    "prompt": "Design a microbial synthesis route for mevalonate in E. coli. Show the pathway with KEGG reaction IDs and EC numbers.",
+    "phase2_followup": "A",
+    "expected_tier": "default"
+  },
+  {
+    "id": "artemisinic_yeast",
+    "category": "pathway_design",
+    "prompt": "How would you engineer S. cerevisiae to produce artemisinic acid? Show the pathway with KEGG R-IDs and EC numbers.",
+    "phase2_followup": "A",
+    "expected_tier": "default"
+  },
+  {
+    "id": "vanillin_ferulic",
+    "category": "pathway_design",
+    "prompt": "Design a biosynthesis route for vanillin from ferulic acid. Include KEGG reaction IDs and EC numbers for each step.",
+    "phase2_followup": "A",
+    "expected_tier": "default"
+  },
+  {
+    "id": "lycopene_ecoli",
+    "category": "pathway_design",
+    "prompt": "Show me a heterologous pathway for lycopene production in E. coli, with KEGG R-IDs and ECs.",
+    "phase2_followup": "A",
+    "expected_tier": "default"
+  },
+  {
+    "id": "resveratrol_ecoli",
+    "category": "pathway_design",
+    "prompt": "Design a heterologous pathway for resveratrol production in E. coli starting from tyrosine. Include KEGG reaction IDs and EC numbers.",
+    "phase2_followup": "A",
+    "expected_tier": "default"
+  },
+  {
+    "id": "kegg_c00022_pyruvate",
+    "category": "lookup",
+    "prompt": "Look up KEGG compound C00022 (pyruvate).",
+    "phase2_followup": null,
+    "expected_tier": "default"
+  },
+  {
+    "id": "uniprot_p05067",
+    "category": "lookup",
+    "prompt": "Get UniProt entry P05067.",
+    "phase2_followup": null,
+    "expected_tier": "default"
+  },
+  {
+    "id": "pubmed_artemisinin_yeast",
+    "category": "lookup",
+    "prompt": "Find recent papers on artemisinin production in yeast.",
+    "phase2_followup": null,
+    "expected_tier": "default"
+  },
+  {
+    "id": "ec_hmgcoa_reductase",
+    "category": "lookup",
+    "prompt": "What is the EC number for HMG-CoA reductase?",
+    "phase2_followup": null,
+    "expected_tier": "default"
+  },
+  {
+    "id": "kegg_r02082",
+    "category": "lookup",
+    "prompt": "Show me the KEGG entry for reaction R02082.",
+    "phase2_followup": null,
+    "expected_tier": "default"
+  },
+  {
+    "id": "shikimate_pathway",
+    "category": "freeform",
+    "prompt": "How does the shikimate pathway work?",
+    "phase2_followup": null,
+    "expected_tier": "default"
+  },
+  {
+    "id": "mep_vs_mva",
+    "category": "freeform",
+    "prompt": "What's the difference between MEP and MVA pathways for isoprenoid biosynthesis?",
+    "phase2_followup": null,
+    "expected_tier": "default"
+  },
+  {
+    "id": "acetyl_coa_metabolism",
+    "category": "freeform",
+    "prompt": "Explain the role of acetyl-CoA in metabolism.",
+    "phase2_followup": null,
+    "expected_tier": "default"
+  },
+  {
+    "id": "fatty_acid_biosynthesis",
+    "category": "freeform",
+    "prompt": "What enzymes are involved in fatty acid biosynthesis?",
+    "phase2_followup": null,
+    "expected_tier": "default"
+  },
+  {
+    "id": "vanillin_microbial_vs_chemical",
+    "category": "freeform",
+    "prompt": "Compare microbial vs chemical synthesis of vanillin.",
+    "phase2_followup": null,
+    "expected_tier": "default"
+  }
+]
