@@ -1,0 +1,192 @@
+{
+  "timestamp_utc": "20260427T080244Z",
+  "kind": "pathway_hallucination_baseline",
+  "flow": "two_turn",
+  "tier": "default",
+  "phase1_stats": {
+    "total_tokens_in": 0,
+    "total_tokens_out": 0,
+    "avg_duration_ms": 8590,
+    "plans_emitted": 2,
+    "plans_parse_failed": 3
+  },
+  "phase2_stats": {
+    "total_tokens_in": 0,
+    "total_tokens_out": 0,
+    "avg_duration_ms": 18586,
+    "phase2_runs": 2,
+    "no_ids_emitted": {
+      "total": 1,
+      "silent_giveup": 0,
+      "declared_insufficient_evidence": 0,
+      "unclassified": 1
+    },
+    "step_convention_ok": 2
+  },
+  "pathway_accuracy": {
+    "total_rids_extracted": 0,
+    "total_rids_hallucinated": 0,
+    "rid_hallucination_rate_pct": 0.0,
+    "total_ecs_extracted": 3,
+    "total_ecs_hallucinated": 0,
+    "ec_hallucination_rate_pct": 0.0
+  },
+  "rid_substrate_relevance": {
+    "rids_extracted_total": 0,
+    "rids_eligible_for_substrate_check": 0,
+    "rids_no_step_context": 0,
+    "rids_existence_verified_eligible": 0,
+    "rids_fully_matching": 0,
+    "rids_substrate_only": 0,
+    "rids_product_only": 0,
+    "rids_neither": 0,
+    "rids_rid_invalid": 0,
+    "rids_substrate_relevant": 0,
+    "rids_real_but_wrong": 0,
+    "rids_fully_matching_pct": 0.0,
+    "rids_substrate_relevant_pct": 0.0,
+    "rids_real_but_wrong_pct": 0.0
+  },
+  "per_prompt": [
+    {
+      "id": "mevalonate_ecoli",
+      "prompt": "Design a microbial synthesis route for mevalonate in E. coli. Show the pathway with KEGG reaction IDs and EC numbers.",
+      "phase1_final_answer": "",
+      "phase1_tokens_in": 0,
+      "phase1_tokens_out": 0,
+      "phase1_duration_ms": 8874,
+      "phase1_iterations": 4,
+      "phase1_plan_ids": [],
+      "followup_sent": null,
+      "phase2_final_answer": null,
+      "phase2_tokens_in": 0,
+      "phase2_tokens_out": 0,
+      "phase2_duration_ms": 0,
+      "phase2_iterations": 0,
+      "phase1_nudge_count": 1,
+      "phase2_nudge_count": 0,
+      "step_convention_ok": false,
+      "rids": [],
+      "ecs": [],
+      "status": "plan_parse_failed",
+      "no_ids_reason": null
+    },
+    {
+      "id": "artemisinic_yeast",
+      "prompt": "How would you engineer S. cerevisiae to produce artemisinic acid? Show the pathway with KEGG R-IDs and EC numbers.",
+      "phase1_final_answer": "<plan>\n[\n{\"id\": \"A\", \"title\": \"Microbial pathway reconstruction\", \"route\": \"microbial\", \"host\": \"scerevisiae\", \"summary\": \"Introduce the full heterologous pathway into S. cerevisiae using known microbial enzymes.\", \"est_difficulty\": \"high\", \"est_confidence\": 0.85},\n{\"id\": \"B\", \"title\": \"Enzymatic cascade optimization\", \"route\": \"enzymatic\", \"host\": null, \"summary\": \"Focus on optimizing key rate-limiting enzymes using recombinant expression.\", \"est_difficulty\": \"medium\", \"est_confidence\": 0.75},\n{\"id\": \"C\", \"title\": \"Chemical synthesis approach\", \"route\": \"chemical\", \"host\": null, \"summary\": \"Use total chemical synthesis as a benchmark or alternative production method.\", \"est_difficulty\": \"high\", \"est_confidence\": 0.60},\n{\"id\": \"D\", \"title\": \"Semi-synthetic modification\", \"route\": \"semi-synthetic\", \"host\": null, \"summary\": \"Synthesize a precursor chemically and convert it in yeast.\", \"est_difficulty\": \"medium\", \"est_confidence\": 0.70}\n]\n</plan>\nPick an approach and I'll produce the full design.",
+      "phase1_tokens_in": 0,
+      "phase1_tokens_out": 0,
+      "phase1_duration_ms": 7257,
+      "phase1_iterations": 2,
+      "phase1_plan_ids": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "followup_sent": "A",
+      "phase2_final_answer": "Here is the full design for engineering *Saccharomyces cerevisiae* to produce artemisinic acid via the microbial pathway reconstruction approach.\n\n### Target and Host Rationale\n\n**Target Compound:** Artemisinic acid (a sesquiterpene lactone).\n**Host:** *Saccharomyces cerevisiae* (baker's yeast).\n\n**Rationale:** *S. cerevisiae* is an excellent chassis for metabolic engineering due to its well-characterized genome, robust growth characteristics, and established genetic manipulation tools. While it does not naturally produce artemisinic acid, it can be successfully engineered to host the heterologous pathway derived from plants (like *Artemisia annua*). The pathway requires the introduction of several genes encoding terpene synthases and tailoring enzymes.\n\n### Artemisinic Acid Biosynthetic Pathway in *S. cerevisiae*\n\nThe pathway generally starts from the mevalonate (MVA) pathway intermediates, which are native to *S. cerevisiae*. The key steps involve converting these precursors into farnesyl diphosphate (FPP), which is then converted into artemisinic acid through a series of heterologous enzymatic steps.\n\nThe pathway steps are detailed below, referencing the necessary reactions and enzymes:\n\n**Step 1: Isopentenyl Diphosphate (IPP) $\\rightarrow$ Dimethylallyl Diphosphate (DMAPP)**\nThis is a native step in the MVA pathway, producing the C5 building blocks.\n    Step 1: IPP $\\rightarrow$ DMAPP\n        Reaction: (Native MVA pathway reaction) EC 2.5.1.57\n        Enzyme: Isopentenyl diphosphate isomerase (*S. cerevisiae*) PMID:xxxxxxx (Note: Specific PMID for this native step is context-dependent, but the reaction is core to yeast metabolism.)\n\n**Step 2: DMAPP + IPP $\\rightarrow$ Geranyl Diphosphate (GPP)**\nThis is the first condensation step to build the C10 backbone.\n    Step 2: DMAPP + IPP $\\rightarrow$ GPP\n        Reaction: (Native MVA pathway reaction) EC 2.5.1.56\n        Enzyme: Geranyl diphosphate synthase (*S. cerevisiae*) PMID:xxxxxxx\n\n**Step 3: GPP $\\rightarrow$ Farnesyl Diphosphate (FPP)**\nThis extends the C10 backbone to the C15 precursor required for artemisinic acid.\n    Step 3: GPP $\\rightarrow$ FPP\n        Reaction: (Native MVA pathway reaction) EC 2.5.1.55\n        Enzyme: Farnesyl diphosphate synthase (*S. cerevisiae*) PMID:xxxxxxx\n\n**Step 4: FPP $\\rightarrow$ Artemisinic Acid**\nThis is the critical, heterologous step, catalyzed by the artemisinic acid synthase (Artemisinic Acid Synthase, AAS).\n    Step 4: FPP $\\rightarrow$ Artemisinic Acid\n        Reaction: (Heterologous conversion) EC 2.6.1.XX (Specific EC depends on the exact enzyme variant used)\n        Enzyme: Artemisinic Acid Synthase (AAS) (*Artemisia annua* or engineered variant) PMID:xxxxxxx\n\n***Note on KEGG IDs:*** *Since artemisinic acid is a complex, non-native metabolite, a complete, pre-defined KEGG pathway map (mapXXXXX) linking all these steps in a single, verified R-ID is often not available in the standard database. The pathway is constructed by integrating native yeast metabolism (MVA pathway) with heterologous gene expression.*\n\n### Genetic Modifications and Implementation\n\n1.  **Gene Acquisition:** Obtain the gene sequence for the Artemisinic Acid Synthase (AAS) from *Artemisia annua* (or a high-performing variant).\n2.  **Vector Design:** Clone the AAS gene into a high-copy, inducible expression vector suitable for *S. cerevisiae* (e.g., under the control of a strong, inducible promoter like $GAL1$).\n3.  **Pathway Integration:** Ensure the native MVA pathway flux is high enough to supply sufficient FPP. This may require overexpression of native MVA pathway enzymes or engineering the upstream flux.\n4.  **Transformation:** Transform the engineered vector into the *S. cerevisiae* host strain.\n5.  **Fermentation:** Grow the yeast under inducing conditions (e.g., galactose induction) to maximize AAS expression and subsequent artemisinic acid production.\n\n**Confidence: 0.85 —** The core MVA pathway is well-established in *S. cerevisiae*. The confidence is high because the AAS gene has been successfully heterologously expressed in yeast strains to produce artemisinic acid, as documented in the literature. The specific KEGG R-IDs for the heterologous steps are often not standardized in the public database, requiring reliance on literature-derived pathway construction.\n\nWould you like me to go deeper into any of these steps? For example, I can:\n1.  Search the literature for specific PMIDs detailing the AAS gene expression in yeast.\n2.  Recommend an expression vector design for the AAS gene in *S. cerevisiae*.\n3.  Compare this microbial approach to a chemical synthesis route.",
+      "phase2_tokens_in": 0,
+      "phase2_tokens_out": 0,
+      "phase2_duration_ms": 17668,
+      "phase2_iterations": 1,
+      "phase1_nudge_count": 0,
+      "phase2_nudge_count": 0,
+      "step_convention_ok": true,
+      "rids": [],
+      "ecs": [
+        {
+          "id": "2.5.1.57",
+          "verified": true,
+          "context": "Step 1: IPP $\\rightarrow$ DMAPP         Reaction: (Native MVA pathway reaction) EC 2.5.1.57         Enzyme: Isopentenyl diphosphate isomerase (*S. cerevisiae*) PMID:xxxxxx"
+        },
+        {
+          "id": "2.5.1.56",
+          "verified": true,
+          "context": ": DMAPP + IPP $\\rightarrow$ GPP         Reaction: (Native MVA pathway reaction) EC 2.5.1.56         Enzyme: Geranyl diphosphate synthase (*S. cerevisiae*) PMID:xxxxxxx  **"
+        },
+        {
+          "id": "2.5.1.55",
+          "verified": true,
+          "context": "Step 3: GPP $\\rightarrow$ FPP         Reaction: (Native MVA pathway reaction) EC 2.5.1.55         Enzyme: Farnesyl diphosphate synthase (*S. cerevisiae*) PMID:xxxxxxx  *"
+        }
+      ],
+      "status": "ok",
+      "no_ids_reason": null
+    },
+    {
+      "id": "vanillin_ferulic",
+      "prompt": "Design a biosynthesis route for vanillin from ferulic acid. Include KEGG reaction IDs and EC numbers for each step.",
+      "phase1_final_answer": "Based on the initial search of the KEGG database, the direct conversion of ferulic acid to vanillin is not explicitly detailed as a single, simple pathway in the results, but I have found several related reactions and compounds that suggest potential routes.\n\nThe search returned:\n*   **R12566**: A reaction involving \"feruloyl-CoA hydro-lyase/vanillin-lyase\" (EC 4.1.2.61), which suggests a lyase activity that could be relevant to the conversion.\n*   **C02666**: Coniferyl aldehyde, a related phenylpropanoid precursor.\n*   **C03057**: 2-Carboxybenzaldehyde, which is structurally close to vanillin.\n\nTo provide a concrete, actionable biosynthesis route, I need to confirm the specific enzymatic steps and the exact chemical transformations. Since the initial results are suggestive rather than definitive for a complete pathway, I will proceed with a structured proposal to design the route, focusing on the most plausible enzymatic conversions.\n\nHere is the proposed plan to design the biosynthesis route for vanillin from ferulic acid:\n\n<plan>\n{\"id\": \"A\", \"title\": \"Microbial conversion via CoA intermediates\", \"route\": \"microbial\", \"host\": \"E. coli\", \"summary\": \"Utilize engineered E. coli to convert ferulic acid derivatives using known phenylpropanoid pathway enzymes.\", \"est_difficulty\": \"medium\", \"est_confidence\": 0.75}\n{\"id\": \"B\", \"title\": \"Enzymatic conversion using isolated enzymes\", \"route\": \"enzymatic\", \"host\": null, \"summary\": \"Express and purify the key lyase/decarboxylase enzymes identified in the literature for *in vitro* conversion.\", \"est_difficulty\": \"high\", \"est_confidence\": 0.65}\n{\"id\": \"C\", \"title\": \"Chemical oxidation/reduction route\", \"route\": \"chemical\", \"host\": null, \"summary\": \"Employ selective chemical oxidations (e.g., using $\\text{KMnO}_4$ or $\\text{HNO}_3$) to cleave the side chain.\", \"est_difficulty\": \"low\", \"est_confidence\": 0.90}\n</plan>\n\nPick an approach and I'll produce the full design.",
+      "phase1_tokens_in": 0,
+      "phase1_tokens_out": 0,
+      "phase1_duration_ms": 10020,
+      "phase1_iterations": 3,
+      "phase1_plan_ids": [],
+      "followup_sent": null,
+      "phase2_final_answer": null,
+      "phase2_tokens_in": 0,
+      "phase2_tokens_out": 0,
+      "phase2_duration_ms": 0,
+      "phase2_iterations": 0,
+      "phase1_nudge_count": 1,
+      "phase2_nudge_count": 0,
+      "step_convention_ok": false,
+      "rids": [],
+      "ecs": [],
+      "status": "plan_parse_failed",
+      "no_ids_reason": null
+    },
+    {
+      "id": "lycopene_ecoli",
+      "prompt": "Show me a heterologous pathway for lycopene production in E. coli, with KEGG R-IDs and ECs.",
+      "phase1_final_answer": "Based on the KEGG data, the core reaction for cyclization is catalyzed by an enzyme with EC 4.2.3.133, which converts a farnesyl diphosphate derivative (C00448) into an alpha-copaene-forming intermediate (C09639).\n\nSince you are asking for a **heterologous** pathway, the native *E. coli* pathway is often incomplete or requires significant engineering. I will propose three distinct approaches to achieve lycopene production in *E. coli*, focusing on the necessary enzymatic steps.\n\n<plan>\n[\n  {\n    \"id\": \"A\",\n    \"title\": \"Complete Heterologous Pathway Assembly\",\n    \"route\": \"microbial\",\n    \"host\": \"ecoli\",\n    \"summary\": \"Introduce the full carotenoid biosynthetic cluster from a model producer (e.g., *Pantoea* or *Erwinia*) into E. coli.\",\n    \"est_difficulty\": \"high\",\n    \"est_confidence\": 0.95\n  },\n  {\n    \"id\": \"B\",\n    \"title\": \"Enzymatic Cascade with Precursor Feeding\",\n    \"route\": \"enzymatic\",\n    \"host\": \"ecoli\",\n    \"summary\": \"Overexpress key cyclases and desaturases, feeding the pathway with a synthesized farnesyl diphosphate analog.\",\n    \"est_difficulty\": \"medium\",\n    \"est_confidence\": 0.85\n  },\n  {\n    \"id\": \"C\",\n    \"title\": \"Semi-synthetic Route via Intermediate\",\n    \"route\": \"semi-synthetic\",\n    \"host\": \"ecoli\",\n    \"summary\": \"Produce an early intermediate (e.g., phytoene) in E. coli, then use an external enzyme for final desaturation.\",\n    \"est_difficulty\": \"medium\",\n    \"est_confidence\": 0.80\n  }\n]\n</plan>\nPick an approach and I'll produce the full design.",
+      "phase1_tokens_in": 0,
+      "phase1_tokens_out": 0,
+      "phase1_duration_ms": 10940,
+      "phase1_iterations": 4,
+      "phase1_plan_ids": [
+        "A",
+        "B",
+        "C"
+      ],
+      "followup_sent": "A",
+      "phase2_final_answer": "Since you selected **Approach A: Complete Heterologous Pathway Assembly**, I will now design the full metabolic engineering plan for producing lycopene in *E. coli*.\n\nThe primary challenge in this approach is assembling the entire carotenoid biosynthesis pathway, which is typically found in plants or certain bacteria, into the *E. coli* chassis. The pathway generally starts from isopentenyl diphosphate (IPP) and dimethylallyl diphosphate (DMAPP), which are native to *E. coli*, and proceeds through geranylgeranyl diphosphate (GGPP) to lycopene.\n\n### Full Design: Lycopene Production in *E. coli*\n\n**Target Compound:** Lycopene (KEGG Compound ID: C00448)\n**Host:** *Escherichia coli* (ecoli)\n\n**Rationale for Host:** *E. coli* is the industry standard for metabolic engineering due to its well-characterized genetics, rapid growth rate, and ease of genetic manipulation. While it lacks the native carotenoid pathway, its robust central carbon metabolism allows for high flux towards the necessary isoprenoid precursors (IPP/DMAPP).\n\n**Pathway Steps & Genetic Modifications:**\n\nThe pathway requires the introduction of several heterologous genes, typically sourced from organisms like *Pantoea agglomerans* or *Erwinia uredovora*, which possess the necessary carotenoid synthases.\n\n1.  **Precursor Supply (Native/Optimized):**\n    *   **Step:** Acetyl-CoA $\\rightarrow$ Isopentenyl Diphosphate (IPP) $\\rightarrow$ Geranylgeranyl Diphosphate (GGPP)\n    *   **Reaction:** This relies on the native MEP/DOXP pathway in *E. coli*. Optimization involves increasing flux through the MEP pathway, often by overexpressing key enzymes like *DXS* (1-deoxy-D-xylulose 5-phosphate synthase).\n    *   **Genetic Modification:** Overexpress *DXS* and potentially other rate-limiting enzymes in the MEP pathway.\n    *   **Confidence:** 0.95 — The MEP pathway is well-established in *E. coli* and flux can be significantly enhanced via overexpression (PMID: 12345678).\n\n2.  **Phytoene Synthase (Psy):**\n    *   **Step:** GGPP $\\rightarrow$ Phytoene\n    *   **Reaction:** This is the first committed step of carotenoid synthesis. The enzyme, Phytoene Synthase (Psy), catalyzes the cyclization of GGPP.\n    *   **Enzyme:** Phytoene Synthase (e.g., from *Pantoea*).\n    *   **Genetic Modification:** Clone and express the *psy* gene under a strong, inducible promoter (e.g., $P_{T7}$ or $P_{lac}$).\n    *   **Confidence:** 0.90 — The *psy* gene is a known bottleneck and its heterologous expression is documented (PMID: 87654321).\n\n3.  **Phytoene Desaturase (Pds):**\n    *   **Step:** Phytoene $\\rightarrow$ Lycopene (via intermediate desaturations)\n    *   **Reaction:** This enzyme introduces the necessary double bonds to form the conjugated system of lycopene.\n    *   **Enzyme:** Phytoene Desaturase (Pds).\n    *   **Genetic Modification:** Clone and express the *pds* gene, ensuring co-expression with *psy* to maintain pathway flux.\n    *   **Confidence:** 0.88 — Desaturases are crucial for color/stability, and their expression levels significantly impact final yield (PMID: 23456789).\n\n4.  **Terminal Desaturase (if needed):**\n    *   **Step:** Intermediate $\\rightarrow$ Lycopene\n    *   **Reaction:** Depending on the specific source organism, additional desaturases may be required to reach the fully saturated lycopene structure.\n    *   **Enzyme:** Terminal Desaturase (e.g., $\\zeta$-carotene desaturase).\n    *   **Genetic Modification:** Introduce the necessary terminal desaturase genes if the initial *psy* and *pds* combination does not yield pure lycopene.\n    *   **Confidence:** 0.75 — This step is highly dependent on the specific donor organism chosen for the pathway genes.\n\n***\n\n**Pathway Diagram Representation (Conceptual):**\n\n*   Acetyl-CoA $\\rightarrow$ IPP $\\rightarrow$ GGPP (Native/Optimized)\n    *   Reaction: (MEP Pathway)\n    *   Enzyme: DXS (*E. coli*)\n*   GGPP $\\rightarrow$ Phytoene\n    *   Reaction: (Cyclization)\n    *   Enzyme: Psy (*Heterologous*)\n*   Phytoene $\\rightarrow$ Lycopene\n    *   Reaction: (Desaturation)\n    *   Enzyme: Pds (*Heterologous*)\n\n**Confidence Summary:** **0.89** — The overall confidence is high because the precursor supply is native to *E. coli*, but the final yield is constrained by the efficiency of the heterologous enzymes (*psy* and *pds*) and the metabolic burden placed on the host.\n\nWould you like me to go deeper into any of these steps? For example, I can:\n1.  Search for specific *Pantoea* or *Erwinia* gene sequences for *psy* and *pds* to design cloning primers.\n2.  Look up the KEGG R-IDs for the key reactions involved in the carotenoid pathway.\n3.  Search the literature for published yields of lycopene in *E. coli* using this exact strategy.",
+      "phase2_tokens_in": 0,
+      "phase2_tokens_out": 0,
+      "phase2_duration_ms": 19504,
+      "phase2_iterations": 1,
+      "phase1_nudge_count": 0,
+      "phase2_nudge_count": 0,
+      "step_convention_ok": true,
+      "rids": [],
+      "ecs": [],
+      "status": "no_ids_emitted",
+      "no_ids_reason": "unclassified"
+    },
+    {
+      "id": "resveratrol_ecoli",
+      "prompt": "Design a heterologous pathway for resveratrol production in E. coli starting from tyrosine. Include KEGG reaction IDs and EC numbers.",
+      "phase1_final_answer": "",
+      "phase1_tokens_in": 0,
+      "phase1_tokens_out": 0,
+      "phase1_duration_ms": 5859,
+      "phase1_iterations": 4,
+      "phase1_plan_ids": [],
+      "followup_sent": null,
+      "phase2_final_answer": null,
+      "phase2_tokens_in": 0,
+      "phase2_tokens_out": 0,
+      "phase2_duration_ms": 0,
+      "phase2_iterations": 0,
+      "phase1_nudge_count": 1,
+      "phase2_nudge_count": 0,
+      "step_convention_ok": false,
+      "rids": [],
+      "ecs": [],
+      "status": "plan_parse_failed",
+      "no_ids_reason": null
+    }
+  ]
+}

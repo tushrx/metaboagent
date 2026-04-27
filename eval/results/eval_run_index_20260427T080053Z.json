@@ -1,0 +1,99 @@
+{
+  "kind": "eval_run_index",
+  "timestamp_utc": "20260427T080053Z",
+  "git_sha": "59b086c",
+  "log_dir": "/home/tusharmicro/metaboagent/logs/eval_runs/20260427T080053Z",
+  "elapsed_total_s": 703.2,
+  "evals": [
+    {
+      "name": "demo_mode",
+      "skipped": false,
+      "variance_runs": 1,
+      "elapsed_total_s": 23.4,
+      "runs": [
+        {
+          "run_idx": 1,
+          "rc": 0,
+          "elapsed_s": 23.4,
+          "log": "/home/tusharmicro/metaboagent/logs/eval_runs/20260427T080053Z/demo_mode_run_1.log",
+          "result_json": "/home/tusharmicro/metaboagent/eval/results/demo_mode_run_1_20260427T080115Z.json"
+        }
+      ]
+    },
+    {
+      "name": "pathway_hallucination",
+      "skipped": false,
+      "variance_runs": 3,
+      "elapsed_total_s": 314.9,
+      "runs": [
+        {
+          "run_idx": 1,
+          "rc": 0,
+          "elapsed_s": 89.3,
+          "log": "/home/tusharmicro/metaboagent/logs/eval_runs/20260427T080053Z/pathway_hallucination_run_1.log",
+          "result_json": "/home/tusharmicro/metaboagent/eval/results/pathway_hallucination_run_1_20260427T080244Z.json"
+        },
+        {
+          "run_idx": 2,
+          "rc": 0,
+          "elapsed_s": 114.6,
+          "log": "/home/tusharmicro/metaboagent/logs/eval_runs/20260427T080053Z/pathway_hallucination_run_2.log",
+          "result_json": "/home/tusharmicro/metaboagent/eval/results/pathway_hallucination_run_2_20260427T080439Z.json"
+        },
+        {
+          "run_idx": 3,
+          "rc": 0,
+          "elapsed_s": 111.0,
+          "log": "/home/tusharmicro/metaboagent/logs/eval_runs/20260427T080053Z/pathway_hallucination_run_3.log",
+          "result_json": "/home/tusharmicro/metaboagent/eval/results/pathway_hallucination_run_3_20260427T080630Z.json"
+        }
+      ],
+      "variance_summary": "/home/tusharmicro/metaboagent/eval/results/pathway_hallucination_variance_3run.json"
+    },
+    {
+      "name": "answer_quality",
+      "skipped": false,
+      "variance_runs": 3,
+      "elapsed_total_s": 133.0,
+      "runs": [
+        {
+          "run_idx": 1,
+          "rc": 0,
+          "elapsed_s": 41.9,
+          "log": "/home/tusharmicro/metaboagent/logs/eval_runs/20260427T080053Z/answer_quality_run_1.log",
+          "result_json": "/home/tusharmicro/metaboagent/eval/results/answer_quality_run_1_20260427T080712Z.json"
+        },
+        {
+          "run_idx": 2,
+          "rc": 0,
+          "elapsed_s": 43.5,
+          "log": "/home/tusharmicro/metaboagent/logs/eval_runs/20260427T080053Z/answer_quality_run_2.log",
+          "result_json": "/home/tusharmicro/metaboagent/eval/results/answer_quality_run_2_20260427T080756Z.json"
+        },
+        {
+          "run_idx": 3,
+          "rc": 0,
+          "elapsed_s": 47.6,
+          "log": "/home/tusharmicro/metaboagent/logs/eval_runs/20260427T080053Z/answer_quality_run_3.log",
+          "result_json": "/home/tusharmicro/metaboagent/eval/results/answer_quality_run_3_20260427T080843Z.json"
+        }
+      ],
+      "variance_summary": "/home/tusharmicro/metaboagent/eval/results/answer_quality_variance_3run.json"
+    },
+    {
+      "name": "structure_extraction",
+      "skipped": false,
+      "variance_runs": 1,
+      "elapsed_total_s": 231.9,
+      "runs": [
+        {
+          "run_idx": 1,
+          "rc": 0,
+          "elapsed_s": 231.9,
+          "log": "/home/tusharmicro/metaboagent/logs/eval_runs/20260427T080053Z/structure_extraction_run_1.log",
+          "result_json": "/home/tusharmicro/metaboagent/eval/results/structure_extraction_run_1_20260427T081235Z.json"
+        }
+      ]
+    }
+  ]
+}

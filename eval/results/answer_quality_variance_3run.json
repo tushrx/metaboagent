@@ -5,56 +5,56 @@
   "max_score": 32,
   "runs": [
     {
-      "path": "answer_quality_run_1_20260426T171906Z.json",
-      "timestamp_utc": "20260426T171906Z",
-      "total_score": 30,
-      "pct": 93.8
+      "path": "answer_quality_run_1_20260427T080712Z.json",
+      "timestamp_utc": "20260427T080712Z",
+      "total_score": 26,
+      "pct": 81.2
     },
     {
-      "path": "answer_quality_run_2_20260426T171952Z.json",
-      "timestamp_utc": "20260426T171952Z",
+      "path": "answer_quality_run_2_20260427T080756Z.json",
+      "timestamp_utc": "20260427T080756Z",
+      "total_score": 29,
+      "pct": 90.6
+    },
+    {
+      "path": "answer_quality_run_3_20260427T080843Z.json",
+      "timestamp_utc": "20260427T080843Z",
       "total_score": 31,
       "pct": 96.9
-    },
-    {
-      "path": "answer_quality_run_3_20260426T172040Z.json",
-      "timestamp_utc": "20260426T172040Z",
-      "total_score": 30,
-      "pct": 93.8
     }
   ],
   "aggregate": {
     "totals_per_run": [
-      30,
-      31,
-      30
+      26,
+      29,
+      31
     ],
     "pcts_per_run": [
-      93.8,
-      96.9,
-      93.8
+      81.2,
+      90.6,
+      96.9
     ],
-    "min": 30,
-    "median": 30,
+    "min": 26,
+    "median": 29,
     "max": 31,
-    "min_pct": 93.8,
-    "median_pct": 93.8,
+    "min_pct": 81.2,
+    "median_pct": 90.6,
     "max_pct": 96.9
   },
   "by_question_type": {
     "mechanism": {
       "per_run_scores": [
-        10,
-        9,
-        9
+        8,
+        8,
+        10
       ],
       "max": 10,
       "stable": false
     },
     "pathway_design": {
       "per_run_scores": [
-        9,
-        11,
+        7,
+        10,
         10
       ],
       "max": 11,
@@ -84,18 +84,27 @@
       "id": "Q1_acetyl_coa_tca",
       "type": "mechanism",
       "scores_per_run": [
-        5,
+        3,
         4,
-        4
+        5
       ],
       "max": 5,
       "flips": [
         {
+          "point_idx": 3,
+          "point": "Identifies citrate synthase as the catalyzing enzyme",
+          "values_per_run": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
           "point_idx": 4,
           "point": "Mentions the cycle generates reduced cofactors (NADH and/or FADH2) and CO2",
           "values_per_run": [
-            true,
             false,
+            true,
             true
           ]
         },
@@ -104,15 +113,15 @@
           "point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)",
           "values_per_run": [
             true,
-            true,
-            false
+            false,
+            true
           ]
         }
       ],
       "fabrication_check_per_run": [
         true,
-        true,
-        false
+        false,
+        true
       ],
       "fabrication_failed_in_any_run": true
     },
@@ -121,11 +130,21 @@
       "type": "mechanism",
       "scores_per_run": [
         5,
-        5,
+        4,
         5
       ],
       "max": 5,
-      "flips": [],
+      "flips": [
+        {
+          "point_idx": 2,
+          "point": "Mentions O2 as the terminal electron acceptor (water as the product)",
+          "values_per_run": [
+            true,
+            false,
+            true
+          ]
+        }
+      ],
       "fabrication_check_per_run": [
         true,
         true,
@@ -137,22 +156,12 @@
       "id": "Q3_resveratrol_ecoli",
       "type": "pathway_design",
       "scores_per_run": [
-        5,
+        6,
         6,
         6
       ],
       "max": 6,
-      "flips": [
-        {
-          "point_idx": 2,
-          "point": "Names 4-coumaric acid (or p-coumarate) as the TAL product",
-          "values_per_run": [
-            false,
-            true,
-            true
-          ]
-        }
-      ],
+      "flips": [],
       "fabrication_check_per_run": [
         true,
         true,
@@ -164,24 +173,33 @@
       "id": "Q4_lycopene_bottleneck",
       "type": "pathway_design",
       "scores_per_run": [
+        1,
         4,
-        5,
         4
       ],
       "max": 5,
       "flips": [
         {
-          "point_idx": 3,
-          "point": "Mentions a downstream constraint such as redox/cofactor balance (NADPH), membrane storage capacity, or competing flux",
+          "point_idx": 1,
+          "point": "Identifies precursor supply (IPP/DMAPP from MEP or MVA pathway, or FPP/GGPP) as a key bottleneck",
           "values_per_run": [
+            false,
             true,
-            true,
-            false
+            true
           ]
         },
         {
-          "point_idx": 4,
-          "point": "Connects the bottleneck to an engineering strategy (overexpression, fusion, push-pull, or knockout of competing pathways)",
+          "point_idx": 2,
+          "point": "Names at least one carotenogenic enzyme (CrtE/GGPP synthase, CrtB/phytoene synthase, or CrtI/phytoene desaturase)",
+          "values_per_run": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "point_idx": 3,
+          "point": "Mentions a downstream constraint such as redox/cofactor balance (NADPH), membrane storage capacity, or competing flux",
           "values_per_run": [
             false,
             true,

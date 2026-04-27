@@ -1,0 +1,268 @@
+{
+  "timestamp_utc": "20260427T080843Z",
+  "judge_model": "google/gemma-4-26B-A4B-it",
+  "rows": [
+    {
+      "id": "Q1_acetyl_coa_tca",
+      "question": "Explain the role of acetyl-CoA in the TCA cycle. What is the first reaction it participates in?",
+      "agent_answer": "Acetyl-CoA plays a central and critical role in the Tricarboxylic Acid (TCA) cycle (also known as the Krebs cycle or Citric Acid Cycle), serving as the primary fuel input that drives the entire metabolic process.\n\nIn essence, the TCA cycle is the metabolic hub where the carbon skeletons derived from carbohydrates, fats, and proteins are completely oxidized to produce energy carriers ($\\text{NADH}$ and $\\text{FADH}_2$) that feed into oxidative phosphorylation. Acetyl-CoA is the two-carbon molecule that enters this cycle, providing the necessary carbon atoms to initiate the cycle's reactions.\n\nThe **first reaction** Acetyl-CoA participates in is the condensation reaction with oxaloacetate.\n\nThis reaction is catalyzed by the enzyme **citrate synthase** ($\\text{EC 2.3.3.2}$). Acetyl-CoA (a two-carbon unit) combines with oxaloacetate (a four-carbon unit) to form citrate (a six-carbon unit).\n\nTo give you a more detailed look at the biochemistry, would you like me to:\n\n1.  **Fetch the KEGG entry** for the TCA cycle to see all the reactions involved?\n2.  **Look up the specific enzyme** (citrate synthase) in UniProt for more detail on its structure or function?\n3.  **Dive deeper** into the fate of the carbons after citrate is formed?",
+      "rubric": [
+        {
+          "point": "States the first reaction is condensation with oxaloacetate",
+          "weight": 1
+        },
+        {
+          "point": "Names citrate (or citric acid) as the product of that condensation",
+          "weight": 1
+        },
+        {
+          "point": "Identifies citrate synthase as the catalyzing enzyme",
+          "weight": 1
+        },
+        {
+          "point": "Mentions the cycle generates reduced cofactors (NADH and/or FADH2) and CO2",
+          "weight": 1
+        },
+        {
+          "point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)",
+          "weight": 1
+        }
+      ],
+      "judge_raw": "{\"scores\": [true, true, true, true, true], \"notes\": \"The answer covers all points, including the generation of NADH and FADH2. No fake IDs were used.\"}",
+      "judge_scores": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer covers all points, including the generation of NADH and FADH2. No fake IDs were used.",
+      "agent_usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "iterations": 1,
+        "duration_ms": 4830
+      }
+    },
+    {
+      "id": "Q2_nadh_etc",
+      "question": "How does NADH get re-oxidized in the electron transport chain?",
+      "agent_answer": "NADH is re-oxidized in the electron transport chain (ETC) through a series of redox reactions that ultimately drive the pumping of protons ($\\text{H}^+$) across the inner mitochondrial membrane, creating the proton motive force necessary for ATP synthesis.\n\nThe process is fundamentally about transferring the high-energy electrons from NADH to a terminal electron acceptor, which is typically oxygen ($\\text{O}_2$) in aerobic respiration.\n\nHere is a breakdown of the key steps:\n\n1.  **NADH Oxidation:** NADH donates a pair of electrons to **Complex I** (NADH dehydrogenase). In this reaction, NADH is oxidized to $\\text{NAD}^+$, releasing a proton into the mitochondrial matrix.\n    $$\\text{NADH} \\rightarrow \\text{NAD}^+ + \\text{H}^+ + 2e^-$$\n2.  **Electron Transfer through Complexes:** The electrons then travel sequentially through the protein complexes embedded in the inner mitochondrial membrane:\n    *   From Complex I to **Ubiquinone** ($\\text{Q}$), which is reduced to ubiquinol ($\\text{QH}_2$).\n    *   From $\\text{QH}_2$ to **Complex III** (Cytochrome $bc_1$ complex).\n    *   From Complex III to another pool of mobile carriers, eventually to **Complex IV** (Cytochrome $c$ oxidase).\n3.  **Proton Pumping:** As electrons pass through Complexes I, III, and IV, the energy released is used to actively pump protons from the mitochondrial matrix into the intermembrane space. This pumping action establishes a high concentration of $\\text{H}^+$ in the intermembrane space, creating an electrochemical gradient (the proton motive force).\n4.  **Terminal Reduction:** At **Complex IV**, the electrons are finally passed to molecular oxygen ($\\text{O}_2$), which acts as the final electron acceptor. Oxygen is reduced to water ($\\text{H}_2\\text{O}$):\n    $$\\frac{1}{2}\\text{O}_2 + 2e^- + 2\\text{H}^+ \\rightarrow \\text{H}_2\\text{O}$$\n\nThe re-oxidation of NADH to $\\text{NAD}^+$ is thus coupled to the creation of a proton gradient, which is then harnessed by ATP synthase to phosphorylate ADP into ATP.\n\nWould you like me to go deeper into the specific biochemistry of any of these complexes (e.g., the structure of Complex I, the role of ubiquinone, or the stoichiometry of proton pumping)?",
+      "rubric": [
+        {
+          "point": "States NADH donates electrons to Complex I (NADH dehydrogenase / NADH:ubiquinone oxidoreductase)",
+          "weight": 1
+        },
+        {
+          "point": "Mentions O2 as the terminal electron acceptor (water as the product)",
+          "weight": 1
+        },
+        {
+          "point": "Mentions proton pumping across the inner mitochondrial membrane to establish a gradient",
+          "weight": 1
+        },
+        {
+          "point": "Mentions ATP synthase coupling the proton gradient to ATP production",
+          "weight": 1
+        },
+        {
+          "point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)",
+          "weight": 1
+        }
+      ],
+      "judge_raw": "{\"scores\": [true, true, true, true, true], \"notes\": \"The answer covers all required biochemical steps and does not contain any fabricated IDs.\"}",
+      "judge_scores": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer covers all required biochemical steps and does not contain any fabricated IDs.",
+      "agent_usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "iterations": 1,
+        "duration_ms": 8471
+      }
+    },
+    {
+      "id": "Q3_resveratrol_ecoli",
+      "question": "What enzymes would you express in E. coli to produce resveratrol from tyrosine?",
+      "agent_answer": "thought\n<channel|>To produce resveratrol from tyrosine in *E. coli*, you need to reconstruct the phenylpropanoid pathway to generate $p$-coumaroyl-CoA, followed by the stilbene-specific condensation step.\n\nThe core enzymatic requirements are:\n\n1.  **Tyrosine $\\rightarrow$ $p$-Coumaric acid**: This typically requires a **Tyrosine Ammonia-Lyase (TAL)** (EC 4.3.1.25) to deaminate tyrosine.\n2.  **$p$-Coumaric acid $\\rightarrow$ $p$-Coumaroyl-CoA**: This requires a **4-coumarate-CoA ligase (4CL)** (EC 6.2.1.12) to activate the acid using CoA and ATP.\n3.  **$p$-Coumaroyl-CoA $\\rightarrow$ Resveratrol**: This is the key step, catalyzed by **Stilbene Synthase (STS)** (EC 2.3.1.95), which performs a specialized condensation of one $p$-coumaroyl-CoA molecule with three molecules of malonyl-CoA.\n\n### Proposed Biosynthetic Route\n\nThe pathway follows this logic:\n**Tyrosine** $\\xrightarrow{\\text{TAL}}$ **$p$-Coumaric acid** $\\xrightarrow{\\text{4CL}}$ **$p$-Coumaroyl-CoA** $\\xrightarrow{\\text{STS (+ 3 Malonyl-CoA)}}$ **Resveratrol**\n\n<plan>\n{\"id\": \"A\", \"title\": \"Microbial Whole-Cell Biosynthesis\", \"route\": \"microbial\", \"host\": \"ecoli\", \"summary\": \"Expressing heterologous TAL, 4CL, and STS in E. coli, potentially supplemented with malonyl-CoA precursors.\", \"est_difficulty\": \"medium\", \"est_confidence\": 0.85}\n{\"id\": \"B\", \"title\": \"Enzymatic Cell-Free Synthesis\", \"route\": \"enzymatic\", \"host\": null, \"summary\": \"Using purified TAL, 4CL, and STS enzymes with tyrosine and malonyl-CoA in a controlled reactor.\", \"est_difficulty\": \"high\", \"est_confidence\": 0.75}\n{\"id\": \"C\", \"title\": \"Semi-Synthetic Approach\", \"route\": \"semi-synthetic\", \"host\": null, \"summary\": \"Feeding $p$-coumaric acid directly to an E. coli strain expressing 4CL and STS to bypass TAL.\", \"est_difficulty\": \"low\", \"est_confidence\": 0.90}\n</plan>\n\nPick an approach and I'll produce the full design.",
+      "rubric": [
+        {
+          "point": "Names tyrosine ammonia-lyase (TAL) as the first enzyme",
+          "weight": 1
+        },
+        {
+          "point": "Names 4-coumaric acid (or p-coumarate) as the TAL product",
+          "weight": 1
+        },
+        {
+          "point": "Names 4-coumarate-CoA ligase (4CL) as the second enzyme",
+          "weight": 1
+        },
+        {
+          "point": "Names stilbene synthase (STS) as producing resveratrol",
+          "weight": 1
+        },
+        {
+          "point": "Mentions malonyl-CoA as a co-substrate for STS (3 units required)",
+          "weight": 1
+        },
+        {
+          "point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)",
+          "weight": 1
+        }
+      ],
+      "judge_raw": "{\"scores\": [true, true, true, true, true, true], \"notes\": \"The answer correctly identifies all enzymes, intermediates, and the required co-substrate (malonyl-CoA). No fake IDs were used.\"}",
+      "judge_scores": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies all enzymes, intermediates, and the required co-substrate (malonyl-CoA). No fake IDs were used.",
+      "agent_usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "iterations": 4,
+        "duration_ms": 10504
+      }
+    },
+    {
+      "id": "Q4_lycopene_bottleneck",
+      "question": "What's the main bottleneck in heterologous lycopene biosynthesis in microbes?",
+      "agent_answer": "thought\n<channel|>The main bottleneck in heterologous lycopene biosynthesis is typically the **supply and availability of the universal isoprenoid precursor, geranylgeranyl diphosphate (GGPP)**, coupled with the **low catalytic efficiency of phytoene synthase (PSY)**.\n\nIn most microbial chassis (like *E. coli* or *S. cerevisiae*), the metabolic flux is naturally directed toward essential isoprenoids (e.g., quinones, sterols, or carotenoids for membrane stability) rather than high-titer lycopene production. This creates three distinct layers of bottlenecks:\n\n### 1. Precursor Limitation (The GGPP Supply)\nLycopene is a $C_{40}$ tetraterpene formed by the head-to-head condensation of two $C_{20}$ GGPP molecules. The primary bottleneck is often the insufficient flux through the **MEP pathway** (in bacteria) or the **MVA pathway** (in yeast) to generate enough GGPP. \n*   **Metabolic Competition:** Endogenous enzymes compete for the same pool of IPP (isopentenyl pyrophosphate) and DMAPP (dimethylallyl pyrophosphate).\n*   **Feedback Inhibition:** High levels of downstream isoprenoids often trigger regulatory mechanisms that throttle the upstream pathway.\n\n### 2. Enzymatic Bottleneck (Phytoene Synthase)\nThe first committed step of the carotenoid branch—the condensation of two GGPP molecules into phytoene—is catalyzed by **phytoene synthase (EC 4.2.3.18)**. \n*   **Low $k_{cat}$:** In many heterologous systems, the plant-derived PSY enzymes exhibit relatively low turnover rates compared to the rapid flux of the upstream MEP/MVA pathways.\n*   **Substrate Channeling:** Without efficient spatial organization or protein scaffolding, the GGPP produced by the host may be diverted to other pathways before it can encounter the PSY enzyme.\n\n### 3. Product Toxicity and Hydrophobicity\nLycopene is extremely hydrophobic and tends to accumulate in the lipid bilayer of the host cell.\n*   **Membrane Integrity:** Excessive accumulation of carotenoids can disrupt membrane fluidity and integrity, leading to growth inhibition or cell death.\n*   **Sequestration:** In yeast, the inability to efficiently sequester lycopene into lipid droplets or specialized organelles can lead to feedback inhibition or cellular stress.\n\n**Would you like me to design a metabolic engineering strategy to overcome these bottlenecks, or perhaps look up specific kinetic parameters for phytoene synthase in different hosts?**",
+      "rubric": [
+        {
+          "point": "Identifies precursor supply (IPP/DMAPP from MEP or MVA pathway, or FPP/GGPP) as a key bottleneck",
+          "weight": 1
+        },
+        {
+          "point": "Names at least one carotenogenic enzyme (CrtE/GGPP synthase, CrtB/phytoene synthase, or CrtI/phytoene desaturase)",
+          "weight": 1
+        },
+        {
+          "point": "Mentions a downstream constraint such as redox/cofactor balance (NADPH), membrane storage capacity, or competing flux",
+          "weight": 1
+        },
+        {
+          "point": "Connects the bottleneck to an engineering strategy (overexpression, fusion, push-pull, or knockout of competing pathways)",
+          "weight": 1
+        },
+        {
+          "point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)",
+          "weight": 1
+        }
+      ],
+      "judge_raw": "{\"scores\": [true, true, true, false, true], \"notes\": \"The answer identifies precursor supply, names phytoene synthase, mentions membrane/toxicity constraints, but does not propose a specific engineering strategy (it only asks if the user wants one). No fake IDs were used.\"}",
+      "judge_scores": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "judge_notes": "The answer identifies precursor supply, names phytoene synthase, mentions membrane/toxicity constraints, but does not propose a specific engineering strategy (it only asks if the user wants one). No fake IDs were used.",
+      "agent_usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "iterations": 4,
+        "duration_ms": 5875
+      }
+    },
+    {
+      "id": "Q5_mep_vs_mva",
+      "question": "Compare the MEP and MVA pathways for isoprenoid precursor production. Which microbes use which?",
+      "agent_answer": "<channel|>The production of isoprenoids (terpenoids) relies on two distinct metabolic routes to generate the universal five-carbon building blocks: **isopentenyl pyrophosphate (IPP)** and **dimethylallyl pyrophosphate (DMAPP)**.\n\n### Comparison of MEP and MVA Pathways\n\n| Feature | MEP Pathway (Methylerythritol Phosphate) | MVA Pathway (Mevalonate) |\n| :--- | :--- | :--- |\n| **Primary Precursors** | Pyruvate + Glyceraldehyde 3-phosphate (G3P) | Acetyl-CoA |\n| **Key Intermediates** | DXP, MEP, HMBPP | Mevalonate, Mevalonate-5-P, IPP |\n| **Cellular Location** | Typically plastids (in plants) or cytoplasm (in bacteria) | Cytoplasm (in eukaryotes/archaea) |\n| **Energy/Redox Cost** | Generally considered more \"efficient\" in terms of carbon flux from glycolysis | Requires significant Acetyl-CoA; often more ATP-intensive |\n| **Regulation** | Highly regulated by feedback from downstream isoprenoids | Regulated primarily at the HMG-CoA reductase step |\n\n### Microbial Distribution\n\nThe choice of pathway is a fundamental taxonomic distinction in microbial metabolism:\n\n*   **MEP Pathway (Non-mevalonate pathway):**\n    *   **Bacteria:** Most bacteria, including common industrial chassis like *Escherichia coli* and *Corynebacterium glutamicum*, utilize the MEP pathway.\n    *   **Plants:** In eukaryotic plants, the MEP pathway is localized to the **plastids** (chloroplasts) and provides precursors for carotenoids, chlorophyll side chains, and certain diterpenes.\n    *   **Cyanobacteria:** Use the MEP pathway for photosynthetic pigment synthesis.\n\n*   **MVA Pathway (Mevalonate pathway):**\n    *   **Eukaryotes:** Most fungi (e.g., *Saccharomyces cerevisiae*) and animals utilize the MVA pathway in the **cytosol**.\n    *   **Archaea:** Most archaea rely on the MVA pathway for their isoprenoid-based membrane lipids.\n    *   **Some Bacteria:** Certain specialized bacteria (e.g., some *Streptomyces* species) possess the MVA pathway, often used for complex secondary metabolite production.\n\n**Engineering Note:** In synthetic biology, it is common to \"swap\" these pathways. For example, engineers often transplant the MVA pathway into *E. coli* to bypass the tight regulation of the native MEP pathway, or express plant MEP enzymes in yeast to expand the isoprenoid repertoire.\n\nWould you like me to design a metabolic engineering strategy to optimize one of these pathways in a specific host?",
+      "rubric": [
+        {
+          "point": "Names MEP starting materials (glyceraldehyde-3-phosphate + pyruvate) or identifies it as the non-mevalonate / DXP pathway",
+          "weight": 1
+        },
+        {
+          "point": "Names MVA starting material (acetyl-CoA) or identifies it as the mevalonate pathway",
+          "weight": 1
+        },
+        {
+          "point": "Identifies bacteria (or specifically E. coli, plant plastids) as MEP users",
+          "weight": 1
+        },
+        {
+          "point": "Identifies yeast (or animals, archaea, plant cytosol) as MVA users",
+          "weight": 1
+        },
+        {
+          "point": "States both pathways converge on IPP/DMAPP as the universal isoprenoid precursor",
+          "weight": 1
+        },
+        {
+          "point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)",
+          "weight": 1
+        }
+      ],
+      "judge_raw": "{\"scores\": [true, true, true, true, true, true], \"notes\": \"The answer covers all rubric points accurately and does not contain any fabricated IDs.\"}",
+      "judge_scores": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer covers all rubric points accurately and does not contain any fabricated IDs.",
+      "agent_usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "iterations": 3,
+        "duration_ms": 6217
+      }
+    },
+    {
+      "id": "Q6_kegg_c00022",
+      "question": "What does KEGG compound C00022 refer to and what pathways is it central to?",
+      "agent_answer": "Pyruvate (C00022) is a central metabolic intermediate, chemically known as Pyruvic acid, with the formula $\\text{C}_3\\text{H}_4\\text{O}_3$.\n\nIt is a critical node in several major metabolic pathways, including:\n*   **Glycolysis / Gluconeogenesis** ($\\text{map00010}$)\n*   **Citrate cycle (TCA cycle)** ($\\text{map00020}$)\n*   **Pentose phosphate pathway** ($\\text{map00030}$)\n*   **Alanine, aspartate and glutamate metabolism** ($\\text{map00250}$)\n\nWould you like to dive deeper into how pyruvate is utilized in one of these pathways, or perhaps look up a specific enzyme involved in its metabolism?",
+      "rubric": [
+        {
+          "point": "Names the compound as pyruvate (or pyruvic acid)",
+          "weight": 1
+        },
+        {
+          "point": "Mentions glycolysis as a central pathway",
+          "weight": 1
+        },
+        {
+          "point": "Mentions the TCA cycle, acetyl-CoA bridge (pyruvate dehydrogenase), or citric acid cycle linkage",
+          "weight": 1
+        },
+        {
+          "point": "Mentions at least one of: gluconeogenesis, amino acid metabolism (alanine), fermentation, or anaplerotic reactions",
+          "weight": 1
+        },
+        {
+          "point": "Does NOT fabricate any KEGG IDs or PMIDs (every ID cited, if any, is real)",
+          "weight": 1
+        }
+      ],
+      "judge_raw": "{\"scores\": [true, true, true, true, true], \"notes\": \"The answer correctly identifies the compound, lists glycolysis, the TCA cycle, and both gluconeogenesis and alanine metabolism. All KEGG map IDs provided are real.\"}",
+      "judge_scores": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies the compound, lists glycolysis, the TCA cycle, and both gluconeogenesis and alanine metabolism. All KEGG map IDs provided are real.",
+      "agent_usage": {
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "iterations": 2,
+        "duration_ms": 3272
+      }
+    }
+  ]
+}

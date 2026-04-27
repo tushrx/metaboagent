@@ -1,0 +1,119 @@
+{
+  "timestamp_utc": "20260427T080843Z",
+  "judge_model": "google/gemma-4-26B-A4B-it",
+  "n_questions": 6,
+  "per_question": [
+    {
+      "id": "Q1_acetyl_coa_tca",
+      "score": 5,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer covers all points, including the generation of NADH and FADH2. No fake IDs were used."
+    },
+    {
+      "id": "Q2_nadh_etc",
+      "score": 5,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer covers all required biochemical steps and does not contain any fabricated IDs."
+    },
+    {
+      "id": "Q3_resveratrol_ecoli",
+      "score": 6,
+      "max": 6,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies all enzymes, intermediates, and the required co-substrate (malonyl-CoA). No fake IDs were used."
+    },
+    {
+      "id": "Q4_lycopene_bottleneck",
+      "score": 4,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "judge_notes": "The answer identifies precursor supply, names phytoene synthase, mentions membrane/toxicity constraints, but does not propose a specific engineering strategy (it only asks if the user wants one). No fake IDs were used."
+    },
+    {
+      "id": "Q5_mep_vs_mva",
+      "score": 6,
+      "max": 6,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer covers all rubric points accurately and does not contain any fabricated IDs."
+    },
+    {
+      "id": "Q6_kegg_c00022",
+      "score": 5,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies the compound, lists glycolysis, the TCA cycle, and both gluconeogenesis and alanine metabolism. All KEGG map IDs provided are real."
+    }
+  ],
+  "aggregate": {
+    "total_score": 31,
+    "max_score": 32,
+    "pct": 96.9,
+    "parse_failures": 0
+  },
+  "by_question_type": {
+    "mechanism": {
+      "score": 10,
+      "max": 10,
+      "n": 2,
+      "pct": 100.0
+    },
+    "pathway_design": {
+      "score": 10,
+      "max": 11,
+      "n": 2,
+      "pct": 90.9
+    },
+    "comparison": {
+      "score": 6,
+      "max": 6,
+      "n": 1,
+      "pct": 100.0
+    },
+    "lookup": {
+      "score": 5,
+      "max": 5,
+      "n": 1,
+      "pct": 100.0
+    }
+  }
+}

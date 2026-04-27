@@ -4,187 +4,120 @@
   "per_run": [
     {
       "run": 1,
-      "path": "pathway_hallucination_run_1_20260426T192804Z.json",
-      "timestamp_utc": "20260426T192804Z",
-      "phase1_plans_emitted": 5,
-      "phase1_plans_parse_failed": 0,
-      "phase2_runs": 5,
-      "rids_extracted": 10,
-      "rids_hallucinated": 2,
-      "ecs_extracted": 6,
-      "ecs_hallucinated": 0,
-      "rids_eligible": 9,
-      "rids_no_step_context": 1,
-      "rids_fully_matching": 0,
-      "rids_substrate_only": 1,
-      "rids_product_only": 0,
-      "rids_neither": 6,
-      "rids_rid_invalid": 2,
-      "rids_real_but_wrong": 7,
-      "rids_real_but_wrong_pct": 100.0,
-      "rids_fully_matching_pct": 0.0,
-      "rids_substrate_relevant_pct": 11.1
-    },
-    {
-      "run": 2,
-      "path": "pathway_hallucination_run_2_20260426T193303Z.json",
-      "timestamp_utc": "20260426T193303Z",
-      "phase1_plans_emitted": 4,
-      "phase1_plans_parse_failed": 1,
-      "phase2_runs": 4,
-      "rids_extracted": 2,
+      "path": "pathway_hallucination_run_1_20260427T080244Z.json",
+      "timestamp_utc": "20260427T080244Z",
+      "phase1_plans_emitted": 2,
+      "phase1_plans_parse_failed": 3,
+      "phase2_runs": 2,
+      "rids_extracted": 0,
       "rids_hallucinated": 0,
-      "ecs_extracted": 6,
+      "ecs_extracted": 3,
       "ecs_hallucinated": 0,
-      "rids_eligible": 2,
+      "rids_eligible": 0,
       "rids_no_step_context": 0,
       "rids_fully_matching": 0,
       "rids_substrate_only": 0,
       "rids_product_only": 0,
-      "rids_neither": 2,
+      "rids_neither": 0,
       "rids_rid_invalid": 0,
-      "rids_real_but_wrong": 2,
-      "rids_real_but_wrong_pct": 100.0,
+      "rids_real_but_wrong": 0,
+      "rids_real_but_wrong_pct": 0.0,
       "rids_fully_matching_pct": 0.0,
       "rids_substrate_relevant_pct": 0.0
     },
     {
-      "run": 3,
-      "path": "pathway_hallucination_run_3_20260426T193450Z.json",
-      "timestamp_utc": "20260426T193450Z",
-      "phase1_plans_emitted": 3,
-      "phase1_plans_parse_failed": 2,
-      "phase2_runs": 3,
-      "rids_extracted": 9,
-      "rids_hallucinated": 2,
-      "ecs_extracted": 9,
+      "run": 2,
+      "path": "pathway_hallucination_run_2_20260427T080439Z.json",
+      "timestamp_utc": "20260427T080439Z",
+      "phase1_plans_emitted": 4,
+      "phase1_plans_parse_failed": 1,
+      "phase2_runs": 4,
+      "rids_extracted": 4,
+      "rids_hallucinated": 0,
+      "ecs_extracted": 3,
       "ecs_hallucinated": 0,
-      "rids_eligible": 7,
-      "rids_no_step_context": 2,
+      "rids_eligible": 4,
+      "rids_no_step_context": 0,
+      "rids_fully_matching": 0,
+      "rids_substrate_only": 1,
+      "rids_product_only": 0,
+      "rids_neither": 3,
+      "rids_rid_invalid": 0,
+      "rids_real_but_wrong": 4,
+      "rids_real_but_wrong_pct": 100.0,
+      "rids_fully_matching_pct": 0.0,
+      "rids_substrate_relevant_pct": 25.0
+    },
+    {
+      "run": 3,
+      "path": "pathway_hallucination_run_3_20260427T080630Z.json",
+      "timestamp_utc": "20260427T080630Z",
+      "phase1_plans_emitted": 4,
+      "phase1_plans_parse_failed": 1,
+      "phase2_runs": 4,
+      "rids_extracted": 1,
+      "rids_hallucinated": 0,
+      "ecs_extracted": 3,
+      "ecs_hallucinated": 0,
+      "rids_eligible": 1,
+      "rids_no_step_context": 0,
       "rids_fully_matching": 0,
       "rids_substrate_only": 0,
       "rids_product_only": 0,
-      "rids_neither": 6,
-      "rids_rid_invalid": 1,
-      "rids_real_but_wrong": 6,
+      "rids_neither": 1,
+      "rids_rid_invalid": 0,
+      "rids_real_but_wrong": 1,
       "rids_real_but_wrong_pct": 100.0,
       "rids_fully_matching_pct": 0.0,
       "rids_substrate_relevant_pct": 0.0
     }
   ],
   "pooled": {
-    "rids_eligible": 18,
-    "rids_existence_verified_eligible": 15,
+    "rids_eligible": 5,
+    "rids_existence_verified_eligible": 5,
     "rids_fully_matching": 0,
     "rids_substrate_only": 1,
     "rids_product_only": 0,
-    "rids_neither": 14,
-    "rids_rid_invalid": 3,
-    "rids_real_but_wrong": 15,
+    "rids_neither": 4,
+    "rids_rid_invalid": 0,
+    "rids_real_but_wrong": 5,
     "rids_fully_matching_pct": 0.0,
     "rids_real_but_wrong_pct": 100.0,
     "band": ">30%"
   },
   "per_rid_detail": [
     {
-      "run": 1,
-      "prompt_id": "mevalonate_ecoli",
-      "rid": "R00017",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "Acetyl-CoA"
-      ],
-      "claimed_products": [
-        "Acetoacetyl-CoA"
-      ],
-      "kegg_substrates": [
-        "C00027",
-        "C00126"
-      ],
-      "kegg_products": [
-        "C00125",
-        "C00001"
-      ]
-    },
-    {
-      "run": 1,
-      "prompt_id": "mevalonate_ecoli",
-      "rid": "R00018",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "Acetoacetyl-CoA"
-      ],
-      "claimed_products": [
-        "HMG-CoA"
-      ],
-      "kegg_substrates": [
-        "C00134"
-      ],
-      "kegg_products": [
-        "C06366",
-        "C00014"
-      ]
-    },
-    {
-      "run": 1,
-      "prompt_id": "mevalonate_ecoli",
-      "rid": "R00019",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "HMG-CoA"
-      ],
-      "claimed_products": [
-        "Mevalonate"
-      ],
-      "kegg_substrates": [
-        "C00138",
-        "C00080"
-      ],
-      "kegg_products": [
-        "C00282",
-        "C00139"
-      ]
-    },
-    {
-      "run": 1,
-      "prompt_id": "mevalonate_ecoli",
-      "rid": "R00020",
-      "verified": false,
-      "verdict": "rid_invalid",
-      "claimed_substrates": [
-        "Mevalonate"
-      ],
-      "claimed_products": [
-        "Mevalonate-5-Phosphate"
-      ],
-      "kegg_substrates": [],
-      "kegg_products": []
-    },
-    {
-      "run": 1,
+      "run": 2,
       "prompt_id": "vanillin_ferulic",
-      "rid": "R07989",
+      "rid": "R12566",
       "verified": true,
-      "verdict": "no_step_context",
-      "claimed_substrates": [],
-      "claimed_products": [],
-      "kegg_substrates": [],
-      "kegg_products": []
+      "verdict": "neither",
+      "claimed_substrates": [
+        "Key Conversion (Feruloyl-CoA"
+      ],
+      "claimed_products": [
+        "Vanillin)"
+      ],
+      "kegg_substrates": [
+        "C00406",
+        "C00001"
+      ],
+      "kegg_products": [
+        "C00755",
+        "C00024"
+      ]
     },
     {
-      "run": 1,
+      "run": 2,
       "prompt_id": "lycopene_ecoli",
       "rid": "R10584",
       "verified": true,
       "verdict": "substrate_only",
       "claimed_substrates": [
-        "FPP"
+        "Farnesyl Diphosphate"
       ],
       "claimed_products": [
-        "Cyclized Intermediate"
+        "Phytoene"
       ],
       "kegg_substrates": [
         "C00448"
@@ -195,260 +128,44 @@
       ]
     },
     {
-      "run": 1,
-      "prompt_id": "resveratrol_ecoli",
-      "rid": "R00015",
+      "run": 2,
+      "prompt_id": "lycopene_ecoli",
+      "rid": "R10585",
       "verified": true,
       "verdict": "neither",
       "claimed_substrates": [
-        "Tyrosine"
+        "Phytoene"
       ],
       "claimed_products": [
-        "Cinnamic Acid"
+        "\\zeta-Carotene"
       ],
       "kegg_substrates": [
-        "C00089"
+        "C11901"
       ],
       "kegg_products": [
-        "C00031",
-        "C03661"
-      ]
-    },
-    {
-      "run": 1,
-      "prompt_id": "resveratrol_ecoli",
-      "rid": "R00016",
-      "verified": false,
-      "verdict": "rid_invalid",
-      "claimed_substrates": [
-        "Cinnamic Acid"
-      ],
-      "claimed_products": [
-        "p-Coumaric Acid"
-      ],
-      "kegg_substrates": [],
-      "kegg_products": []
-    },
-    {
-      "run": 1,
-      "prompt_id": "resveratrol_ecoli",
-      "rid": "R00017",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "p-Coumaric Acid"
-      ],
-      "claimed_products": [
-        "Intermediate"
-      ],
-      "kegg_substrates": [
-        "C00027",
-        "C00126"
-      ],
-      "kegg_products": [
-        "C00125",
-        "C00001"
-      ]
-    },
-    {
-      "run": 1,
-      "prompt_id": "resveratrol_ecoli",
-      "rid": "R00018",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "Intermediate"
-      ],
-      "claimed_products": [
-        "Resveratrol"
-      ],
-      "kegg_substrates": [
-        "C00134"
-      ],
-      "kegg_products": [
-        "C06366",
-        "C00014"
+        "C20711",
+        "C00013"
       ]
     },
     {
       "run": 2,
       "prompt_id": "lycopene_ecoli",
-      "rid": "R00001",
+      "rid": "R10586",
       "verified": true,
       "verdict": "neither",
       "claimed_substrates": [
-        "Geranylgeranyl diphosphate"
+        "\\zeta-Carotene"
       ],
       "claimed_products": [
-        "Phytoene"
+        "Lycopene"
       ],
       "kegg_substrates": [
-        "C00404",
-        "C00001"
+        "C20649",
+        "C00019"
       ],
       "kegg_products": [
-        "C02174"
-      ]
-    },
-    {
-      "run": 2,
-      "prompt_id": "lycopene_ecoli",
-      "rid": "R00010",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "Geranylgeranyl diphosphate"
-      ],
-      "claimed_products": [
-        "Phytoene"
-      ],
-      "kegg_substrates": [
-        "C01083",
-        "C00001"
-      ],
-      "kegg_products": [
-        "C00031"
-      ]
-    },
-    {
-      "run": 3,
-      "prompt_id": "mevalonate_ecoli",
-      "rid": "R00013",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "Acetyl-CoA"
-      ],
-      "claimed_products": [
-        "Acetoacetyl-CoA"
-      ],
-      "kegg_substrates": [
-        "C00048"
-      ],
-      "kegg_products": [
-        "C01146",
-        "C00011"
-      ]
-    },
-    {
-      "run": 3,
-      "prompt_id": "mevalonate_ecoli",
-      "rid": "R00014",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "Acetoacetyl-CoA"
-      ],
-      "claimed_products": [
-        "HMG-CoA"
-      ],
-      "kegg_substrates": [
-        "C00022",
-        "C00068"
-      ],
-      "kegg_products": [
-        "C05125",
-        "C00011"
-      ]
-    },
-    {
-      "run": 3,
-      "prompt_id": "mevalonate_ecoli",
-      "rid": "R00015",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "HMG-CoA"
-      ],
-      "claimed_products": [
-        "Mevalonate"
-      ],
-      "kegg_substrates": [
-        "C00089"
-      ],
-      "kegg_products": [
-        "C00031",
-        "C03661"
-      ]
-    },
-    {
-      "run": 3,
-      "prompt_id": "artemisinic_yeast",
-      "rid": "R00015",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "Acetyl-CoA"
-      ],
-      "claimed_products": [
-        "Mevalonate"
-      ],
-      "kegg_substrates": [
-        "C00089"
-      ],
-      "kegg_products": [
-        "C00031",
-        "C03661"
-      ]
-    },
-    {
-      "run": 3,
-      "prompt_id": "artemisinic_yeast",
-      "rid": "R00016",
-      "verified": false,
-      "verdict": "no_step_context",
-      "claimed_substrates": [],
-      "claimed_products": [],
-      "kegg_substrates": [],
-      "kegg_products": []
-    },
-    {
-      "run": 3,
-      "prompt_id": "artemisinic_yeast",
-      "rid": "R00017",
-      "verified": true,
-      "verdict": "no_step_context",
-      "claimed_substrates": [],
-      "claimed_products": [],
-      "kegg_substrates": [],
-      "kegg_products": []
-    },
-    {
-      "run": 3,
-      "prompt_id": "artemisinic_yeast",
-      "rid": "R00020",
-      "verified": false,
-      "verdict": "rid_invalid",
-      "claimed_substrates": [
-        "GGPP"
-      ],
-      "claimed_products": [
-        "\\beta-amyrin"
-      ],
-      "kegg_substrates": [],
-      "kegg_products": []
-    },
-    {
-      "run": 3,
-      "prompt_id": "artemisinic_yeast",
-      "rid": "R00021",
-      "verified": true,
-      "verdict": "neither",
-      "claimed_substrates": [
-        "\\beta-amyrin"
-      ],
-      "claimed_products": [
-        "Artemisinic acid"
-      ],
-      "kegg_substrates": [
-        "C00025",
-        "C00139"
-      ],
-      "kegg_products": [
-        "C00064",
-        "C00026",
-        "C00138",
-        "C00080"
+        "C20659",
+        "C00021"
       ]
     },
     {
@@ -458,10 +175,10 @@
       "verified": true,
       "verdict": "neither",
       "claimed_substrates": [
-        "Ferulic Acid"
+        "Feruloyl-CoA"
       ],
       "claimed_products": [
-        "Feruloyl-CoA"
+        "Vanillin Precursor"
       ],
       "kegg_substrates": [
         "C00406",

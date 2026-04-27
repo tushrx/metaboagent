@@ -245,7 +245,11 @@ def _section_structure(row: dict[str, Any] | None) -> tuple[str, str]:
     s = data.get("summary", {})
     overall = s.get("overall", {})
     n = s.get("overall_n", 0)
-    correct = overall.get("correct", 0)
+    # "Correct" = PASS_STRICT (canonical SMILES match) + PASS_INCHI (same
+    # molecule, different SMILES form). PARTIAL/FAIL fall short.
+    pass_strict = overall.get("PASS_STRICT", 0)
+    pass_inchi = overall.get("PASS_INCHI", 0)
+    correct = pass_strict + pass_inchi
     pct = round(100.0 * correct / n, 1) if n else 0.0
 
     bucket_lines = ["| Bucket | Count | % |", "| --- | ---: | ---: |"]
@@ -258,7 +262,7 @@ def _section_structure(row: dict[str, Any] | None) -> tuple[str, str]:
                   "| --- | ---: | ---: | --- |"]
     for d, row_d in by_diff.items():
         total_d = sum(row_d.values())
-        correct_d = row_d.get("correct", 0)
+        correct_d = row_d.get("PASS_STRICT", 0) + row_d.get("PASS_INCHI", 0)
         dist = ", ".join(f"{k}={v}" for k, v in row_d.items() if v)
         diff_lines.append(f"| {d} | {total_d} | {correct_d} | {dist} |")
 

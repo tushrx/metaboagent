@@ -1,0 +1,119 @@
+{
+  "timestamp_utc": "20260427T080756Z",
+  "judge_model": "google/gemma-4-26B-A4B-it",
+  "n_questions": 6,
+  "per_question": [
+    {
+      "id": "Q1_acetyl_coa_tca",
+      "score": 4,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "judge_notes": "The answer uses placeholder strings 'R00001' and 'PMID:xxxxxxx' which triggers the fabrication-check failure."
+    },
+    {
+      "id": "Q2_nadh_etc",
+      "score": 4,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies Complex I, proton pumping, and ATP synthase, but fails to mention oxygen as the terminal electron acceptor."
+    },
+    {
+      "id": "Q3_resveratrol_ecoli",
+      "score": 6,
+      "max": 6,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies all enzymes, products, and co-substrates required for the pathway and uses real EC numbers without fabrication."
+    },
+    {
+      "id": "Q4_lycopene_bottleneck",
+      "score": 4,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "judge_notes": "The answer identifies precursor supply, names CrtB, mentions membrane/toxicity constraints, but does not propose an engineering strategy (it asks the user if they want one instead). No fabricated IDs were used."
+    },
+    {
+      "id": "Q5_mep_vs_mva",
+      "score": 6,
+      "max": 6,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies all precursors, pathways, microbial distributions, and the convergence point. No fabricated IDs were used."
+    },
+    {
+      "id": "Q6_kegg_c00022",
+      "score": 5,
+      "max": 5,
+      "rubric_breakdown": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "judge_notes": "The answer correctly identifies the compound, lists glycolysis, the TCA cycle, and both gluconeogenesis and alanine metabolism. All KEGG map IDs provided are real."
+    }
+  ],
+  "aggregate": {
+    "total_score": 29,
+    "max_score": 32,
+    "pct": 90.6,
+    "parse_failures": 0
+  },
+  "by_question_type": {
+    "mechanism": {
+      "score": 8,
+      "max": 10,
+      "n": 2,
+      "pct": 80.0
+    },
+    "pathway_design": {
+      "score": 10,
+      "max": 11,
+      "n": 2,
+      "pct": 90.9
+    },
+    "comparison": {
+      "score": 6,
+      "max": 6,
+      "n": 1,
+      "pct": 100.0
+    },
+    "lookup": {
+      "score": 5,
+      "max": 5,
+      "n": 1,
+      "pct": 100.0
+    }
+  }
+}

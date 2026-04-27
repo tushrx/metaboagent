@@ -1,0 +1,97 @@
+{
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "by_category": {
+      "live_with_fallback": {
+        "total": 3,
+        "passed": 3
+      },
+      "live_no_fallback": {
+        "total": 1,
+        "passed": 1
+      },
+      "no_tool": {
+        "total": 1,
+        "passed": 1
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "Q1_pubmed_lycopene",
+      "prompt": "Search PubMed for recent papers on lycopene biosynthesis in E. coli.",
+      "category": "live_with_fallback",
+      "passed": true,
+      "tool_calls": [
+        "fetch_pubmed_live",
+        "search_literature"
+      ],
+      "iterations": 3,
+      "duration_ms": 8859,
+      "final_answer": "Based on a search of the literature, while the search was broad, I did not find specific, recent papers directly detailing the *lycopene biosynthesis pathway* in *E. coli*. The results returned were focused on carotenoid biosynthesis in other hosts like *Pichia pastoris* and *Yarrowia lipolytica*, or on other metabolic engineering topics in *E. coli* (like chlorophyll or vanillin).\n\nTo give you the best possible answer, I need to pivot the search or focus on the pathway itself.\n\nWould you like me to:\n1.  **Search for the general lycopene biosynthesis pathway** (using KEGG/literature) to see the known enzymatic steps, and then we can discuss how to engineer *E. coli* to perform them?\n2.  **Search for literature on carotenoid biosynthesis in *E. coli*** specifically, which might be a close proxy?\n3.  **Start a full design plan** for lycopene production, assuming we can find the necessary genes?",
+      "notes": [
+        "indexed fallback invoked: ['search_literature']"
+      ]
+    },
+    {
+      "id": "Q2_kegg_compound",
+      "prompt": "Look up KEGG compound C00022.",
+      "category": "live_with_fallback",
+      "passed": true,
+      "tool_calls": [
+        "fetch_kegg_live"
+      ],
+      "iterations": 2,
+      "duration_ms": 3022,
+      "final_answer": "Pyruvate (C00022) is a central metabolic intermediate in many biological pathways. It is chemically known as Pyruvic acid, with the formula $\\text{C}_3\\text{H}_4\\text{O}_3$ and an exact mass of $88.0160$.\n\nIt plays a critical role in several major pathways, including:\n*   Glycolysis / Gluconeogenesis ($\\text{map00010}$)\n*   Citrate cycle (TCA cycle) ($\\text{map00020}$)\n*   Pentose phosphate pathway ($\\text{map00030}$)\n\nWould you like to know more about its role in a specific pathway, or perhaps look up a related enzyme?",
+      "notes": [
+        "live-fetch returned a real cached result (cache-hit path)"
+      ]
+    },
+    {
+      "id": "Q3_uniprot_p05067",
+      "prompt": "Get the UniProt entry for P05067.",
+      "category": "live_with_fallback",
+      "passed": true,
+      "tool_calls": [
+        "fetch_uniprot"
+      ],
+      "iterations": 2,
+      "duration_ms": 2186,
+      "final_answer": "The UniProt entry for P05067 corresponds to the **Amyloid-beta precursor protein (APP)** from *Homo sapiens*.\n\nThis protein is a cell surface receptor involved in several physiological functions in neurons, including neurite growth, neuronal adhesion, and axonogenesis. It is also implicated in synaptogenesis and regulates transcription through protein-protein interactions.\n\nWould you like me to look up more details on this protein, such as its interaction partners, or perhaps explore a related metabolic pathway?",
+      "notes": [
+        "live-fetch returned a real cached result (cache-hit path)"
+      ]
+    },
+    {
+      "id": "Q4_zinc_aspirin",
+      "prompt": "Search ZINC15 for aspirin analogs.",
+      "category": "live_no_fallback",
+      "passed": true,
+      "tool_calls": [
+        "fetch_zinc"
+      ],
+      "iterations": 2,
+      "duration_ms": 1765,
+      "final_answer": "I apologize, but the live lookup for \"aspirin analogs\" in ZINC15 is currently unavailable in this demo mode. I cannot pull real-time commercial availability or vendor information from the ZINC database right now.\n\nIf you have a specific chemical name, a PubChem CID, or a ZINC ID for an analog, I would be happy to look up its properties for you!",
+      "notes": [
+        "honest demo-mode admission present"
+      ]
+    },
+    {
+      "id": "Q5_glucose_formula",
+      "prompt": "What is the molecular formula of glucose?",
+      "category": "no_tool",
+      "passed": true,
+      "tool_calls": [],
+      "iterations": 1,
+      "duration_ms": 1417,
+      "final_answer": "The molecular formula of glucose is $\\text{C}_6\\text{H}_{12}\\text{O}_6$.\n\nSince this is a very common chemical fact, I can provide it directly. However, if you'd like to look up more detailed information about glucose—such as its KEGG entry, metabolic pathways it's involved in, or its structure in PubChem—just let me know!",
+      "notes": [
+        "zero tool calls as expected"
+      ]
+    }
+  ]
+}
