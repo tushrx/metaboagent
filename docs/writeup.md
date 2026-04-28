@@ -95,7 +95,7 @@ This is the load-bearing contribution. We measured a gap between two verificatio
 
 **Reproducibility note on the unified Phase 8.4 run.** The unified eval reproduced the qualitative finding on a smaller sample — 5/5 = 100% real-but-wrong on existence-verified IDs in [`eval/results/full_report_phase8_close.md`](../eval/results/full_report_phase8_close.md).[^1] The reduced R-ID volume (5 vs. 21) is a confound from a separate phase-1 recursion bug: on most pathway-design prompts in the 8.4 run the agent emitted meta-options ("here are three approaches you could take") instead of a step-by-step plan, suppressing R-ID emission. This bug is tracked in [`docs/phase8-followups.md`](phase8-followups.md). The 8.3.B baseline (n=15, 93%) is the more defensible measurement and is the headline number for this writeup.
 
-[^1]: The 100% rate on the smaller 8.4 sample is consistent with the 8.3.B 93% baseline within sampling noise — what changed is the absolute R-ID count, not the per-ID failure rate.
+[^1]: The 100% rate on the smaller 8.4 sample is qualitatively consistent with the 8.3.B 93% baseline; we do not assert statistical equivalence given the n=5 sample size.
 
 ## What Works Well
 
