@@ -87,3 +87,7 @@ structural, not linguistic.
 left untouched per investigation guidance. Phase 8's eval harness
 expansion owns this refinement alongside the real-but-wrong-enzyme
 work above.
+
+## Sharper variance bounds for substrate-relevance per-run rate
+
+The 8.3.B baseline reports a pooled 93% real-but-wrong rate across 15 verified-eligible R-IDs from 3 runs. Per-run rates were not separately computed. Re-running the substrate-relevance verifier against the per-run R-IDs (from `pathway_hallucination_run_1/2/3.json`) would produce true per-run rates, allowing the writeup's reproducibility note to give a tighter range than the current 70-100% reader-expectation band. Estimated effort: ~1 hour. Deferred to post-submission.
