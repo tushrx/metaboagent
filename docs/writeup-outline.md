@@ -57,7 +57,9 @@
 
 ## 5. Findings (~600 words — centerpiece)
 
-### 5.1 Finding 1 — Vision LLMs do not substitute for specialised OCSR (~250 words)
+**Word allocation:** Finding 1 ~150–200 words (capability measurement), Finding 2 ~400–450 words (load-bearing methodological contribution). The research-note framing is earned only if Finding 2 is prominent in the body, not just the abstract.
+
+### 5.1 Finding 1 — Vision LLMs do not substitute for specialised OCSR (~150–200 words)
 
 - **Setup.** 20-structure benchmark, ground truth = PubChem canonical SMILES re-canonicalised through RDKit. Direct vision call to Gemma 4 E4B via vLLM's OpenAI-compatible API.
 - **Headline number.** **1/20 = 5% PASS_STRICT** accuracy. Bucket distribution: PASS_STRICT=1, PASS_INCHI=0, PARTIAL=14, FAIL=5 (with FAIL/PARTIAL boundary sensitive to vision-call timeout — extending from 90s to 300s flipped one erythromycin FAIL to PARTIAL but did not produce a correct answer; coenzyme B12 still timed out at 300s).
@@ -67,7 +69,9 @@
 - **Implication.** Specialised OCSR systems (DECIMER, OSRA, MolScribe) encode chemistry-notation prior knowledge that a general-purpose vision encoder does not. A production agent should integrate a specialised extractor; Gemma 4 vision can play an enrichment role (notes, ambiguity flags, higher-level pathway diagrams not requiring atom-level precision).
 - **What MetaboAgent does with this finding (today).** The `parse_structure_image` tool is wired end-to-end. The UI marks it experimental and surfaces the model's RDKit-canonicalised SMILES alongside its self-reported confidence and notes. Cite `docs/multimodal-finding.md` for the full writeup.
 
-### 5.2 Finding 2 — Existence-only citation verification hides semantic hallucination (~350 words — the headline)
+### 5.2 Finding 2 — Existence-only citation verification hides semantic hallucination (~400–450 words — the load-bearing contribution)
+
+**Explicit framing language to use in this section:** "To our knowledge this gap has not been measured systematically in prior agent benchmarks; we provide a reproducible methodology and a baseline measurement." Position substrate-relevance verification as the methodological novelty — not the agent itself.
 
 - **Setup.** Three independent runs of `eval_pathway_hallucination`, 5 design prompts each. Across runs the agent emitted **21 KEGG reaction IDs (R-IDs)** in the 8.3.B baseline run; 18 had enough step context to test substrate-relevance, and **15 of those passed existence verification** (verified-eligible).
 - **Two verification layers.**
