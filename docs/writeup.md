@@ -30,9 +30,9 @@ We built the agent so we could measure it. The agent is necessary infrastructure
 
 **Tool registry.** Fifteen tools: PubMed/KEGG/UniProt search and detail fetchers, KEGG pathway and reaction lookups, BLAST, compound resolvers, plus the multimodal `parse_structure_image` entry point. Each tool exposes an OpenAI-style schema; the agent uses Gemma 4's native function calling, not a hand-written ReAct parser. The agent loop in [`agent/core.py`](../agent/core.py) caps iterations at 6 and emits a streaming event protocol (`thinking`, `tool_call`, `tool_result`, `token`, `final_answer`).
 
-**Verification.** The agent performs **existence verification** of cited identifiers (KEGG reactions, KEGG compounds, UniProt accessions) at runtime. The **substrate-relevance verifier** described in Finding 2 was added in Phase 8.3.B and currently runs in eval-only mode; integrating it into the runtime self-verification loop is deferred and called out in Section 7.
+**Verification.** The agent performs existence verification of cited KEGG and UniProt identifiers at runtime. The deeper substrate-relevance check is the subject of Finding 2; it runs in eval-only mode pre-submission.
 
-**Demo-safe mode.** `DEMO_MODE=1` combined with `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` runs the agent end-to-end against the indexed corpus. The four live-fetch tools return clear demo-stub responses rather than masquerading as live ones. This is what the public demo runs on.
+**Demo-safe mode.** `DEMO_MODE=1` runs the agent against the indexed corpus only; live-fetch tools return clear demo-stub responses. The public demo runs on this mode.
 
 We deliberately do not sell the agent here. The agent is the measurement platform. Its job is to make the findings reproducible.
 
