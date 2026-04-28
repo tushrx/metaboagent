@@ -114,7 +114,7 @@ Comparison and lookup are stable across runs; mechanism and pathway-design are n
 
 **Surface fabrication is rare.** The KEGG R-IDs the agent emits *exist* — 0/21 hallucinated against existence verification across the 8.3.B baseline. The failure mode is misapplication, not invention. This is a non-trivial property of the system and worth stating directly, even though Finding 2 then explains why "doesn't fabricate" is a weaker guarantee than it appears.
 
-**Latency profile.** vLLM prefix caching makes cache-hot prompts cheap (40–90 seconds for three runs of a multi-step design prompt on an L40), and routing E4B for lookups makes the average-turn target (≤5 seconds) realistic for the common case.
+**Latency profile.** Pathway-design prompts (the heaviest case in the harness) complete end-to-end in **median 24.5 s** across both reasoning phases (n=45 prompt-runs across 3 independent 5-prompt runs of `eval_pathway_hallucination`, range 5.9–38.5 s; phase-1 planner median 9.4 s, phase-2 deep-dive median 14.5 s when triggered). Lookup-class prompts route through E4B and complete much faster, but we do not benchmark them separately and so do not claim a number here. The whole unified eval (4 evals, 8 runs, ~30 prompt-completions of varying weight) finishes in ~12 minutes thanks to vLLM prefix caching on the cache-hot prompt portions.
 
 **Scope-honest framing of vision OCSR in the UI.** Rather than ship a known-broken capability silently, the agent surfaces the vision result with an experimental badge, the RDKit-canonicalised SMILES alongside the model's self-reported confidence, and the model's own caveat notes. The user sees what the model said, whether it hedged, and has enough information to verify before trusting.
 
