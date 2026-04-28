@@ -36,9 +36,11 @@ Existence-checking would have passed all 15 IDs as "verified". Semantic
 verification flags 14 of them. The agent's failure mode at this layer is
 **not fabrication** (the IDs exist in KEGG) but **misapplication** (real
 IDs are attached to the wrong steps). Concrete case: `R12566` is the real
-feruloyl-CoA hydrolase reaction (Feruloyl-CoA → Vanillin), and the agent
-emitted it at step 1 (Ferulic Acid → Feruloyl-CoA, the activation step) —
-right ID, wrong step.
+feruloyl-CoA hydratase/lyase reaction (EC 4.1.2.61, KEGG orthology
+K18383): Feruloyl-CoA + H2O ⇌ Vanillin + Acetyl-CoA. The agent emitted
+it at step 1 of vanillin-from-ferulic synthesis (Ferulic Acid →
+Feruloyl-CoA — the upstream activation step that *produces* feruloyl-CoA,
+not the lyase step that consumes it). Right ID, wrong step.
 
 ## Methodological contribution
 
