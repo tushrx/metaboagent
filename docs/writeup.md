@@ -132,7 +132,11 @@ The **phase-1 recursion bug** documented in [`docs/phase8-followups.md`](phase8-
 
 ## Reproducibility
 
-The repository is Apache 2.0 licensed. One-command full eval: `python -m eval all --report` from a `DEMO_MODE=1` shell. Required environment: `PYTHONPATH=<repo root>`, `EMBEDDING_DEVICE=cuda:3` (or any GPU not held by vLLM — see [`docs/troubleshooting.md`](troubleshooting.md)), `DEMO_MODE=1`. Every numerical claim in this writeup links to a JSON file under [`eval/results/`](../eval/results/); the unified report [`eval/results/full_report_phase8_close.md`](../eval/results/full_report_phase8_close.md) is the index. Methodology details: [`docs/eval-methodology.md`](eval-methodology.md). Findings: [`docs/phase8-finding.md`](phase8-finding.md), [`docs/multimodal-finding.md`](multimodal-finding.md). Architecture: [`CLAUDE.md`](../CLAUDE.md) and [`agent/core.py`](../agent/core.py).
+The repository is Apache 2.0 licensed. One-command full eval: `python -m eval all --report` from a `DEMO_MODE=1` shell. Required environment: `PYTHONPATH=<repo root>`, `EMBEDDING_DEVICE=cuda:3` (or any GPU not held by vLLM — see [`docs/troubleshooting.md`](troubleshooting.md)), `DEMO_MODE=1`. Every numerical claim in this writeup links to a JSON file under [`eval/results/`](../eval/results/); the unified report [`eval/results/full_report_phase8_close.md`](../eval/results/full_report_phase8_close.md) is the index.
+
+**Variance note for reproducers.** Pathway-hallucination per-run R-ID counts vary substantially (3–7 R-IDs/run in the 8.3.B baseline; 0–4 R-IDs/run in the 8.4 unified run, owing to the phase-1 recursion bug noted in Section 7). The per-ID real-but-wrong rate is much more stable: 14/15 (93%) pooled across the 8.3.B baseline and 5/5 (100%) pooled across the 8.4 unified run. Readers reproducing the eval should expect a real-but-wrong rate in the 70–100% range on existence-verified IDs, with the absolute R-ID volume varying with run.
+
+Methodology details: [`docs/eval-methodology.md`](eval-methodology.md). Findings: [`docs/phase8-finding.md`](phase8-finding.md), [`docs/multimodal-finding.md`](multimodal-finding.md). Architecture: [`CLAUDE.md`](../CLAUDE.md) and [`agent/core.py`](../agent/core.py).
 
 ---
 
