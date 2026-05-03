@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import { Wrench, AlertCircle, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Attachment, ToolCallEvent } from "@/lib/api";
+import { normalizeText } from "@/lib/normalize-text";
 import { Lightbox } from "./lightbox";
 
 export interface ChatMessage {
@@ -270,7 +271,7 @@ function AssistantProse({ content }: { content: string }) {
           strong: (props) => <strong className="font-semibold" {...props} />,
         }}
       >
-        {content}
+        {normalizeText(content)}
       </ReactMarkdown>
     </div>
   );
