@@ -35,13 +35,16 @@ export function EvidenceDrawer({ toolActivity, pathway }: Props) {
 
   return (
     <>
-      {/* Floating toggle — hidden on lg+ where the rail is always visible. */}
+      {/* Floating toggle — hidden on lg+ where the rail is always
+          visible. The bottom offset clears the input area + footer
+          (~112 px combined) so the button doesn't sit on top of the
+          send button on narrow viewports. */}
       <button
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open evidence panel"
         aria-expanded={open}
-        className="fixed bottom-5 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400/60 lg:hidden"
+        className="fixed bottom-[124px] right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400/60 lg:hidden"
       >
         <Layers size={20} />
         {badgeCount > 0 && (

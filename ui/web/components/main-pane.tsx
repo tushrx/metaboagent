@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown } from "lucide-react";
+import { AlertTriangle, ArrowDown } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatMessage, StreamingState } from "./message-list";
 import { MessageList } from "./message-list";
@@ -122,13 +122,22 @@ export function MainPane({
       )}
 
       {lastError && !streaming && (
-        <div className="mx-auto w-full max-w-3xl px-6">
-          <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-            <span>{lastError}</span>
+        <div className="mx-auto w-full max-w-3xl px-6 pb-2">
+          <div
+            role="alert"
+            className="flex animate-fade-in items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-800 shadow-sm"
+          >
+            <div className="flex min-w-0 items-start gap-2">
+              <AlertTriangle
+                size={15}
+                className="mt-0.5 shrink-0 text-red-600"
+              />
+              <span className="break-words">{lastError}</span>
+            </div>
             <button
               type="button"
               onClick={onRetry}
-              className="ml-3 rounded-md border border-red-300 bg-white px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-100"
+              className="shrink-0 rounded-md border border-red-300 bg-white px-3 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-400/40"
             >
               Retry
             </button>

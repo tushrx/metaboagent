@@ -10,3 +10,19 @@ body {
 body {
   @apply bg-white text-gray-900;
 }
+
+/* Subtle one-shot fade-in for cards mounted mid-stream (tool activity,
+   citations). Runs on mount only; doesn't loop. Kept quiet on purpose
+   — no slide, no bounce. */
+@keyframes mb-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: mb-fade-in 200ms ease-out;
+}

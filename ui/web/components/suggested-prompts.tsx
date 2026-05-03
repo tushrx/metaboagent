@@ -28,12 +28,12 @@ export function SuggestedPrompts({ onPick }: Props) {
             <button
               type="button"
               onClick={() => onPick(prompt)}
-              className="group flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-left text-[15px] text-gray-800 transition-colors hover:border-blue-300 hover:bg-blue-50 focus:border-blue-400 focus:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="group flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-left text-[15px] text-gray-800 transition-all duration-150 ease-out hover:-translate-y-px hover:border-blue-300 hover:bg-blue-50 hover:shadow-sm focus:border-blue-400 focus:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             >
               <span>{prompt}</span>
               <ArrowRight
                 size={16}
-                className="ml-3 shrink-0 text-gray-400 transition-colors group-hover:text-blue-600"
+                className="ml-3 shrink-0 text-gray-400 transition-all duration-150 ease-out group-hover:translate-x-0.5 group-hover:text-blue-600"
               />
             </button>
           </li>

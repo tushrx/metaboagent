@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import { Wrench, AlertCircle, XCircle } from "lucide-react";
+import { Wrench, AlertTriangle, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Attachment, ToolCallEvent } from "@/lib/api";
 import { normalizeText } from "@/lib/normalize-text";
@@ -12,6 +12,7 @@ import { extractPlan, formatPlanAsMarkdown } from "@/lib/plan";
 import { processChildren } from "@/lib/render-text";
 import { CopyButton } from "./copy-button";
 import { Lightbox } from "./lightbox";
+import { MessageSkeleton } from "./message-skeleton";
 
 export interface ChatMessage {
   id: string;
@@ -42,7 +43,7 @@ export function MessageList({ messages, streaming, onToolCrumbClick }: Props) {
   // Scroll control lives in the MainPane parent now — it owns the
   // scrollable viewport. We just render content.
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-8">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-6 py-8">
       {messages.map((m) => (
         <MessageRow key={m.id} message={m} onToolCrumbClick={onToolCrumbClick} />
       ))}
@@ -134,9 +135,9 @@ function MessageRow({
         </div>
       )}
       {message.error && (
-        <div className="flex items-center gap-1.5 text-sm text-red-600">
-          <AlertCircle size={14} />
-          <span>{message.error}</span>
+        <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+          <span className="break-words">{message.error}</span>
         </div>
       )}
     </div>
@@ -164,10 +165,7 @@ function StreamingRow({
       {state.text ? (
         <AssistantProse content={state.text} />
       ) : (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-gray-400" />
-          <span>Thinking…</span>
-        </div>
+        <MessageSkeleton />
       )}
     </div>
   );
@@ -268,35 +266,41 @@ function AssistantProse({ content }: { content: string }) {
     ? `${textWithoutPlan}\n\n${formatPlanAsMarkdown(plan)}`.trim()
     : content;
   return (
-    <div className="prose-assistant text-[15px] leading-7 text-gray-900">
+    <div className="prose-assistant text-[15px] leading-[1.7] text-gray-900">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
         components={{
           p: ({ children, ...props }) => (
-            <p className="my-3 first:mt-0 last:mb-0" {...props}>
+            <p className="my-4 first:mt-0 last:mb-0" {...props}>
               {processChildren(children)}
             </p>
           ),
-          ul: (props) => <ul className="my-3 list-disc pl-6" {...props} />,
-          ol: (props) => <ol className="my-3 list-decimal pl-6" {...props} />,
+          ul: (props) => <ul className="my-4 list-disc pl-6" {...props} />,
+          ol: (props) => <ol className="my-4 list-decimal pl-6" {...props} />,
           li: ({ children, ...props }) => (
             <li className="my-1" {...props}>
               {processChildren(children)}
             </li>
           ),
           h1: ({ children, ...props }) => (
-            <h1 className="mt-5 mb-2 text-lg font-semibold" {...props}>
+            <h1
+              className="mt-6 mb-2 text-[19px] font-semibold tracking-tight first:mt-0"
+              {...props}
+            >
               {processChildren(children)}
             </h1>
           ),
           h2: ({ children, ...props }) => (
-            <h2 className="mt-4 mb-2 text-[17px] font-semibold" {...props}>
+            <h2 className="mt-5 mb-2 text-[16px] font-semibold" {...props}>
               {processChildren(children)}
             </h2>
           ),
           h3: ({ children, ...props }) => (
-            <h3 className="mt-3 mb-1.5 text-[15px] font-semibold" {...props}>
+            <h3
+              className="mt-4 mb-1.5 text-[13px] font-semibold uppercase tracking-wider text-gray-600"
+              {...props}
+            >
               {processChildren(children)}
             </h3>
           ),

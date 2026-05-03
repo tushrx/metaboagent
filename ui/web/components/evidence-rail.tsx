@@ -140,7 +140,7 @@ function ToolActivityCard({ activity }: { activity: ToolActivity }) {
     <article
       role="article"
       aria-label={`Tool ${activity.name}, status ${activity.status}`}
-      className="rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-sm"
+      className="animate-fade-in rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-sm"
     >
       <button
         type="button"
@@ -568,7 +568,7 @@ export function CitationRow({ citation }: { citation: Citation }) {
       : `from ${citation.provenance.join(", ")}`;
 
   return (
-    <div className="group relative flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-white px-2 py-2 transition-all hover:border-blue-300 hover:bg-blue-50 hover:shadow-sm">
+    <div className="group relative flex animate-fade-in items-center justify-between gap-2 rounded-md border border-gray-200 bg-white px-2 py-2 transition-all hover:border-blue-300 hover:bg-blue-50 hover:shadow-sm">
       <a
         href={citation.url}
         target="_blank"
