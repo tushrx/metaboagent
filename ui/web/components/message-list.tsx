@@ -6,6 +6,7 @@ import { Wrench, AlertCircle, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Attachment, ToolCallEvent } from "@/lib/api";
 import { normalizeText } from "@/lib/normalize-text";
+import { extractPlan, formatPlanAsMarkdown } from "@/lib/plan";
 import { Lightbox } from "./lightbox";
 
 export interface ChatMessage {
@@ -217,6 +218,10 @@ function ToolCrumbStrip({
 }
 
 function AssistantProse({ content }: { content: string }) {
+  const { plan, textWithoutPlan } = extractPlan(content);
+  const merged = plan
+    ? `${textWithoutPlan}\n\n${formatPlanAsMarkdown(plan)}`.trim()
+    : content;
   return (
     <div className="prose-assistant text-[15px] leading-7 text-gray-900">
       <ReactMarkdown
@@ -293,7 +298,7 @@ function AssistantProse({ content }: { content: string }) {
           ),
         }}
       >
-        {normalizeText(content)}
+        {normalizeText(merged)}
       </ReactMarkdown>
     </div>
   );
