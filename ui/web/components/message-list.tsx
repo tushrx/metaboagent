@@ -269,6 +269,28 @@ function AssistantProse({ content }: { content: string }) {
           ),
           hr: () => <hr className="my-4 border-gray-200" />,
           strong: (props) => <strong className="font-semibold" {...props} />,
+          table: (props) => (
+            <div className="my-4 overflow-x-auto">
+              <table
+                className="w-full border-collapse border-t border-b border-gray-300 text-[14px]"
+                {...props}
+              />
+            </div>
+          ),
+          thead: (props) => (
+            <thead className="border-b border-gray-300" {...props} />
+          ),
+          tbody: (props) => <tbody {...props} />,
+          tr: (props) => <tr {...props} />,
+          th: (props) => (
+            <th
+              className="px-4 py-2 text-left font-medium text-gray-900"
+              {...props}
+            />
+          ),
+          td: (props) => (
+            <td className="px-4 py-2 align-top text-gray-800" {...props} />
+          ),
         }}
       >
         {normalizeText(content)}
