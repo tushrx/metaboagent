@@ -59,5 +59,17 @@ whichever applies:
 - `npx tsc --noEmit` (type-check only, doesn't touch `.next/`).
 - `npm run lint` (eslint only).
 - Stop dev, run `npm run build`, then restart dev.
-- Or build into a separate output directory by setting
-  `distDir` in `next.config.js` for that one build.
+- **Run a parallel production build into a separate dir** —
+  `next.config.mjs` honours
+  `distDir: process.env.NEXT_DIST_DIR || ".next"`, so:
+
+  ```bash
+  NEXT_DIST_DIR=.next-prod npx next build
+  ```
+
+  writes to `ui/web/.next-prod/` while the dev server's `ui/web/.next/`
+  stays untouched. Use this when you need a real First Load JS number
+  without restarting dev. Remember to `rm -rf ui/web/.next-prod` when
+  done. Side note: Next will auto-add `.next-prod/types/**/*.ts` to the
+  `include` array in `tsconfig.json` when it runs — that line is
+  harmless to keep around even after the directory is deleted.
