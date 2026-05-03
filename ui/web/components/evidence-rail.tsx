@@ -2,7 +2,12 @@
 
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react";
 import {
+  Atom,
+  BookOpen,
   Wrench,
+  Database,
+  Dna,
+  Link2,
   Loader2,
   CheckCircle2,
   AlertCircle,
@@ -20,6 +25,7 @@ import {
   groupCitations,
 } from "@/lib/citations";
 import type { PathwayData } from "@/lib/pathway";
+import { CopyButton } from "./copy-button";
 import { PathwayDiagram } from "./pathway-diagram";
 
 export interface EvidenceRailHandle {
@@ -516,37 +522,105 @@ function CitationGroup({
   );
 }
 
-function CitationRow({ citation }: { citation: Citation }) {
-  const sourceLabel =
+/**
+ * Source-type icon for a citation. Same gray-400 / hover-blue styling
+ * as the rest of the row's icons; not color-coded by source family
+ * (intentionally — keeps the rail visually quiet so the IDs are the
+ * primary scannable element).
+ */
+function CitationIcon({ kind }: { kind: CitationKind }) {
+  const Icon =
+    kind === "pmid"
+      ? BookOpen
+      : kind === "uniprot"
+        ? Dna
+        : kind === "chebi"
+          ? Atom
+          : kind === "doi"
+            ? Link2
+            : Database; // all kegg_* fall through here
+  return (
+    <Icon
+      size={12}
+      className="shrink-0 text-gray-400 transition-colors group-hover:text-blue-600"
+    />
+  );
+}
+
+/**
+ * Pattern: "card link" with sibling actions.
+ *
+ * The whole card needs to act like a link (click anywhere → open the
+ * source) AND host an interactive Copy-ID button (click copy → copy
+ * the ID to clipboard, do NOT navigate). We can't nest a button
+ * inside the <a> because nested-interactive elements are invalid HTML.
+ *
+ * Solution: an absolutely-positioned <a> covering the whole card (with
+ * a `<span class="sr-only">` for screen readers) sits at z-10. The
+ * visible decorative content is a sibling, marked aria-hidden so
+ * screen readers don't get a duplicated announcement. The Copy button
+ * sits at z-20 so it captures clicks above the link.
+ */
+export function CitationRow({ citation }: { citation: Citation }) {
+  const provenanceTitle =
     citation.provenance.length === 1
       ? `from ${citation.provenance[0]}`
-      : `seen in ${citation.provenance.length} tools`;
+      : `from ${citation.provenance.join(", ")}`;
 
   return (
-    <a
-      href={citation.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`Open ${citation.id} on ${hostOf(citation.url)}, opens in new tab`}
-      title={citation.provenance.join(", ")}
-      className="group flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-white px-2 py-1.5 transition-colors hover:border-blue-300 hover:bg-blue-50"
-    >
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wide text-gray-700 group-hover:bg-blue-100 group-hover:text-blue-800">
+    <div className="group relative flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-white px-2 py-2 transition-all hover:border-blue-300 hover:bg-blue-50 hover:shadow-sm">
+      <a
+        href={citation.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Open ${citation.id} on ${hostOf(citation.url)}, opens in new tab`}
+        title={provenanceTitle}
+        className="absolute inset-0 z-10 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400/40"
+      >
+        <span className="sr-only">
+          {citationLabel(citation.kind)} {citation.id}
+        </span>
+      </a>
+
+      <div
+        aria-hidden="true"
+        className="relative z-0 flex min-w-0 items-center gap-2"
+      >
+        <CitationIcon kind={citation.kind} />
+        <span className="inline-flex min-w-[64px] justify-center rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wide text-gray-700 group-hover:bg-blue-100 group-hover:text-blue-800">
           {citationLabel(citation.kind)}
         </span>
         <span className="truncate font-mono text-[12px] text-gray-900">
           {citation.id}
         </span>
       </div>
-      <div className="flex shrink-0 items-center gap-1.5">
-        <span className="text-[10px] text-gray-400">{sourceLabel}</span>
+
+      <div
+        aria-hidden="true"
+        className="relative z-0 flex shrink-0 items-center gap-1.5"
+      >
+        <span
+          className="flex items-center gap-0.5"
+          title={provenanceTitle}
+        >
+          <Wrench size={10} className="text-gray-300" />
+          <span className="font-mono text-[9px] text-gray-400">
+            {citation.provenance.length}
+          </span>
+        </span>
+        <div className="relative z-20 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+          <CopyButton
+            getText={() => citation.id}
+            ariaLabel={`Copy ${citation.id}`}
+            size="compact"
+          />
+        </div>
         <ExternalLink
           size={12}
           className="text-gray-400 group-hover:text-blue-600"
         />
       </div>
-    </a>
+    </div>
   );
 }
 
