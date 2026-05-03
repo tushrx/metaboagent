@@ -1,17 +1,21 @@
 /**
  * Normalize raw LaTeX-flavoured fragments and chemistry notation that
  * Gemma 4 emits in chat prose, so the markdown renderer shows arrows,
- * Unicode subscripts/superscripts, and bare compound names — not the
- * raw source. We intentionally do NOT pull in a math renderer (KaTeX);
- * chemistry notation in our domain is well covered by Unicode glyphs
- * with HTML <sub>/<sup> as a fallback.
+ * Unicode subscripts/superscripts, Greek letters, and bare compound
+ * names — not the raw source.
+ *
+ * Display math `$$...$$` and inline math `$...$` that contains real
+ * math commands (\frac, \sum, \int, Greek letters, etc.) are LEFT
+ * UNTOUCHED so that remark-math + rehype-katex can render them.
+ *
+ * "Simple chemistry" inside `$...$` (no \X commands beyond the simple
+ * arrow set, or no \X at all) is treated as chat prose: dollar
+ * wrappers stripped, sub/super converted, etc.
  *
  * A separate, narrower normalizer lives in `lib/pathway.ts`
- * (`normalizeArrows`) for the pathway-step parser. They overlap on the
- * arrow patterns by design — the pathway parser must stay independent
- * of the chat-display path.
- *
- * Pass order matters; see the inline comments in `normalizeText`.
+ * (`normalizeArrows`) for the pathway-step parser. They overlap on
+ * the arrow patterns by design — the pathway parser must stay
+ * independent of the chat-display path.
  */
 
 // --- LaTeX command -> unicode glyph -----------------------------------
@@ -27,32 +31,67 @@ const COMMAND_REPLACEMENTS: ReadonlyArray<[RegExp, string]> = [
   [/\\to\b/g, "→"],
 ];
 
+// Commands that the chat-prose path handles itself (arrow conversions
+// + \text collapse). Inside `$...$`, these don't promote a span to
+// "math" — `$\rightarrow$` should still strip down to `→`. Anything
+// outside this set is treated as KaTeX-bound math.
+const SIMPLE_PROSE_COMMANDS = new Set([
+  "text",
+  "rightarrow",
+  "leftarrow",
+  "rightleftharpoons",
+  "leftrightarrow",
+  "longrightarrow",
+  "Rightarrow",
+  "to",
+]);
+
+// --- Greek letter map -------------------------------------------------
+// Applied AFTER the arrow command pass. KaTeX handles Greek inside
+// math spans natively; this map is for `\beta` that the model emits in
+// PROSE outside any `$...$` wrapper.
+const GREEK_REPLACEMENTS: ReadonlyArray<[RegExp, string]> = [
+  [/\\alpha\b/g, "α"], [/\\Alpha\b/g, "Α"],
+  [/\\beta\b/g, "β"], [/\\Beta\b/g, "Β"],
+  [/\\gamma\b/g, "γ"], [/\\Gamma\b/g, "Γ"],
+  [/\\delta\b/g, "δ"], [/\\Delta\b/g, "Δ"],
+  [/\\epsilon\b/g, "ε"], [/\\Epsilon\b/g, "Ε"],
+  [/\\theta\b/g, "θ"], [/\\Theta\b/g, "Θ"],
+  [/\\lambda\b/g, "λ"], [/\\Lambda\b/g, "Λ"],
+  [/\\mu\b/g, "μ"], [/\\Mu\b/g, "Μ"],
+  [/\\rho\b/g, "ρ"], [/\\Rho\b/g, "Ρ"],
+  [/\\sigma\b/g, "σ"], [/\\Sigma\b/g, "Σ"],
+  [/\\pi\b/g, "π"], [/\\Pi\b/g, "Π"],
+  [/\\phi\b/g, "φ"], [/\\Phi\b/g, "Φ"],
+  [/\\omega\b/g, "ω"], [/\\Omega\b/g, "Ω"],
+  [/\\tau\b/g, "τ"], [/\\Tau\b/g, "Τ"],
+  [/\\kappa\b/g, "κ"], [/\\Kappa\b/g, "Κ"],
+];
+
 // --- Dollar-strip regexes ---------------------------------------------
 // Math-like: spaces allowed, but inner span must contain at least one
-// math marker (sub/super/arrow). Catches reaction equations like
+// math marker. Catches reaction equations like
 // "$Glucose → Glucose-6-phosphate$".
 const DOLLAR_MATH_RE =
-  /\$([A-Za-z0-9().+\-\s_^{}→⇌←↔⇒]*[_^→⇌←↔⇒][A-Za-z0-9().+\-\s_^{}→⇌←↔⇒]*)\$/g;
+  /\$([A-Za-z0-9().+\-\s_^{}\[\]→⇌←↔⇒]*[_^→⇌←↔⇒][A-Za-z0-9().+\-\s_^{}\[\]→⇌←↔⇒]*)\$/g;
 
 // Chemistry-shape: no spaces inside, length ≤ 30, must contain at
-// least one letter. Catches $C=C$, $H_2(g)$, $Na+$, $(CH_3)_2$, $NADH$.
-// No-spaces is what protects "$50 to $100" — the inner span there has
-// spaces and won't match.
-const DOLLAR_CHEM_RE = /\$([A-Za-z0-9\-+=()_^{}→⇌←↔⇒]{1,30})\$/g;
+// least one letter. Brackets allowed for biochem concentration like
+// $[S]$, $[NADH]$.
+const DOLLAR_CHEM_RE =
+  /\$([A-Za-z0-9\-+=()_^{}\[\]→⇌←↔⇒]{1,30})\$/g;
+
+// Charge-only spans like $+2$, $-1$, $+3$. Length 2-4 (sign + 1-3
+// digits). Currency stays safe because `$50` and `$100` don't start
+// with +/−.
+const DOLLAR_CHARGE_RE = /\$([+\-][0-9]{1,3})\$/g;
 
 // --- Sub/superscript regexes ------------------------------------------
-// Base char (the thing being subscripted/superscripted) is a letter,
-// digit, or closing bracket — covers H, 5, ), ].
-// Content is either braced ({12}, {2+}, {cat}), bare digits (12), or a
-// single letter. Superscript also allows bare "digits[+|-|=]?" for
-// charges like ^2+ and bare sign ^+.
 const SUB_RE = /([A-Za-z0-9)\]])_(\{[^}]+\}|\d+|[A-Za-z])/g;
 const SUP_RE =
   /([A-Za-z0-9)\]])\^(\{[^}]+\}|\d+[+\-=]?|[+\-=]|[A-Za-z])/g;
 
 // --- Unicode maps ------------------------------------------------------
-// Subscript: digits + signs + parens + the "common subscript-able
-// lowercase letters" per spec.
 const SUB_MAP: Record<string, string> = {
   "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄",
   "5": "₅", "6": "₆", "7": "₇", "8": "₈", "9": "₉",
@@ -63,10 +102,6 @@ const SUB_MAP: Record<string, string> = {
   v: "ᵥ", x: "ₓ",
 };
 
-// Superscript: digits + signs + parens + n + i only. Letter set is
-// intentionally smaller than subscript — Unicode superscripts for most
-// letters exist but stack visually awkwardly when chained, so we let
-// multi-letter exponents fall back to <sup>HTML</sup>.
 const SUP_MAP: Record<string, string> = {
   "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
   "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹",
@@ -74,20 +109,12 @@ const SUP_MAP: Record<string, string> = {
   n: "ⁿ", i: "ⁱ",
 };
 
-/**
- * Try to map every character of `content` through `map`. Returns the
- * concatenated unicode string if every char has a mapping; null
- * otherwise (signal to caller that HTML fallback is needed).
- */
 function mapAllOrNull(
   content: string,
   map: Record<string, string>,
 ): string | null {
-  // Strip { } if the content is brace-wrapped.
   let chars = content;
-  if (chars.startsWith("{") && chars.endsWith("}")) {
-    chars = chars.slice(1, -1);
-  }
+  if (chars.startsWith("{") && chars.endsWith("}")) chars = chars.slice(1, -1);
   if (chars.length === 0) return null;
   const out: string[] = [];
   for (const c of chars) {
@@ -103,9 +130,88 @@ function stripBraces(s: string): string {
   return s;
 }
 
-export function normalizeText(input: string): string {
-  if (!input) return input;
+/**
+ * Decide whether the contents of a `$...$` span should be treated as
+ * KaTeX-bound math. True when the span contains any `\command` outside
+ * `SIMPLE_PROSE_COMMANDS` (Greek letters, \frac, \sum, \int, etc.).
+ */
+function isMathSpan(content: string): boolean {
+  const re = /\\([A-Za-z]+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(content)) !== null) {
+    if (!SIMPLE_PROSE_COMMANDS.has(m[1])) return true;
+  }
+  return false;
+}
 
+interface Segment {
+  math: boolean;
+  text: string;
+}
+
+/**
+ * Walk the input and split it into math segments (which are left
+ * untouched for KaTeX) and prose segments (which run through the
+ * normalization passes). Display math `$$...$$` is always math.
+ * Inline `$...$` is math only if `isMathSpan` says so — otherwise
+ * it's prose with a chemistry-shaped dollar wrapper.
+ *
+ * Unmatched lone `$` characters stay in their prose segment.
+ */
+function splitForMath(input: string): Segment[] {
+  const out: Segment[] = [];
+  let buf = "";
+  let i = 0;
+
+  const flushProse = () => {
+    if (buf.length > 0) {
+      out.push({ math: false, text: buf });
+      buf = "";
+    }
+  };
+
+  while (i < input.length) {
+    // Display math $$...$$ (always math).
+    if (input[i] === "$" && input[i + 1] === "$") {
+      const close = input.indexOf("$$", i + 2);
+      if (close !== -1) {
+        flushProse();
+        out.push({ math: true, text: input.slice(i, close + 2) });
+        i = close + 2;
+        continue;
+      }
+    }
+
+    // Inline $...$ — only "math" if the contents trigger isMathSpan.
+    if (input[i] === "$") {
+      let close = -1;
+      for (let j = i + 1; j < input.length; j++) {
+        if (input[j] === "$" && input[j - 1] !== "\\") {
+          close = j;
+          break;
+        }
+      }
+      if (close !== -1) {
+        const content = input.slice(i + 1, close);
+        if (isMathSpan(content)) {
+          flushProse();
+          out.push({ math: true, text: input.slice(i, close + 1) });
+          i = close + 1;
+          continue;
+        }
+        // Not math — fall through to buffer the chars normally.
+      }
+    }
+
+    buf += input[i];
+    i++;
+  }
+
+  flushProse();
+  return out;
+}
+
+function applyProsePasses(input: string): string {
   let s = input;
 
   // 1. HTML entity arrow.
@@ -116,33 +222,33 @@ export function normalizeText(input: string): string {
     s = s.replace(re, glyph);
   }
 
-  // 3. Collapse \text{X} -> X. Handles compound chemistry like
-  //    $\text{C}_3\text{H}_4\text{O}_3$ where each species is wrapped.
+  // 3. Collapse \text{X} -> X.
   s = s.replace(/\\text\{([^{}]*)\}/g, "$1");
 
-  // 4. Math-like $...$ strip (spaces allowed, marker required). Catches
-  //    reaction equations: "$Glucose → Glucose-6-phosphate$".
+  // 4. Greek letter map -> unicode glyph.
+  for (const [re, glyph] of GREEK_REPLACEMENTS) {
+    s = s.replace(re, glyph);
+  }
+
+  // 5. Math-like $...$ strip (spaces allowed, marker required).
   s = s.replace(DOLLAR_MATH_RE, "$1");
 
-  // 5. Chemistry-shape $...$ strip (no spaces, ≤30 chars, has letter).
-  //    Catches $C=C$, $C-C$, $Na+$, $(CH_3)_2$, $NADH$.
+  // 6. Chemistry-shape $...$ strip (no spaces, ≤30 chars, has letter).
   s = s.replace(DOLLAR_CHEM_RE, (match, inner) => {
     return /[A-Za-z]/.test(inner) ? inner : match;
   });
 
-  // 6. Subscript: every-char-mapped -> Unicode, else placeholder. The
-  //    placeholder is parsed back into a React <sub> element by the
-  //    chat renderer (see `lib/render-text.tsx`). We don't emit raw
-  //    HTML here because react-markdown without rehype-raw would
-  //    escape it — and pulling rehype-raw in adds ~50 kB to First
-  //    Load JS for an HTML5 parser we don't otherwise need.
+  // 7. Charge-only $...$ strip ($+2$, $-1$).
+  s = s.replace(DOLLAR_CHARGE_RE, "$1");
+
+  // 8. Subscript: every-char-mapped -> Unicode, else placeholder.
   s = s.replace(SUB_RE, (_match, base, content) => {
     const unicode = mapAllOrNull(content, SUB_MAP);
     if (unicode !== null) return base + unicode;
     return `${base}{{SUB:${stripBraces(content)}}}`;
   });
 
-  // 7. Superscript: same, but with the conservative SUP_MAP.
+  // 9. Superscript: same, but with the conservative SUP_MAP.
   s = s.replace(SUP_RE, (_match, base, content) => {
     const unicode = mapAllOrNull(content, SUP_MAP);
     if (unicode !== null) return base + unicode;
@@ -150,4 +256,12 @@ export function normalizeText(input: string): string {
   });
 
   return s;
+}
+
+export function normalizeText(input: string): string {
+  if (!input) return input;
+  const segments = splitForMath(input);
+  return segments
+    .map((seg) => (seg.math ? seg.text : applyProsePasses(seg.text)))
+    .join("");
 }

@@ -2,6 +2,8 @@
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import { Wrench, AlertCircle, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Attachment, ToolCallEvent } from "@/lib/api";
@@ -226,7 +228,8 @@ function AssistantProse({ content }: { content: string }) {
   return (
     <div className="prose-assistant text-[15px] leading-7 text-gray-900">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex]}
         components={{
           p: ({ children, ...props }) => (
             <p className="my-3 first:mt-0 last:mb-0" {...props}>

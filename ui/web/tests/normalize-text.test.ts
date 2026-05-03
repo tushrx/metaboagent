@@ -180,4 +180,99 @@ describe("normalizeText", () => {
   it("returns empty string unchanged", () => {
     expect(normalizeText("")).toBe("");
   });
+
+  // --- Greek letters in prose (outside math spans) -------------------
+
+  it("converts \\beta-galactosidase to β-galactosidase", () => {
+    expect(normalizeText("\\beta-galactosidase enzyme")).toBe(
+      "β-galactosidase enzyme",
+    );
+  });
+
+  it("leaves 'alpha-helix' untouched (no backslash)", () => {
+    expect(normalizeText("alpha-helix")).toBe("alpha-helix");
+  });
+
+  it("converts \\alpha-\\beta interaction to α-β interaction", () => {
+    expect(normalizeText("\\alpha-\\beta interaction")).toBe(
+      "α-β interaction",
+    );
+  });
+
+  it("converts \\Delta G (uppercase Greek)", () => {
+    expect(normalizeText("\\Delta G of reaction")).toBe("Δ G of reaction");
+  });
+
+  it("preserves $\\beta$ as a math span for KaTeX", () => {
+    expect(normalizeText("$\\beta$")).toBe("$\\beta$");
+  });
+
+  // --- Brackets in chemistry-shape strip -----------------------------
+
+  it("strips $[S]$ to [S]", () => {
+    expect(normalizeText("substrate $[S]$ value")).toBe(
+      "substrate [S] value",
+    );
+  });
+
+  it("strips $[NADH]$ to [NADH]", () => {
+    expect(normalizeText("$[NADH]$ concentration")).toBe(
+      "[NADH] concentration",
+    );
+  });
+
+  it("strips $[E][S]$ to [E][S] (binding complex)", () => {
+    expect(normalizeText("Michaelis: $[E][S]$ complex")).toBe(
+      "Michaelis: [E][S] complex",
+    );
+  });
+
+  // --- Charge-only spans ---------------------------------------------
+
+  it("strips $+2$ to +2", () => {
+    expect(normalizeText("ion charge $+2$ here")).toBe("ion charge +2 here");
+  });
+
+  it("strips $-1$ to -1", () => {
+    expect(normalizeText("electron $-1$")).toBe("electron -1");
+  });
+
+  it("leaves '$50' (currency, no leading sign) alone", () => {
+    expect(normalizeText("Cost: $50 today")).toBe("Cost: $50 today");
+  });
+
+  it("strips $+200$ (charge-like, accepted trade-off)", () => {
+    expect(normalizeText("net $+200$ kJ")).toBe("net +200 kJ");
+  });
+
+  // --- Math span preservation (KaTeX targets) ------------------------
+
+  it("preserves display math $$V = \\frac{V_{max}[S]}{K_M + [S]}$$", () => {
+    const src = "$$V = \\frac{V_{max}[S]}{K_M + [S]}$$";
+    expect(normalizeText(src)).toBe(src);
+  });
+
+  it("preserves $\\frac{a}{b}$ inline math", () => {
+    expect(normalizeText("$\\frac{a}{b}$")).toBe("$\\frac{a}{b}$");
+  });
+
+  it("preserves $\\sum_{i=1}^n x_i$ inline math", () => {
+    expect(normalizeText("$\\sum_{i=1}^n x_i$")).toBe("$\\sum_{i=1}^n x_i$");
+  });
+
+  // --- Mixed: math span preserved, prose chemistry normalized -------
+
+  it("mixes preserved $\\beta$ with normalized $K_M$ in same string", () => {
+    expect(
+      normalizeText("Reaction: $\\beta$-D-glucose with $K_M$ = 10 mM"),
+    ).toBe("Reaction: $\\beta$-D-glucose with K{{SUB:M}} = 10 mM");
+  });
+
+  it("preserves display math containing simple-arrow commands", () => {
+    // $$...$$ is always math regardless of contents — even simple
+    // arrow commands stay as \rightleftharpoons / \rightarrow because
+    // KaTeX renders them with proper math styling.
+    const src = "$$E + S \\rightleftharpoons ES \\rightarrow E + P$$";
+    expect(normalizeText(src)).toBe(src);
+  });
 });
