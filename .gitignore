@@ -36,3 +36,6 @@ ui/web/out/
 *.swo
 .DS_Store
 Thumbs.db
+
+# Local scratch — kept outside version control
+runserver
