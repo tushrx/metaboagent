@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import type { Attachment, ToolCallEvent } from "@/lib/api";
 import { normalizeText } from "@/lib/normalize-text";
 import { extractPlan, formatPlanAsMarkdown } from "@/lib/plan";
+import { processChildren } from "@/lib/render-text";
 import { Lightbox } from "./lightbox";
 
 export interface ChatMessage {
@@ -227,20 +228,37 @@ function AssistantProse({ content }: { content: string }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          p: (props) => <p className="my-3 first:mt-0 last:mb-0" {...props} />,
+          p: ({ children, ...props }) => (
+            <p className="my-3 first:mt-0 last:mb-0" {...props}>
+              {processChildren(children)}
+            </p>
+          ),
           ul: (props) => <ul className="my-3 list-disc pl-6" {...props} />,
           ol: (props) => <ol className="my-3 list-decimal pl-6" {...props} />,
-          li: (props) => <li className="my-1" {...props} />,
-          h1: (props) => (
-            <h1 className="mt-5 mb-2 text-lg font-semibold" {...props} />
+          li: ({ children, ...props }) => (
+            <li className="my-1" {...props}>
+              {processChildren(children)}
+            </li>
           ),
-          h2: (props) => (
-            <h2 className="mt-4 mb-2 text-[17px] font-semibold" {...props} />
+          h1: ({ children, ...props }) => (
+            <h1 className="mt-5 mb-2 text-lg font-semibold" {...props}>
+              {processChildren(children)}
+            </h1>
           ),
-          h3: (props) => (
-            <h3 className="mt-3 mb-1.5 text-[15px] font-semibold" {...props} />
+          h2: ({ children, ...props }) => (
+            <h2 className="mt-4 mb-2 text-[17px] font-semibold" {...props}>
+              {processChildren(children)}
+            </h2>
+          ),
+          h3: ({ children, ...props }) => (
+            <h3 className="mt-3 mb-1.5 text-[15px] font-semibold" {...props}>
+              {processChildren(children)}
+            </h3>
           ),
           code: ({ className, children, ...rest }) => {
+            // Code blocks are intentionally NOT processed for sub/sup
+            // placeholders — `{{SUB:M}}` inside code is the source the
+            // user typed, not chemistry rendering.
             const isInline = !(className && className.startsWith("language-"));
             if (isInline) {
               return (
@@ -264,16 +282,25 @@ function AssistantProse({ content }: { content: string }) {
               {...props}
             />
           ),
-          a: (props) => (
+          a: ({ children, ...props }) => (
             <a
               className="text-blue-600 underline underline-offset-2 hover:text-blue-700"
               target="_blank"
               rel="noopener noreferrer"
               {...props}
-            />
+            >
+              {processChildren(children)}
+            </a>
           ),
           hr: () => <hr className="my-4 border-gray-200" />,
-          strong: (props) => <strong className="font-semibold" {...props} />,
+          strong: ({ children, ...props }) => (
+            <strong className="font-semibold" {...props}>
+              {processChildren(children)}
+            </strong>
+          ),
+          em: ({ children, ...props }) => (
+            <em {...props}>{processChildren(children)}</em>
+          ),
           table: (props) => (
             <div className="my-4 overflow-x-auto">
               <table
@@ -287,14 +314,18 @@ function AssistantProse({ content }: { content: string }) {
           ),
           tbody: (props) => <tbody {...props} />,
           tr: (props) => <tr {...props} />,
-          th: (props) => (
+          th: ({ children, ...props }) => (
             <th
               className="px-4 py-2 text-left font-medium text-gray-900"
               {...props}
-            />
+            >
+              {processChildren(children)}
+            </th>
           ),
-          td: (props) => (
-            <td className="px-4 py-2 align-top text-gray-800" {...props} />
+          td: ({ children, ...props }) => (
+            <td className="px-4 py-2 align-top text-gray-800" {...props}>
+              {processChildren(children)}
+            </td>
           ),
         }}
       >
