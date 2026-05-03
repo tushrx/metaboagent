@@ -1,7 +1,5 @@
-import { Code2, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
-const GITHUB_URL =
-  "https://github.com/tusharmicro/metaboagent";
 const DOCS_URL =
   "https://github.com/tusharmicro/metaboagent/tree/main/docs";
 
@@ -14,16 +12,6 @@ export function Footer() {
           Hackathon · May 2026
         </span>
         <div className="flex items-center gap-3">
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 hover:text-gray-900"
-            aria-label="GitHub repository (opens in new tab)"
-          >
-            <Code2 size={11} />
-            GitHub
-          </a>
           <a
             href={DOCS_URL}
             target="_blank"
