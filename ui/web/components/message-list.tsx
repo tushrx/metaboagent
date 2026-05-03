@@ -5,11 +5,12 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { Wrench, AlertCircle, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Attachment, ToolCallEvent } from "@/lib/api";
 import { normalizeText } from "@/lib/normalize-text";
 import { extractPlan, formatPlanAsMarkdown } from "@/lib/plan";
 import { processChildren } from "@/lib/render-text";
+import { CopyButton } from "./copy-button";
 import { Lightbox } from "./lightbox";
 
 export interface ChatMessage {
@@ -104,8 +105,13 @@ function MessageRow({
     );
   }
 
+  // Hide the copy affordance on canceled / error rows — there's
+  // nothing useful to paste, and surfacing one would be misleading.
+  const showCopy =
+    !message.canceled && !message.error && Boolean(message.content);
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="group/msg relative flex flex-col gap-2">
       {message.toolCalls && message.toolCalls.length > 0 && (
         <ToolCrumbStrip
           toolCalls={message.toolCalls}
@@ -113,6 +119,14 @@ function MessageRow({
         />
       )}
       <AssistantProse content={message.content} />
+      {showCopy && (
+        <div className="absolute right-0 top-0 opacity-0 transition-opacity group-hover/msg:opacity-100 focus-within:opacity-100">
+          <CopyButton
+            getText={() => message.content}
+            ariaLabel="Copy message"
+          />
+        </div>
+      )}
       {message.canceled && (
         <div className="flex items-center gap-1.5 text-sm text-gray-500">
           <XCircle size={14} />
@@ -220,6 +234,34 @@ function ToolCrumbStrip({
   );
 }
 
+/**
+ * Fenced code block with a copy button anchored top-right. We attach a
+ * ref to the <pre> and read `.textContent` at click-time rather than
+ * walking the children prop tree — children may include syntax-
+ * highlighting spans (none today, but future-proof) and we want the
+ * raw plaintext on the clipboard.
+ */
+function CodeBlockWithCopy(
+  props: React.HTMLAttributes<HTMLPreElement>,
+) {
+  const { children, ...rest } = props;
+  const ref = useRef<HTMLPreElement>(null);
+  return (
+    <pre
+      ref={ref}
+      className="group/code relative my-3 overflow-x-auto rounded-lg bg-gray-900 p-3 pr-10 text-gray-100"
+      {...rest}
+    >
+      <CopyButton
+        getText={() => ref.current?.textContent ?? ""}
+        className="absolute right-1.5 top-1.5 text-gray-400 hover:bg-gray-800 hover:text-gray-100"
+        ariaLabel="Copy code"
+      />
+      {children}
+    </pre>
+  );
+}
+
 function AssistantProse({ content }: { content: string }) {
   const { plan, textWithoutPlan } = extractPlan(content);
   const merged = plan
@@ -279,12 +321,7 @@ function AssistantProse({ content }: { content: string }) {
               </code>
             );
           },
-          pre: (props) => (
-            <pre
-              className="my-3 overflow-x-auto rounded-lg bg-gray-900 p-3 text-gray-100"
-              {...props}
-            />
-          ),
+          pre: CodeBlockWithCopy,
           a: ({ children, ...props }) => (
             <a
               className="text-blue-600 underline underline-offset-2 hover:text-blue-700"
