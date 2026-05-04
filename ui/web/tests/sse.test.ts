@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { streamChat, ChatRequestError } from "@/lib/sse";
+import { streamChat, ChatRequestError, formatChatError } from "@/lib/sse";
 import type { AgentEvent } from "@/lib/api";
 
 function sseFrame(payload: object): string {
@@ -123,5 +123,52 @@ describe("streamChat", () => {
     await expect(
       collect(streamChat([{ role: "user", content: "q" }])),
     ).rejects.toBeInstanceOf(ChatRequestError);
+  });
+});
+
+describe("formatChatError", () => {
+  it("substitutes a friendly message for HTML 5xx bodies (Cloudflare 502 page)", () => {
+    const html =
+      "<!DOCTYPE html><html><head><title>502 Bad Gateway</title></head>" +
+      "<body><h1>Bad gateway</h1>Error code: 502</body></html>";
+    const msg = formatChatError(502, "Bad Gateway", html);
+    expect(msg).toBe(
+      "[HTTP 502] The server is temporarily unreachable. Please try again in a moment.",
+    );
+    expect(msg).not.toMatch(/<\/?html|DOCTYPE/i);
+  });
+
+  it("uses timeout phrasing for HTML 504 (NGINX gateway timeout page)", () => {
+    const html = "<html><body>504 Gateway Time-out</body></html>";
+    const msg = formatChatError(504, "Gateway Timeout", html);
+    expect(msg).toBe(
+      "[HTTP 504] The agent took too long to respond. Try a simpler question or use cached prompts.",
+    );
+  });
+
+  it("recognizes JSON {error: upstream_unreachable} from chat-proxy", () => {
+    const body = JSON.stringify({
+      error: "upstream_unreachable",
+      message: "fetch failed: ECONNREFUSED 127.0.0.1:8080",
+    });
+    const msg = formatChatError(502, "Bad Gateway", body);
+    expect(msg).toBe(
+      "[HTTP 502] The agent backend is unreachable. The server may have restarted.",
+    );
+  });
+
+  it("preserves the JSON message for structured 4xx validation errors", () => {
+    const body = JSON.stringify({
+      error: "validation_failed",
+      message: "messages[0].content must be a non-empty string",
+    });
+    const msg = formatChatError(400, "Bad Request", body);
+    expect(msg).toBe(
+      "[HTTP 400] messages[0].content must be a non-empty string",
+    );
+  });
+
+  it("falls back to a generic '[HTTP 500] Server error' for 500 with empty body", () => {
+    expect(formatChatError(500, "", "")).toBe("[HTTP 500] Server error");
   });
 });

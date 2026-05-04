@@ -11,12 +11,7 @@
  *     // ev is a typed AgentEvent
  *   }
  */
-import {
-  API_BASE_URL,
-  type AgentEvent,
-  type MessageIn,
-  type Tier,
-} from "./api";
+import { type AgentEvent, type MessageIn, type Tier } from "./api";
 
 export class ChatRequestError extends Error {
   readonly status: number;
@@ -60,7 +55,7 @@ export async function* streamChat(
     const text = await res.text().catch(() => "");
     throw new ChatRequestError(
       res.status,
-      `chat: HTTP ${res.status}${text ? ` — ${text.slice(0, 200)}` : ""}`,
+      formatChatError(res.status, res.statusText, text),
     );
   }
 
@@ -118,4 +113,54 @@ function parseFrame(frame: string): AgentEvent | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Build a human-readable error message from a non-2xx /api/chat-proxy
+ * response. Always leads with "[HTTP <status>]" so developers can grep,
+ * then a friendly suffix tailored to the body shape:
+ *   - HTML body (Cloudflare 502 / NGINX gateway page) → generic "server
+ *     temporarily unreachable" (or timeout phrasing for 504)
+ *   - JSON body → recognized {error: "upstream_unreachable" | "upstream_timeout"}
+ *     get tailored messages; otherwise prefer parsed.message, then parsed.error
+ *   - Anything else → fall back to res.statusText, or a generic class label
+ */
+export function formatChatError(
+  status: number,
+  statusText: string,
+  body: string,
+): string {
+  const prefix = `[HTTP ${status}]`;
+  const trimmed = body.trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower.startsWith("<!doctype") || lower.startsWith("<html")) {
+    if (status === 504) {
+      return `${prefix} The agent took too long to respond. Try a simpler question or use cached prompts.`;
+    }
+    return `${prefix} The server is temporarily unreachable. Please try again in a moment.`;
+  }
+
+  if (trimmed.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(trimmed) as { error?: unknown; message?: unknown };
+      if (parsed.error === "upstream_unreachable") {
+        return `${prefix} The agent backend is unreachable. The server may have restarted.`;
+      }
+      if (parsed.error === "upstream_timeout") {
+        return `${prefix} The agent took too long to respond. Try a simpler question or use cached prompts.`;
+      }
+      if (typeof parsed.message === "string" && parsed.message) {
+        return `${prefix} ${parsed.message}`;
+      }
+      if (typeof parsed.error === "string" && parsed.error) {
+        return `${prefix} ${parsed.error}`;
+      }
+    } catch {
+      // fall through to generic fallback
+    }
+  }
+
+  const fallback = statusText || (status >= 500 ? "Server error" : "Request error");
+  return `${prefix} ${fallback}`;
 }
