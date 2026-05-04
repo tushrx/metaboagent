@@ -46,7 +46,7 @@ export async function* streamChat(
   if (maxIterations !== undefined) body.max_iterations = maxIterations;
   if (temperature !== undefined) body.temperature = temperature;
 
-  const res = await fetch(`${API_BASE_URL}/chat`, {
+  const res = await fetch(`/api/chat-proxy`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
