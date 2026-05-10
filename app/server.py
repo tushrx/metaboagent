@@ -33,6 +33,7 @@ from app.schemas import ChatRequest, MessageIn, ToolDescriptor
 from config import (
     DEEP_LLM_BASE_URL,
     MAX_RIGOR_LLM_BASE_URL,
+    PRIMARY_LLM_API_KEY,
     PRIMARY_LLM_BASE_URL,
 )
 
@@ -103,7 +104,7 @@ def create_app() -> FastAPI:
             "max_rigor": MAX_RIGOR_LLM_BASE_URL,
         }
         results = await asyncio.gather(
-            *(_probe(url) for url in endpoints.values()),
+            *(_probe(url, PRIMARY_LLM_API_KEY) for url in endpoints.values()),
             return_exceptions=False,
         )
         statuses = dict(zip(endpoints.keys(), results))
@@ -148,13 +149,18 @@ app = create_app()
 
 # --- helpers -----------------------------------------------------------------
 
-async def _probe(base_url: str) -> str:
+async def _probe(base_url: str, api_key: str | None = None) -> str:
     url = base_url.rstrip("/") + "/models"
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
     try:
         async with httpx.AsyncClient(timeout=_PROBE_TIMEOUT_S) as client:
-            r = await client.get(url)
-            return "ok" if r.status_code == 200 else "down"
-    except Exception:
+            r = await client.get(url, headers=headers)
+            if r.status_code == 200:
+                return "ok"
+            logger.warning("tier_probe_failed url=%s status=%d", url, r.status_code)
+            return "down"
+    except Exception as exc:
+        logger.warning("tier_probe_exception url=%s err=%s", url, exc)
         return "down"
 
 

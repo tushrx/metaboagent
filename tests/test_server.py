@@ -43,7 +43,7 @@ def _scripted_run_agent(events: list[dict]):
 
 def _scripted_probe(status_by_port: dict[str, str]):
     """Replace _probe with a lookup keyed on the port substring of the URL."""
-    async def fake(base_url: str) -> str:
+    async def fake(base_url: str, api_key: str | None = None) -> str:
         for port, status in status_by_port.items():
             if f":{port}" in base_url:
                 return status
