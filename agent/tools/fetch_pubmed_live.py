@@ -74,24 +74,33 @@ def _parse_pubmed_xml(xml_text: str) -> list[dict]:
 
 @tool(parse_docstring=True)
 def fetch_pubmed_live(query: str, max_results: int = 10) -> str:
-    """Search PubMed in real time via NCBI E-utilities.
+    """Search PubMed in real time via NCBI E-utilities. Auto-indexes returned
+    abstracts into the literature collection.
 
-    Call this tool whenever the user references a PMID, asks for
-    "recent", "latest", or "new" papers on a topic, or explicitly says
-    "PubMed", "NCBI", "search the literature", "find papers", or
-    similar. Prefer this over answering from memory when the user wants
-    actual citations. Also use it when ``search_literature`` returned
-    empty. The returned abstracts are auto-indexed into the literature
-    collection so follow-up semantic searches can find them.
+    This is the DEFAULT tool for current literature questions. Use it when
+    the user:
+    - Asks "what does the literature say about X" or "papers on X"
+    - Uses recency words: "recent", "latest", "newest", "current",
+      "this year", "2024"/"2025"/"2026", "post-2020"
+    - Asks about contemporary state: "modern approaches", "where is the
+      field now", "what's known today"
+    - Asks about ongoing work: "active research", "emerging", "cutting-edge"
+    - References a PMID, says "PubMed" / "NCBI" / "find papers"
+    - Asks for citations on fast-moving topics: metabolic engineering,
+      drug discovery, synthetic biology, AI in biology
+
+    For explicit recency requests, append a date filter to the query:
+    "AND 2024:2026[pdat]" or similar.
+
+    Use search_literature instead only when the user explicitly asks for
+    foundational/historical work.
 
     Args:
-        query: Free-text search (supports MeSH syntax, e.g.,
-            "lycopene biosynthesis[MeSH Terms]").
+        query: Free-text search (supports MeSH syntax).
         max_results: Cap on abstracts returned (default 10, max 50).
 
     Returns:
-        JSON string with a list of hits: PMID, title, abstract (truncated),
-        journal, year, and MeSH terms.
+        JSON string with PMID, title, abstract (truncated), journal, year, MeSH terms.
     """
     q = (query or "").strip()
     if not q:

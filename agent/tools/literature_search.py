@@ -17,20 +17,23 @@ def search_literature(
     max_results: int = 5,
     mesh_term: Optional[str] = None,
 ) -> str:
-    """Semantic search over PubMed abstracts and KEGG pathway descriptions.
+    """Semantic search over indexed PubMed abstracts and KEGG pathway descriptions.
 
-    Call this tool whenever the user wants literature on a topic and
-    does not specifically need *latest/recent* papers (in which case
-    prefer fetch_pubmed_live). Works for questions like "what's known
-    about X", "papers on Y", or when citing evidence for a mechanism.
-    Prefer this over memory when the user asks "what does the
-    literature say" or requests PMIDs — the indexed corpus has ~54k
-    papers and the ground truth lives there, not in your recall.
+    Use this for FOUNDATIONAL or HISTORICAL literature questions:
+    - "classic papers on", "original discovery of", "seminal work"
+    - "history of", "first paper on", "who first showed"
+    - Mechanism/concept questions citing established evidence
+    - Follow-up searches over abstracts that fetch_pubmed_live indexed earlier
+      in this same conversation
+
+    For "what does the literature say" / "papers on Y" / general literature
+    questions, prefer fetch_pubmed_live — those queries usually expect
+    current work.
 
     Args:
         query: free-text query (e.g., "heterologous lycopene production in E. coli").
         max_results: number of hits to return.
-        mesh_term: optional exact MeSH-term filter (e.g., "Metabolic Engineering"). Pass null to skip.
+        mesh_term: optional exact MeSH-term filter. Pass null to skip.
 
     Returns:
         JSON string with list of {pmid, title, year, journal, snippet, score}.
