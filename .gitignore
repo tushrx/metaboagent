@@ -39,3 +39,9 @@ Thumbs.db
 
 # Local scratch — kept outside version control
 runserver
+
+# Query log database (already covered by logs/, listed explicitly for clarity)
+logs/queries.db
+logs/queries.db-journal
+logs/queries.db-wal
+logs/queries.db-shm

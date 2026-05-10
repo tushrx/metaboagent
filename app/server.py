@@ -20,15 +20,19 @@ import asyncio
 import json
 import logging
 import os
+import time
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from typing import Any, AsyncIterator
 
 import httpx
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
 from agent.core import build_tool_registry, run_agent
+from app.query_log import init_db, log_query
 from app.schemas import ChatRequest, MessageIn, ToolDescriptor
 from config import (
     DEEP_LLM_BASE_URL,
@@ -50,8 +54,14 @@ def _extra_cors_origins() -> list[str]:
     return [o.strip() for o in raw.split(",") if o.strip()]
 
 
+@asynccontextmanager
+async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+    init_db()
+    yield
+
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="MetaboAgent", version="0.1.0")
+    app = FastAPI(title="MetaboAgent", version="0.1.0", lifespan=_lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origin_regex=_DEFAULT_CORS_REGEX,
@@ -62,8 +72,30 @@ def create_app() -> FastAPI:
     )
 
     @app.post("/chat")
-    async def chat(body: ChatRequest) -> StreamingResponse:
+    async def chat(body: ChatRequest, request: Request) -> StreamingResponse:
         messages = _to_langchain_messages(body.messages)
+
+        start_monotonic = time.monotonic()
+        timestamp_utc = datetime.now(timezone.utc).isoformat(
+            timespec="seconds"
+        ).replace("+00:00", "Z")
+        user_email = request.headers.get("X-User-Email")
+        remote_ip = request.headers.get("CF-Connecting-IP") or (
+            request.client.host if request.client else None
+        )
+        user_query = ""
+        for m in reversed(body.messages):
+            if m.role == "user":
+                user_query = m.content
+                break
+        demo_mode = os.environ.get("DEMO_MODE") == "1"
+
+        tools_used: list[str] = []
+        log_state: dict[str, Any] = {
+            "status": "ok",
+            "error_message": None,
+            "response_length": None,
+        }
 
         async def event_stream() -> AsyncIterator[bytes]:
             try:
@@ -73,18 +105,51 @@ def create_app() -> FastAPI:
                     max_iterations=body.max_iterations,
                     temperature=body.temperature,
                 ):
+                    if isinstance(ev, dict):
+                        t = ev.get("type")
+                        if t == "tool_call":
+                            name = ev.get("name")
+                            if isinstance(name, str):
+                                tools_used.append(name)
+                        elif t == "final_answer":
+                            content = ev.get("content")
+                            if isinstance(content, str):
+                                log_state["response_length"] = len(content)
                     yield _sse(ev)
             except asyncio.CancelledError:
+                log_state["status"] = "cancelled"
                 logger.info("chat stream cancelled by client")
                 raise
             except Exception as e:
+                log_state["status"] = "error"
+                log_state["error_message"] = f"{type(e).__name__}: {e}"
                 logger.exception("chat stream error")
                 yield _sse({
                     "type": "error",
                     "where": "server",
-                    "message": f"{type(e).__name__}: {e}",
+                    "message": log_state["error_message"],
                 })
                 yield _sse({"type": "done", "usage": {}})
+            finally:
+                duration_ms = int((time.monotonic() - start_monotonic) * 1000)
+                record = {
+                    "timestamp_utc": timestamp_utc,
+                    "user_email": user_email,
+                    "user_query": user_query,
+                    "tier": body.tier,
+                    "demo_mode": demo_mode,
+                    "tools_called": tools_used,
+                    "tool_count": len(tools_used),
+                    "response_length": log_state["response_length"]
+                    if log_state["status"] != "error"
+                    else None,
+                    "duration_ms": duration_ms,
+                    "status": log_state["status"],
+                    "error_message": log_state["error_message"],
+                    "remote_ip": remote_ip,
+                }
+                # Fire-and-forget; log_query already swallows its own errors.
+                asyncio.create_task(log_query(record))
 
         return StreamingResponse(
             event_stream(),
