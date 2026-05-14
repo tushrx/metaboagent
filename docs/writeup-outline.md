@@ -1,25 +1,17 @@
 # MetaboAgent — Hackathon Writeup Outline
 
-**Framing:** research-note tone, methodological findings as headline contribution. The agent is the platform; the findings are what we publish.
-
-**Track:** Health primary (antimalarial pathway design, India public-health context), climate secondary (bio-manufacturing of fragrances/fuels).
-
-**Target length:** 1500–2500 words, Markdown.
-
-**Voice:** first-person plural ("we measured"), precise technical language, no marketing words, every numerical claim traceable to a JSON artefact under `eval/results/`.
-
 ---
 
-## 1. Title + Abstract (~150 words)
+## 1. Title + Abstract
 
-- **Working title:** "MetaboAgent: Measuring Where an Evidence-Grounded Co-Scientist Fails — Two Findings on Vision OCSR and Reaction Citation"
-- **Abstract bullets:**
+- **Title:** "MetaboAgent: Measuring Where an Evidence-Grounded Co-Scientist Fails — Two Findings on Vision OCSR and Reaction Citation"
+- **Abstract**
   - One-sentence problem: metabolic-engineering literature triage and pathway design is expert-gated and slow; an evidence-grounded LLM agent could lower the floor — but only if its failure modes are measured before deployment.
   - One-sentence platform description: MetaboAgent is a Gemma 4 family agent (E4B router, 26B planner, optional 31B) over a 54k-doc PubMed/KEGG/UniProt corpus, with a 15-tool registry and a multimodal structure-parsing entry.
   - Two-sentence findings teaser: (1) general-purpose vision LLMs do not substitute for specialised OCSR — Gemma 4 E4B reaches 5% strict accuracy on a 20-structure benchmark; (2) existence-only citation verification hides ~93% real-but-wrong reaction IDs that a substrate-relevance check catches.
   - Closing: both findings are reproducible from the released eval harness; the codebase is Apache 2.0 and runs on a single L40-class GPU.
 
-## 2. Motivation (~250 words)
+## 2. Motivation 
 
 - **Health framing first.** Antimalarial production (artemisinin, semisynthetic route via amorphadiene) is the canonical metabolic-engineering case study; India carries a substantial share of global malaria burden and hosts much of the world's generic-pharma capacity. Cite this as the primary impact lens.
 - **Climate framing second.** Bio-manufactured replacements for petrochemicals and overharvested natural products (vanillin, taxadiene, lycopene) — same toolchain, different optimisation target.
@@ -30,7 +22,7 @@
   2. A scoped capability finding about vision OCSR (Section 5.1).
 - **Position framing:** we built the agent so we could measure it. The agent is necessary infrastructure for the findings; the findings are what we publish.
 
-## 3. MetaboAgent: Brief Description (~300 words)
+## 3. MetaboAgent: 
 
 - **Model strategy.** Gemma 4 family used heterogeneously: E4B (~16 GB, one L40) for routing, tool-calling, and multimodal calls; 26B MoE (~2 L40s, TP=2) for multi-step pathway synthesis; 31B dense available as an optional "deep mode". One vLLM process per model, distinct ports. Cite `CLAUDE.md` §3 and `config.py`.
 - **Retrieval layer.** Three ChromaDB collections (PubMed, KEGG, UniProt — 54k documents total), embedded with PubMedBERT on a dedicated GPU. Live-fetch tools available but disabled in `DEMO_MODE=1`.
@@ -41,7 +33,7 @@
 - **What this section deliberately does *not* do:** sell the agent. The agent is the measurement platform. Architecture diagram (or brief ASCII version reproducing `CLAUDE.md` §4) goes here as visual reference.
 - **Note for draft:** `docs/architecture.md` does NOT exist — do not link to it. Reference `CLAUDE.md` and `agent/core.py` instead.
 
-## 4. Measurement Methodology (~350 words)
+## 4. Measurement Methodology 
 
 - **Four runtime evals, ordered cheap → expensive.** Evidence: `eval/run_all.py` and the unified report `eval/results/full_report_phase8_close.md`.
   - `eval_demo_mode` — 5 prompts × 3 categories (live-with-fallback, live-no-fallback, no-tool). Pass/fail per prompt. Source: `eval/results/demo_mode_run_1_20260427T080115Z.json`.
@@ -55,11 +47,11 @@
 - **Variance budget.** vLLM prefix caching collapsed cache-hot prompts into 40–90s/run on the L40 hardware; total runtime for the unified eval is ~12 minutes.
 - **Reproducibility command.** `python -m eval all --report` from a `DEMO_MODE=1` shell with `EMBEDDING_DEVICE=cuda:3`. Cite `docs/troubleshooting.md` for the cuda:0 vLLM contention fix.
 
-## 5. Findings (~600 words — centerpiece)
+## 5. Findings 
 
 **Word allocation:** Finding 1 ~150–200 words (capability measurement), Finding 2 ~400–450 words (load-bearing methodological contribution). The research-note framing is earned only if Finding 2 is prominent in the body, not just the abstract.
 
-### 5.1 Finding 1 — Vision LLMs do not substitute for specialised OCSR (~150–200 words)
+### 5.1 Finding 1 — Vision LLMs do not substitute for specialised OCSR  
 
 - **Setup.** 20-structure benchmark, ground truth = PubChem canonical SMILES re-canonicalised through RDKit. Direct vision call to Gemma 4 E4B via vLLM's OpenAI-compatible API.
 - **Headline number.** **1/20 = 5% PASS_STRICT** accuracy. Bucket distribution: PASS_STRICT=1, PASS_INCHI=0, PARTIAL=14, FAIL=5 (with FAIL/PARTIAL boundary sensitive to vision-call timeout — extending from 90s to 300s flipped one erythromycin FAIL to PARTIAL but did not produce a correct answer; coenzyme B12 still timed out at 300s).
@@ -69,7 +61,7 @@
 - **Implication.** Specialised OCSR systems (DECIMER, OSRA, MolScribe) encode chemistry-notation prior knowledge that a general-purpose vision encoder does not. A production agent should integrate a specialised extractor; Gemma 4 vision can play an enrichment role (notes, ambiguity flags, higher-level pathway diagrams not requiring atom-level precision).
 - **What MetaboAgent does with this finding (today).** The `parse_structure_image` tool is wired end-to-end. The UI marks it experimental and surfaces the model's RDKit-canonicalised SMILES alongside its self-reported confidence and notes. Cite `docs/multimodal-finding.md` for the full writeup.
 
-### 5.2 Finding 2 — Existence-only citation verification hides semantic hallucination (~400–450 words — the load-bearing contribution)
+### 5.2 Finding 2 — Existence-only citation verification hides semantic hallucination  
 
 **Explicit framing language to use in this section:** "To our knowledge this gap has not been measured systematically in prior agent benchmarks; we provide a reproducible methodology and a baseline measurement." Position substrate-relevance verification as the methodological novelty — not the agent itself.
 
@@ -86,7 +78,7 @@
 - **Methodological argument (the contribution).** Most agent-grounding benchmarks check whether cited identifiers exist. We argue this is insufficient: a citation can be valid at the existence layer while wrong at the semantic layer. **Substrate-relevance verification is a primary correctness metric for evidence-grounded scientific agents, not a defensive afterthought.** A reaction citation that exists but does not match the claimed chemistry is not a defensive edge case — it is a category of failure that existence-only metrics structurally cannot detect.
 - **Reproducibility note.** Phase 8.4's unified eval reproduced the qualitative finding on a smaller sample (5/5 = 100% real-but-wrong on existence-verified IDs in `full_report_phase8_close.md`). The reduced R-ID volume is a confound from a separate phase-1 recursion bug (the agent emitted meta-options instead of step-by-step plans on most prompts; tracked in `docs/phase8-followups.md`). The 8.3.B baseline (n=15, 93%) is the more defensible measurement.
 
-## 6. What Works Well (~250 words)
+## 6. What Works Well  
 
 - **Demo-mode reliability.** 5/5 demo-mode scenarios pass — the offline corpus + tool-stub responses give a deterministic, network-free demo path. Source: `eval/results/demo_mode_run_1_20260427T080115Z.json`.
 - **Answer quality on biochemistry questions.** 3-run aggregate **median 29/32 (90.6%)**, range 81.2%–96.9%. By question type:
@@ -99,14 +91,14 @@
 - **Latency profile.** vLLM prefix caching makes cache-hot prompts cheap (~40–90s for 3 runs of a multi-step design prompt on an L40); the documented avg-turn target (≤5s) is realistic for E4B-routed lookups.
 - **Scope-honest framing of vision OCSR.** Rather than ship a known-broken capability silently, the agent surfaces the finding in the UI (experimental badge, RDKit-canonicalised output, confidence and notes visible). The user sees what the model said and can verify before trusting.
 
-## 7. Limits and Future Work (~150 words)
+## 7. Limits and Future Work  
 
 - **Substrate-relevance verifier is eval-only.** Production runtime still uses existence-only verification. Folding the verifier into the agent's runtime self-verification loop is the obvious next step.
 - **Phase-1 recursion bug.** On most pathway-design prompts in the unified Phase 8.4 run, the agent emitted meta-options instead of a step-by-step plan, suppressing R-ID volume. Tracked in `docs/phase8-followups.md`. Fixing this likely raises both the absolute R-ID count and the absolute number of detected real-but-wrong citations.
 - **Vision OCSR.** Integrate DECIMER (or equivalent) as the primary structure extractor; A/B against the same 20-structure benchmark to publish a defensible comparison number.
 - **Q1 mechanism fabrication.** The acetyl-CoA TCA mechanism question fails the fabrication-check rubric point on 2/3 runs at otherwise high overall scores. Investigate whether this is prompt-specific or a systematic pattern in mechanism-type questions.
 
-## 8. Reproducibility (~100 words)
+## 8. Reproducibility  
 
 - **Repository.** Apache 2.0 licensed. Branch `v2-rebuild` at the submission tag.
 - **One-command full eval.** `python -m eval all --report` from a `DEMO_MODE=1` shell.
