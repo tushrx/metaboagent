@@ -40,6 +40,10 @@ Thumbs.db
 # Local scratch — kept outside version control
 runserver
 
+# Agent context / planning notes (kept local, not pushed)
+CLAUDE.md
+PHASE0_FOLLOWUPS.md
+
 # Query log database (already covered by logs/, listed explicitly for clarity)
 logs/queries.db
 logs/queries.db-journal
