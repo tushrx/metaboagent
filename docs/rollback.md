@@ -2,7 +2,7 @@
 
 ## Baseline
 
-- **v2-rebuild starting git SHA:** `b92ea34f12fb191bea8fff631cc31b7fd9643070` (branch point from `main`, created 2026-04-22)
+- **v2-rebuild starting git SHA:** created 2026-04-22)
 - **Baseline branch:** `main` — commit `b92ea34` is the first and currently only commit; reverting to it restores the Day-1 code state (with env-only API key, v2 directory scaffolding in place, and `agent/rag/` + `agent/router.py` in the gitignored `archive/`).
 
 ## Running vLLM at baseline
@@ -47,7 +47,7 @@ If a v2 phase breaks the agent and we need to fall back to the Day-1 behavior:
    ```bash
    git checkout main
    # or, to restore baseline on v2-rebuild directly:
-   # git reset --hard b92ea34f12fb191bea8fff631cc31b7fd9643070
+    
    ```
 4. **Restore runtime env:** `cp .env.example .env` and set `PRIMARY_LLM_API_KEY` to the live vLLM key.
 5. **Smoke test the Day-1 agent:**
