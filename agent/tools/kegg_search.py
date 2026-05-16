@@ -13,7 +13,7 @@ from typing import Literal, Optional
 
 from langchain_core.tools import tool
 
-from vectorstore.retriever import Retriever
+from vectorstore.retriever import Retriever, get_retriever
 
 _retriever: Retriever | None = None
 
@@ -24,7 +24,7 @@ _FILTER_VALUE_REJECTIONS = frozenset({"none", "null", ""})
 def _get_retriever() -> Retriever:
     global _retriever
     if _retriever is None:
-        _retriever = Retriever()
+        _retriever = get_retriever()
     return _retriever
 
 

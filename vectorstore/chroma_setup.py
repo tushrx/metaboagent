@@ -30,9 +30,15 @@ COLLECTIONS = (COLLECTION_REACTIONS, COLLECTION_COMPOUNDS, COLLECTION_LITERATURE
 
 
 def get_client() -> chromadb.api.ClientAPI:
+    # Use the Python/hnswlib segment backend; the Rust backend (default in 1.4+)
+    # segfaults on these indices which were built with the Python HNSW writer.
     return chromadb.PersistentClient(
         path=str(CHROMADB_DIR),
-        settings=Settings(anonymized_telemetry=False, allow_reset=False),
+        settings=Settings(
+            anonymized_telemetry=False,
+            allow_reset=False,
+            chroma_api_impl="chromadb.api.segment.SegmentAPI",
+        ),
     )
 
 

@@ -46,7 +46,7 @@ from agent.entities import (
     Reaction,
     ResolutionTier,
 )
-from vectorstore.retriever import RetrievedDoc, Retriever
+from vectorstore.retriever import RetrievedDoc, Retriever, get_retriever
 
 log = logging.getLogger(__name__)
 
@@ -92,7 +92,7 @@ class KeggIndexedResolver:
 
     def _r(self) -> Retriever:
         if self._retriever is None:
-            self._retriever = Retriever()
+            self._retriever = get_retriever()
         return self._retriever
 
     def resolve(self, query: str, kind: EntityKind, *, limit: int = 5) -> list[EntityCandidate]:
@@ -317,7 +317,7 @@ class LiteratureRetriever:
 
     def _r(self) -> Retriever:
         if self._retriever is None:
-            self._retriever = Retriever()
+            self._retriever = get_retriever()
         return self._retriever
 
     def retrieve(
@@ -376,7 +376,7 @@ class KeggIndexedRetriever:
 
     def _r(self) -> Retriever:
         if self._retriever is None:
-            self._retriever = Retriever()
+            self._retriever = get_retriever()
         return self._retriever
 
     def retrieve(
