@@ -8,7 +8,7 @@ langchain-community>=0.3.0
 langgraph>=0.2.0
 
 # === Vector Store ===
-chromadb>=0.5.0
+chromadb==1.4.1  # 1.5+ Rust backend segfaults on Python-HNSW indices; pin here, use SegmentAPI in chroma_setup.py
 
 # === Embeddings (runs on CPU) ===
 transformers>=4.40.0
